@@ -23,6 +23,7 @@ azure_speech_voice: "zh-CN-XiaoxiaoNeural"
 
 # Model Configurations
 groq_model: "whisper-large-v3-turbo"
+groq_llm_model: "llama-3.3-70b-versatile"
 gemini_model: "gemini-3.5-flash"
 gemini_tts_voice: "Kore"
 
