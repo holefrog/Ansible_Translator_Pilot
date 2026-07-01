@@ -1,7 +1,7 @@
 import os
 import wave
 import logging
-from typing import List, dict
+from typing import List
 from contracts import Segment
 
 logger = logging.getLogger("align_check")

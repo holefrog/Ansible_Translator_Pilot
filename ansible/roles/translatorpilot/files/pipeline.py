@@ -2,7 +2,7 @@ import os
 import sys
 import json
 import logging
-from typing import Callable, Optional, dict
+from typing import Callable, Optional
 from contracts import Segment
 from stt import GroqWhisperSTT, GeminiSTT
 from translate import GeminiTranslate
