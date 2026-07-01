@@ -12,7 +12,7 @@ venv_dir: "{{ install_dir }}/.venv"
 # Provider Settings
 stt_provider: "groq_whisper"
 translate_provider: "gemini"
-tts_provider: "nvidia_magpie"
+tts_provider: "sherpa_onnx"
 
 # Azure Speech Settings
 azure_speech_region: "eastus"
@@ -33,6 +33,7 @@ nvidia_tts_sample_rate_hz: 44100
 tts_sherpa_onnx_model_dir: "{{ install_dir }}/models/sherpa_onnx/matcha-icefall-zh-baker"
 tts_sherpa_onnx_vocoder: "{{ install_dir }}/models/sherpa_onnx/vocos-22khz-univ.onnx"
 tts_sherpa_onnx_num_threads: 4
+tts_sherpa_onnx_volume_gain: 2.0
 
 # Retry Policies
 retry_max_retries: 3

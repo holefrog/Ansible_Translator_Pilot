@@ -22,6 +22,7 @@ class SherpaOnnxTTS(TTSProvider):
     def __init__(self, config: dict, retry_config: dict = None):
         self.config = config
         self._tts = None  # lazy-loaded on first synthesize() call
+        self.volume_gain = float(self.config.get("volume_gain", 1.0))
 
     @property
     def name(self) -> str:
@@ -111,9 +112,10 @@ class SherpaOnnxTTS(TTSProvider):
 
     def _write_wav(self, path: str, samples, sample_rate: int):
         # sherpa-onnx returns float32 samples in [-1.0, 1.0]; convert to 16-bit PCM.
+        # Apply volume gain to compensate for lower output level.
         int_samples = array.array(
             "h",
-            [max(-32768, min(32767, int(s * 32767))) for s in samples],
+            [max(-32768, min(32767, int(s * self.volume_gain * 32767))) for s in samples],
         )
         with wave.open(path, "wb") as wf:
             wf.setnchannels(1)
