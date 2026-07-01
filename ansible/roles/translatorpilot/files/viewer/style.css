@@ -39,7 +39,7 @@
 
         header {
             text-align: center;
-            margin-bottom: 50px;
+            margin-bottom: 20px;
         }
 
         h1 {
@@ -310,20 +310,65 @@
         }
 
         .status-message {
-            text-align: center;
-            padding: 40px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 16px 20px;
             color: var(--text-secondary);
-            font-size: 1.2rem;
+            font-size: 1rem;
+            margin-bottom: 16px;
+        }
+
+        /* Left side: progress message + bar */
+        .status-progress-area {
+            flex: 1;
+        }
+
+        /* Right side: spinner + label */
+        .status-spinner-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
 
         .loader {
             display: inline-block;
-            width: 40px;
-            height: 40px;
+            width: 28px;
+            height: 28px;
             border: 3px solid rgba(255,255,255,0.1);
             border-radius: 50%;
             border-top-color: var(--accent-color);
             animation: spin 1s ease-in-out infinite;
+            flex-shrink: 0;
+        }
+
+        .progress-message {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-family: monospace;
+            margin-bottom: 8px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .progress-container {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            height: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--accent-color);
+            width: 0%;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px var(--accent-color);
         }
 
         .fallback-banner {
@@ -348,30 +393,6 @@
             to { transform: rotate(360deg); }
         }
 
-        .progress-container {
-            width: 100%;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
-            height: 12px;
-            margin-top: 15px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .progress-bar {
-            height: 100%;
-            background: var(--accent-color);
-            width: 0%;
-            transition: width 0.3s ease;
-            box-shadow: 0 0 10px var(--accent-color);
-        }
-
-        .progress-message {
-            margin-top: 10px;
-            font-size: 0.95rem;
-            color: var(--text-secondary);
-            font-family: monospace;
-        }
 
 
         /* Responsive */

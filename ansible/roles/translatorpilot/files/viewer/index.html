@@ -17,13 +17,19 @@
         <div class="subtitle">翻译结果预览终端</div>
     </header>
 
-    <!-- Spinner + progress bar — hidden once completed -->
+    <!-- Status bar: horizontal layout with progress on left, spinner on right -->
     <div id="status" class="status-message">
-        <div class="loader" id="loader"></div>
-        <p id="loading-text" style="margin-top: 20px; font-weight: 600;">正在等待管线启动...</p>
-        <div class="progress-message" id="progress-msg">正在连接 pipeline_state.json...</div>
-        <div class="progress-container" id="progress-container" style="display:none; margin-top: 20px;">
-            <div class="progress-bar" id="progress-bar"></div>
+        <!-- Left: progress message + bar -->
+        <div class="status-progress-area" id="progress-area" style="display:none;">
+            <div class="progress-message" id="progress-msg">正在连接 pipeline_state.json...</div>
+            <div class="progress-container" id="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+        </div>
+        <!-- Right: spinner + status text -->
+        <div class="status-spinner-area" id="spinner-area">
+            <div class="loader" id="loader"></div>
+            <span id="loading-text" style="font-weight: 600;">正在等待管线启动...</span>
         </div>
     </div>
 
