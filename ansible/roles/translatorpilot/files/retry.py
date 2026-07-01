@@ -4,10 +4,10 @@ import logging
 logger = logging.getLogger("retry")
 
 def with_retry(fn, retry_config: dict, label: str = "Operation"):
-    max_retries = retry_config.get("max_retries", 3)
-    base_delay = retry_config.get("base_delay", 1.0)
-    backoff_factor = retry_config.get("backoff_factor", 2.0)
-    max_delay = retry_config.get("max_delay", 30.0)
+    max_retries = retry_config["max_retries"]
+    base_delay = retry_config["base_delay"]
+    backoff_factor = retry_config["backoff_factor"]
+    max_delay = retry_config["max_delay"]
     
     attempt = 0
     while True:

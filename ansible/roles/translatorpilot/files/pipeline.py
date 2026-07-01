@@ -63,9 +63,9 @@ class TranslatorPilotPipeline:
                     "is_fallback": getattr(seg, 'is_fallback', False)
                 })
             engines_info = {
-                "stt": self.settings.get("provider", {}).get("stt", "groq_whisper"),
-                "translate": self.settings.get("provider", {}).get("translate", "groq_llm"),
-                "tts": self.settings.get("provider", {}).get("tts", "azure_speech")
+                "stt": self.settings["provider"]["stt"],
+                "translate": self.settings["provider"]["translate"],
+                "tts": self.settings["provider"]["tts"]
             }
             state_data = {
                 "status": status,
@@ -93,24 +93,24 @@ class TranslatorPilotPipeline:
             # 1. Initialization
             trigger_progress("Initializing STT, Translation, and TTS providers...", 5)
             
-            retry_cfg = self.settings.get("retry", {})
-            stt_name = self.settings.get("provider", {}).get("stt", "groq_whisper")
+            retry_cfg = self.settings["retry"]
+            stt_name = self.settings["provider"]["stt"]
             if stt_name == "groq_whisper":
-                stt_provider = GroqWhisperSTT(self.settings.get("stt", {}).get("groq_whisper", {}), retry_cfg)
+                stt_provider = GroqWhisperSTT(self.settings["stt"]["groq_whisper"], retry_cfg)
             else:
-                stt_provider = GeminiSTT(self.settings.get("stt", {}).get("gemini", {}), retry_cfg)
+                stt_provider = GeminiSTT(self.settings["stt"]["gemini"], retry_cfg)
 
-            translate_name = self.settings.get("provider", {}).get("translate", "groq_llm")
+            translate_name = self.settings["provider"]["translate"]
             if translate_name == "groq_llm":
-                translate_provider = GroqTranslate(self.settings.get("translate", {}).get("groq_llm", {}), retry_cfg)
+                translate_provider = GroqTranslate(self.settings["translate"]["groq_llm"], retry_cfg)
             else:
-                translate_provider = GeminiTranslate(self.settings.get("translate", {}).get("gemini", {}), retry_cfg)
+                translate_provider = GeminiTranslate(self.settings["translate"]["gemini"], retry_cfg)
 
-            tts_name = self.settings.get("provider", {}).get("tts", "azure_speech")
+            tts_name = self.settings["provider"]["tts"]
             if tts_name == "azure_speech":
-                tts_provider = AzureSpeechTTS(self.settings.get("tts", {}).get("azure_speech", {}), retry_cfg)
+                tts_provider = AzureSpeechTTS(self.settings["tts"]["azure_speech"], retry_cfg)
             else:
-                tts_provider = GeminiTTS(retry_cfg)
+                tts_provider = GeminiTTS(self.settings["tts"]["gemini_tts"], retry_cfg)
             
             trigger_progress(f"Providers successfully loaded: STT=[{stt_provider.name}], TRANSLATE=[{translate_provider.name}], TTS=[{tts_provider.name}]", 10)
 
@@ -131,7 +131,7 @@ class TranslatorPilotPipeline:
 
             # 4. TTS Phase
             trigger_progress("Synthesizing localized Chinese voiceovers...", 75)
-            threshold = self.settings.get("align", {}).get("warning_threshold_ratio", 1.3)
+            threshold = self.settings["align"]["warning_threshold_ratio"]
 
             def on_tts_done(idx, total):
                 percent = 75 + int(20 * (idx / total))
@@ -144,7 +144,7 @@ class TranslatorPilotPipeline:
 
             # 5. Alignment Timing Analysis
             trigger_progress("Running audio-duration timing alignment diagnostics...", 98)
-            threshold = self.settings.get("align", {}).get("warning_threshold_ratio", 1.3)
+            threshold = self.settings["align"]["warning_threshold_ratio"]
             alignment_report = check_alignment(segments, self.output_dir, threshold)
 
             warnings = [r for r in alignment_report if r["warning"]]
@@ -192,14 +192,23 @@ class TranslatorPilotPipeline:
 
 def parse_toml_file(file_path: str) -> dict:
     if not os.path.exists(file_path):
-        return {}
+        logger.error(f"Configuration file not found: {file_path}")
+        sys.exit(1)
     try:
         import tomllib
         with open(file_path, "rb") as f:
             return tomllib.load(f)
     except ImportError:
-        logger.warning("tomllib not found (requires Python 3.11+). Using empty settings.")
-        return {}
+        try:
+            import toml
+            with open(file_path, "r", encoding="utf-8") as f:
+                return toml.load(f)
+        except ImportError:
+            logger.error("No TOML parser available. Please use Python 3.11+ or install 'toml' package.")
+            sys.exit(1)
+    except Exception as e:
+        logger.error(f"Failed to parse TOML file {file_path}: {e}")
+        sys.exit(1)
 
 if __name__ == "__main__":
     # Allow execution directly from CLI command
@@ -211,36 +220,11 @@ if __name__ == "__main__":
     toml_path = sys.argv[2] if len(sys.argv) > 2 else "./settings.toml"
     output_directory = sys.argv[3] if len(sys.argv) > 3 else "./output"
     
-    # Load dynamic settings or fallback
+    # Load dynamic settings
     settings = parse_toml_file(toml_path)
     if not settings:
-        settings = {
-            "provider": {
-                "stt": "groq_whisper",
-                "translate": "gemini",
-                "tts": "azure_speech"
-            },
-            "stt": {
-                "groq_whisper": {"api_key": "", "model": "whisper-large-v3-turbo"},
-                "gemini": {"api_key": "", "model": "gemini-3.5-flash"}
-            },
-            "translate": {
-                "gemini": {"api_key": "", "model": "gemini-3.5-flash"}
-            },
-            "tts": {
-                "azure_speech": {"api_key": "", "region": "eastus", "voice": "zh-CN-XiaoxiaoNeural"},
-                "gemini_tts": {"voice": "Kore"}
-            },
-            "retry": {
-                "max_retries": 3,
-                "base_delay": 1.0,
-                "backoff_factor": 2.0,
-                "max_delay": 30.0
-            },
-            "align": {
-                "warning_threshold_ratio": 1.3
-            }
-        }
+        print(f"Error: Failed to load valid configuration from {toml_path}.")
+        sys.exit(1)
     
     pipeline = TranslatorPilotPipeline(settings, output_directory)
     result = pipeline.run(input_audio)

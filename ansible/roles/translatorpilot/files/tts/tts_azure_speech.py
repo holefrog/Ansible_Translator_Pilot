@@ -24,9 +24,9 @@ class AzureSpeechTTS(TTSProvider):
             
         os.makedirs(output_dir, exist_ok=True)
         
-        api_key = self.config.get("api_key") or os.environ.get("AZURE_SPEECH_KEY")
-        region = self.config.get("region", "eastus") or os.environ.get("AZURE_SPEECH_REGION", "eastus")
-        voice = self.config.get("voice", "zh-CN-XiaoxiaoNeural")
+        api_key = self.config["api_key"]
+        region = self.config["region"]
+        voice = self.config["voice"]
 
         if not api_key:
             logger.error("[TTS] Azure Subscription Key is missing. Cannot proceed.")
@@ -105,7 +105,8 @@ class AzureSpeechTTS(TTSProvider):
 
 
 class GeminiTTS(TTSProvider):
-    def __init__(self, retry_config: dict):
+    def __init__(self, config: dict, retry_config: dict):
+        self.config = config
         self.retry_config = retry_config
 
     @property
@@ -117,7 +118,7 @@ class GeminiTTS(TTSProvider):
             return []
             
         os.makedirs(output_dir, exist_ok=True)
-        api_key = os.environ.get("GEMINI_API_KEY")
+        api_key = self.config["api_key"]
 
         if not api_key:
             logger.error("[TTS] Gemini API Key is missing for TTS. Cannot proceed.")
@@ -148,7 +149,7 @@ class GeminiTTS(TTSProvider):
                         "speechConfig": {
                             "voiceConfig": {
                                 "prebuiltVoiceConfig": {
-                                    "voiceName": "Kore"
+                                    "voiceName": self.config["voice"]
                                 }
                             }
                         }

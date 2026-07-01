@@ -18,8 +18,8 @@ class GroqWhisperSTT(STTProvider):
         return "groq_whisper"
 
     def transcribe(self, audio_path: str) -> List[Segment]:
-        api_key = self.config.get("api_key") or os.environ.get("GROQ_API_KEY")
-        model = self.config.get("model", "whisper-large-v3-turbo")
+        api_key = self.config["api_key"]
+        model = self.config["model"]
 
         if not api_key:
             logger.warning("[STT] Groq API key is missing. Using pre-loaded mock demonstration segments.")
@@ -107,8 +107,8 @@ class GeminiSTT(STTProvider):
         return "gemini_stt"
 
     def transcribe(self, audio_path: str) -> List[Segment]:
-        api_key = self.config.get("api_key") or os.environ.get("GEMINI_API_KEY")
-        model = self.config.get("model", "gemini-3.5-flash")
+        api_key = self.config["api_key"]
+        model = self.config["model"]
 
         if not api_key:
             logger.warning("[STT] Gemini API key is missing. Using pre-loaded mock demonstration segments.")

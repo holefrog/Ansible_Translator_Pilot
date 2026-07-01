@@ -15,7 +15,7 @@ venv_dir: "{{ install_dir }}/.venv"
 # Provider Settings
 stt_provider: "groq_whisper"
 translate_provider: "gemini"
-tts_provider: "azure_speech"
+tts_provider: "gemini_tts"
 
 # Azure Speech Settings
 azure_speech_region: "eastus"

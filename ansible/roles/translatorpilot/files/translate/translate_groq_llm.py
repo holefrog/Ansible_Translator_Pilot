@@ -21,8 +21,8 @@ class GroqTranslate(TranslateProvider):
         if not segments:
             return []
 
-        api_key = self.config.get("api_key") or os.environ.get("GROQ_API_KEY")
-        model = self.config.get("model", "llama3-70b-8192")
+        api_key = self.config["api_key"]
+        model = self.config["model"]
 
         if not api_key:
             logger.error("[Translate] Groq API Key is missing. Cannot proceed.")
@@ -52,7 +52,7 @@ class GroqTranslate(TranslateProvider):
                     for seg in batch
                 ]
 
-                system_instruction = self.config.get("system_prompt")
+                system_instruction = self.config["system_prompt"]
                 if not system_instruction:
                     logger.error("[Translate] System prompt is missing from config.")
                     raise RuntimeError("Fatal pipeline error")
@@ -61,7 +61,7 @@ class GroqTranslate(TranslateProvider):
                 system_instruction += f"\nCRITICAL: You are given {len(items_to_translate)} segments. Your JSON array MUST contain exactly {len(items_to_translate)} items. DO NOT skip any IDs."
                 system_instruction += "\nCRITICAL: Output raw UTF-8 Chinese characters. DO NOT use \\uXXXX unicode escaping."
 
-                user_instruction = self.config.get("user_prompt")
+                user_instruction = self.config["user_prompt"]
                 if not user_instruction:
                     logger.error("[Translate] User prompt is missing from config.")
                     raise RuntimeError("Fatal pipeline error")
