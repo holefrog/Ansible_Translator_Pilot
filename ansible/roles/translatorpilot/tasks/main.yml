@@ -46,6 +46,7 @@
     - "translate/__init__.py"
     - "translate/base.py"
     - "translate/gemini.py"
+    - "translate/groq_llm.py"
     - "tts/__init__.py"
     - "tts/base.py"
     - "tts/azure_speech.py"

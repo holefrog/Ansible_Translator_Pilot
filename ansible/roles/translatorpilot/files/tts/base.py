@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List
+from typing import List, Optional, Callable
 from contracts import Segment
 
 class TTSProvider(ABC):
