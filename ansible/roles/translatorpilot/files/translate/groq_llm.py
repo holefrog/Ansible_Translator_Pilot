@@ -42,7 +42,7 @@ class GroqTranslate(TranslateProvider):
                 for seg in segments
             ]
 
-            system_instruction = (
+            system_instruction = self.config.get("system_prompt", (
                 "You are a professional video translator translating a sequence of English audio transcripts into Chinese spoken dubbing.\n"
                 "CRITICAL RULES:\n"
                 "1. Maintain extreme context coherence. Read all segments together to understand the full meaning.\n"
@@ -51,9 +51,10 @@ class GroqTranslate(TranslateProvider):
                 "4. You MUST output ONLY a valid JSON array of objects. Do not include markdown code blocks or any other text.\n"
                 "5. Each object must have exactly two string fields: 'id' and 'translated_text'.\n"
                 "6. Output exactly matching translated objects for each ID.\n"
-                "7. CRITICAL: DO NOT merge translations across segments! You MUST strictly translate ONLY the exact English words present within each specific segment's 'text', even if that text is an incomplete fragment. Never pull meaning from the next segment into the current segment.\n"
-                "Output JSON format: {\"translations\": [{\"id\": \"...\", \"translated_text\": \"...\"}]}"
-            )
+                "7. CRITICAL: DO NOT merge translations across segments! You MUST strictly translate ONLY the exact English words present within each specific segment's 'text', even if that text is an incomplete fragment. Never pull meaning from the next segment into the current segment."
+            ))
+            
+            system_instruction += "\nOutput JSON format: {\"translations\": [{\"id\": \"...\", \"translated_text\": \"...\"}]}"
 
             user_prompt = f"Please translate these segments and return ONLY JSON:\n{json.dumps(items_to_translate, indent=2)}"
 

@@ -39,7 +39,7 @@ class GeminiTranslate(TranslateProvider):
                 for seg in segments
             ]
             
-            system_instruction = (
+            system_instruction = self.config.get("system_prompt", (
                 "You are a professional video translator translating a sequence of English audio transcripts into Chinese spoken dubbing.\n"
                 "CRITICAL RULES:\n"
                 "1. Maintain extreme context coherence. Read all segments together to understand the full meaning.\n"
@@ -47,7 +47,7 @@ class GeminiTranslate(TranslateProvider):
                 "3. Keep any tech/industry acronyms natural.\n"
                 "4. Output exactly matching translated objects for each ID.\n"
                 "5. CRITICAL: DO NOT merge translations across segments! You MUST strictly translate ONLY the exact English words present within each specific segment's 'text', even if that text is an incomplete fragment. Never pull meaning from the next segment into the current segment."
-            )
+            ))
 
             user_prompt = f"Please translate these segments:\n{json.dumps(items_to_translate, indent=2)}"
             

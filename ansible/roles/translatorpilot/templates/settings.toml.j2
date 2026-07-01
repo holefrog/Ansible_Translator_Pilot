@@ -16,10 +16,12 @@ model = "{{ gemini_model }}"
 [translate.groq_llm]
 api_key = "{{ groq_api_key }}"
 model = "{{ groq_llm_model }}"
+system_prompt = """{{ llm_system_prompt | trim }}"""
 
 [translate.gemini]
 api_key = "{{ gemini_api_key }}"
 model = "{{ gemini_model }}"
+system_prompt = """{{ llm_system_prompt | trim }}"""
 
 [tts.azure_speech]
 api_key = "{{ azure_speech_key }}"
