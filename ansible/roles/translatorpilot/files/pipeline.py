@@ -1,13 +1,13 @@
 import os
 import sys
 import json
-import logging
 import time
+import logging
 from typing import Callable, Optional
 from contracts import Segment
 from stt import GroqWhisperSTT, GeminiSTT
 from translate import TranslateProvider, GeminiTranslate, GroqTranslate
-from tts import AzureSpeechTTS, GeminiTTS
+from tts import AzureSpeechTTS, GeminiTTS, SherpaOnnxTTS
 from align_check import check_alignment
 
 class ColorFormatter(logging.Formatter):
@@ -112,6 +112,8 @@ class TranslatorPilotPipeline:
             tts_name = self.settings["provider"]["tts"]
             if tts_name == "azure_speech":
                 tts_provider = AzureSpeechTTS(self.settings["tts"]["azure_speech"], retry_cfg)
+            elif tts_name == "sherpa_onnx":
+                tts_provider = SherpaOnnxTTS(self.settings["tts"]["sherpa_onnx"])
             else:
                 tts_provider = GeminiTTS(self.settings["tts"]["gemini_tts"], retry_cfg)
             

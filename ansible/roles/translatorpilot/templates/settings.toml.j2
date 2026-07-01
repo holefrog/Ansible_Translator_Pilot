@@ -32,7 +32,13 @@ voice = "{{ azure_speech_voice | mandatory }}"
 
 [tts.gemini_tts]
 api_key = "{{ gemini_api_key | mandatory }}"
+model = "{{ gemini_tts_model | mandatory }}"
 voice = "{{ gemini_tts_voice | mandatory }}"
+
+[tts.sherpa_onnx]
+model_dir = "{{ tts_sherpa_onnx_model_dir | mandatory }}"
+vocoder_path = "{{ tts_sherpa_onnx_vocoder | mandatory }}"
+num_threads = {{ tts_sherpa_onnx_num_threads | mandatory }}
 
 [retry]
 max_retries = {{ retry_max_retries | mandatory }}

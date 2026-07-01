@@ -40,7 +40,8 @@ class GeminiTTS(TTSProvider):
                 import requests
                 import base64
                 
-                url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-tts-preview:generateContent?key={api_key}"
+                model = self.config["model"]
+                url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
                 headers = {"Content-Type": "application/json"}
                 
                 payload = {

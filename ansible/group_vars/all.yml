@@ -14,7 +14,7 @@ venv_dir: "{{ install_dir }}/.venv"
 
 # Provider Settings
 stt_provider: "groq_whisper"
-translate_provider: "gemini"
+translate_provider: "groq_llm"
 tts_provider: "gemini_tts"
 
 # Azure Speech Settings
@@ -23,9 +23,15 @@ azure_speech_voice: "zh-CN-XiaoxiaoNeural"
 
 # Model Configurations
 groq_model: "whisper-large-v3-turbo"
-groq_llm_model: "llama-3.3-70b-versatile"
+groq_llm_model: "openai/gpt-oss-120b"
 gemini_model: "gemini-3.5-flash"
+gemini_tts_model: "gemini-3.1-flash-tts-preview"
 gemini_tts_voice: "Kore"
+
+# Sherpa-ONNX Local TTS Settings (fully offline, no quota, no API key)
+tts_sherpa_onnx_model_dir: "{{ install_dir }}/models/sherpa_onnx/matcha-icefall-zh-baker"
+tts_sherpa_onnx_vocoder: "{{ install_dir }}/models/sherpa_onnx/vocos-22khz-univ.onnx"
+tts_sherpa_onnx_num_threads: 4
 
 # Retry Policies
 retry_max_retries: 3
