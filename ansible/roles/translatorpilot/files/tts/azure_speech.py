@@ -44,6 +44,20 @@ class AzureSpeechTTS(TTSProvider):
 
             def run_api_call():
                 import requests
+                import hashlib
+                import shutil
+
+                cache_dir = os.path.join(os.path.dirname(output_dir), "cache", "wav")
+                os.makedirs(cache_dir, exist_ok=True)
+
+                cache_key = hashlib.md5(f"{seg.target_text}_{voice}".encode("utf-8")).hexdigest()
+                cache_filepath = os.path.join(cache_dir, f"{cache_key}.wav")
+
+                if os.path.exists(cache_filepath):
+                    logger.info(f"[TTS] Cache hit for segment {seg.segment_id}")
+                    shutil.copy2(cache_filepath, full_output_path)
+                    seg.audio_path = f"/output/{audio_filename}"
+                    return
                 
                 escaped_text = self.escape_xml(seg.target_text)
                 ssml = (
@@ -68,6 +82,8 @@ class AzureSpeechTTS(TTSProvider):
 
                 with open(full_output_path, "wb") as audio_file:
                     audio_file.write(response.content)
+                
+                shutil.copy2(full_output_path, cache_filepath)
 
                 seg.audio_path = f"/output/{audio_filename}"
 
