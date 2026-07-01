@@ -25,8 +25,9 @@ class GroqTranslate(TranslateProvider):
         model = self.config.get("model", "llama3-70b-8192")
 
         if not api_key:
-            logger.warning("[Translate] Groq API Key is missing. Falling back to default rule-based translations.")
-            return self.get_mock_translations(segments)
+            logger.error("[Translate] Groq API Key is missing. Cannot proceed.")
+            import sys
+            sys.exit(1)
 
         def run_api_call():
             import requests
@@ -105,33 +106,23 @@ class GroqTranslate(TranslateProvider):
             translation_map = {item["id"]: item["translated_text"] for item in parsed_translations}
             
             for seg in segments:
-                seg.target_text = translation_map.get(seg.segment_id, self.fallback_translate_text(seg.source_text))
-                
+                if seg.segment_id not in translation_map:
+                    logger.error(f"[Translate] Missing translation for segment {seg.segment_id}")
+                    import sys
+                    sys.exit(1)
+                seg.target_text = translation_map[seg.segment_id]
+
             return segments
 
         try:
             return with_retry(run_api_call, self.retry_config, "GroqTranslate")
         except ImportError:
-            logger.error("[Translate] 'requests' library not found. Falling back to simple default translation.")
-            return self.get_mock_translations(segments)
+            logger.error("[Translate] 'requests' library not found.")
+            import sys
+            sys.exit(1)
         except Exception as e:
-            logger.error(f"[Translate] Failed Groq translation: {e}. Falling back to mock translations.")
-            return self.get_mock_translations(segments)
+            logger.error(f"[Translate] Failed Groq translation: {e}.")
+            import sys
+            sys.exit(1)
 
-    def fallback_translate_text(self, text: str) -> str:
-        text_lower = text.lower()
-        if "welcome to today's deep dive" in text_lower or "welcome to the future" in text_lower:
-            return "欢迎来到 Translator Pilot 翻译技术的未来。"
-        if "runs whisper" in text_lower or "this pipeline runs" in text_lower:
-            return "该管线使用 Whisper 进行语音识别，使用 Gemini 进行翻译，并使用 Azure 进行语音合成。"
-        if "extremely fast" in text_lower:
-            return "它被设计为运行极快、稳健，且支持完全离线或混合模式。"
-        if "length check" in text_lower or "perform a length check" in text_lower:
-            return "让我们进行时长检查，以确保中文配音音频与原始英文时间对齐良好。"
-        return f"[中译] {text}"
 
-    def get_mock_translations(self, segments: List[Segment]) -> List[Segment]:
-        for seg in segments:
-            seg.target_text = self.fallback_translate_text(seg.source_text)
-            seg.is_fallback = True
-        return segments

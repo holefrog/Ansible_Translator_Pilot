@@ -29,8 +29,9 @@ class AzureSpeechTTS(TTSProvider):
         voice = self.config.get("voice", "zh-CN-XiaoxiaoNeural")
 
         if not api_key:
-            logger.warning("[TTS] Azure Subscription Key is missing. Generating pure local synthetic waves.")
-            return self.synthesize_with_synthetic_wav(segments, output_dir)
+            logger.error("[TTS] Azure Subscription Key is missing. Cannot proceed.")
+            import sys
+            sys.exit(1)
 
         updated_segments = []
         for seg in segments:
@@ -90,10 +91,9 @@ class AzureSpeechTTS(TTSProvider):
             try:
                 with_retry(run_api_call, self.retry_config, f"AzureTTS-{seg.segment_id}")
             except Exception as e:
-                logger.error(f"[TTS] Failed Azure synthesis for {seg.segment_id}: {e}. Falling back to synthetic wave.")
-                self.generate_beep_wav(full_output_path, max(1.5, min(seg.end - seg.start, len(seg.target_text or "") * 0.25)))
-                seg.audio_path = f"/output/{audio_filename}"
-                seg.is_fallback = True
+                logger.error(f"[TTS] Failed Azure synthesis for {seg.segment_id}: {e}.")
+                import sys
+                sys.exit(1)
 
             updated_segments.append(seg)
             if on_segment_done:
@@ -104,29 +104,7 @@ class AzureSpeechTTS(TTSProvider):
     def escape_xml(self, unsafe: str) -> str:
         return unsafe.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;").replace("'", "&apos;")
 
-    def synthesize_with_synthetic_wav(self, segments: List[Segment], output_dir: str) -> List[Segment]:
-        updated = []
-        for seg in segments:
-            audio_filename = f"segment_{seg.segment_id}.wav"
-            full_output_path = os.path.join(output_dir, audio_filename)
-            
-            text_len = len(seg.target_text or "")
-            target_duration = max(1.5, min(seg.end - seg.start, text_len * 0.25))
-            
-            self.generate_beep_wav(full_output_path, target_duration)
-            seg.audio_path = f"/output/{audio_filename}"
-            seg.is_fallback = True
-            updated.append(seg)
-        return updated
 
-    def generate_beep_wav(self, file_path: str, duration: float):
-        sample_rate = 24000
-        with wave.open(file_path, "wb") as f:
-            f.setnchannels(1)
-            f.setsampwidth(2) # 16 bit
-            f.setframerate(sample_rate)
-            # Create completely silent audio of the required duration
-            f.writeframes(b'\x00' * int(sample_rate * duration * 2))
 
 class GeminiTTS(TTSProvider):
     def __init__(self, retry_config: dict):
@@ -144,8 +122,9 @@ class GeminiTTS(TTSProvider):
         api_key = os.environ.get("GEMINI_API_KEY")
 
         if not api_key:
-            logger.warning("[TTS] Gemini API Key is missing for TTS. Falling back to synthetic generator.")
-            return AzureSpeechTTS({}, self.retry_config).synthesize(segments, output_dir)
+            logger.error("[TTS] Gemini API Key is missing for TTS. Cannot proceed.")
+            import sys
+            sys.exit(1)
 
         updated_segments = []
         for seg in segments:
@@ -195,8 +174,8 @@ class GeminiTTS(TTSProvider):
                 with_retry(run_api_call, self.retry_config, f"GeminiTTS-{seg.segment_id}")
             except Exception as e:
                 logger.error(f"[TTS] Gemini TTS synthesis failed for {seg.segment_id}: {e}")
-                AzureSpeechTTS({}, self.retry_config).generate_beep_wav(full_output_path, max(1.5, min(seg.end - seg.start, len(seg.target_text) * 0.25)))
-                seg.audio_path = f"/output/{audio_filename}"
+                import sys
+                sys.exit(1)
 
             updated_segments.append(seg)
             if on_segment_done:
