@@ -12,11 +12,7 @@ stt_provider: "groq_whisper"
 translate_provider: "gemini"
 tts_provider: "azure_speech"
 
-# API Keys & Credentials
-# Replace these with your real keys or use ansible-vault encrypted values
-groq_api_key: "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"
-gemini_api_key: "AIzaSyB4W4KyfQFe_cpB85zpSVqyHURolFwSNuI"
-azure_speech_key: "A2wB12S2eFDMp1eZtZVzS4vBaUjQnbZW8dSHKyXRtilBsWkOgO0fJQQJ99CGACYeBjFXJ3w3AAAYACOGShgt"
+# Azure Speech Settings
 azure_speech_region: "eastus"
 azure_speech_voice: "zh-CN-XiaoxiaoNeural"
 
