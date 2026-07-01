@@ -17,25 +17,30 @@
         <div class="subtitle">翻译结果预览终端</div>
     </header>
 
+    <!-- Progress / Status panel — stays visible even after completion -->
     <div id="status" class="status-message">
         <div class="loader" id="loader"></div>
         <p id="loading-text" style="margin-top: 20px; font-weight: 600;">正在等待管线启动...</p>
         <div class="progress-message" id="progress-msg">正在连接 pipeline_state.json...</div>
-        
+
+        <!-- Pipeline stages — each badge shows stage name + engine + elapsed time -->
         <div class="pipeline-stages" id="pipeline-stages">
-            <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 5px;">
                 <span id="stage-stt" class="stage-badge pending">语音识别 (STT)</span>
-                <span id="time-stt" style="font-size: 0.85rem; color: #94a3b8; font-family: monospace; height: 16px;"></span>
+                <span id="engine-stt" style="font-size: 0.78rem; color: #64748b; font-family: monospace; min-height: 14px;"></span>
+                <span id="time-stt"   style="font-size: 0.85rem; color: #94a3b8; font-family: monospace; min-height: 16px;"></span>
             </div>
-            <span id="arrow-1" class="stage-arrow" style="margin-bottom: 22px;">➔</span>
-            <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+            <span id="arrow-1" class="stage-arrow" style="margin-bottom: 38px;">➔</span>
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 5px;">
                 <span id="stage-translate" class="stage-badge pending">机器翻译 (Translate)</span>
-                <span id="time-translate" style="font-size: 0.85rem; color: #94a3b8; font-family: monospace; height: 16px;"></span>
+                <span id="engine-translate" style="font-size: 0.78rem; color: #64748b; font-family: monospace; min-height: 14px;"></span>
+                <span id="time-translate"   style="font-size: 0.85rem; color: #94a3b8; font-family: monospace; min-height: 16px;"></span>
             </div>
-            <span id="arrow-2" class="stage-arrow" style="margin-bottom: 22px;">➔</span>
-            <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+            <span id="arrow-2" class="stage-arrow" style="margin-bottom: 38px;">➔</span>
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 5px;">
                 <span id="stage-tts" class="stage-badge pending">语音合成 (TTS)</span>
-                <span id="time-tts" style="font-size: 0.85rem; color: #94a3b8; font-family: monospace; height: 16px;"></span>
+                <span id="engine-tts" style="font-size: 0.78rem; color: #64748b; font-family: monospace; min-height: 14px;"></span>
+                <span id="time-tts"   style="font-size: 0.85rem; color: #94a3b8; font-family: monospace; min-height: 16px;"></span>
             </div>
         </div>
 
@@ -61,14 +66,6 @@
         </div>
 
         <div class="dashboard">
-            <div class="stat-card">
-                <div class="stat-value" style="font-size: 0.95rem; font-weight: 600; text-align: left; display: inline-block; line-height: 1.5; font-family: monospace;">
-                    <div id="stat-stt"><span style="color: var(--accent-color);">STT:</span> <span style="color: var(--primary-color); font-weight: bold;">-</span></div>
-                    <div id="stat-translate"><span style="color: var(--accent-color);">Translate:</span> <span style="color: var(--primary-color); font-weight: bold;">-</span></div>
-                    <div id="stat-tts"><span style="color: var(--accent-color);">TTS:</span> <span style="color: var(--primary-color); font-weight: bold;">-</span></div>
-                </div>
-                <div class="stat-label">运行引擎</div>
-            </div>
             <div class="stat-card">
                 <div class="stat-value" id="stat-segments">0</div>
                 <div class="stat-label">分段总数</div>

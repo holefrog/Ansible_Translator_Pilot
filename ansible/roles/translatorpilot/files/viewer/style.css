@@ -465,7 +465,6 @@
     100% { transform: scale(0.95); opacity: 1; }
 }
 
-/* Disabled Play Button */
 .play-btn:disabled {
     background: #e2e8f0;
     color: #94a3b8;
@@ -477,4 +476,10 @@
     background: #e2e8f0;
     transform: none;
     box-shadow: none;
+}
+
+/* Stage timing spans — always bold */
+#time-stt, #time-translate, #time-tts {
+    font-weight: 700;
+    color: #475569;
 }

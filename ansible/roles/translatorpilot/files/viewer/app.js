@@ -56,9 +56,16 @@ let currentAudio = null;
             document.getElementById('progress-bar').style.width = p + '%';
 
             if (data.timings) {
-                if (data.timings.stt !== null) document.getElementById('time-stt').textContent = data.timings.stt.toFixed(1) + '秒';
-                if (data.timings.translate !== null) document.getElementById('time-translate').textContent = data.timings.translate.toFixed(1) + '秒';
-                if (data.timings.tts !== null) document.getElementById('time-tts').textContent = data.timings.tts.toFixed(1) + '秒';
+                if (data.timings.stt !== null) document.getElementById('time-stt').textContent = data.timings.stt.toFixed(1) + ' 秒';
+                if (data.timings.translate !== null) document.getElementById('time-translate').textContent = data.timings.translate.toFixed(1) + ' 秒';
+                if (data.timings.tts !== null) document.getElementById('time-tts').textContent = data.timings.tts.toFixed(1) + ' 秒';
+            }
+
+            if (data.engines) {
+                const e = data.engines;
+                if (e.stt)       document.getElementById('engine-stt').textContent       = e.stt;
+                if (e.translate) document.getElementById('engine-translate').textContent = e.translate;
+                if (e.tts)       document.getElementById('engine-tts').textContent       = e.tts;
             }
 
             // Update Pipeline Stages Status
@@ -90,14 +97,36 @@ let currentAudio = null;
                 }
             }
         } else if (data.status === 'completed') {
-            document.getElementById('status').style.display = 'none';
+            // Keep status panel visible so timings remain readable — only stop the spinner
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('loading-text').style.display = 'none';
+            document.getElementById('progress-msg').style.display = 'none';
             document.getElementById('content').style.display = 'block';
             hasFinished = true;
             clearInterval(pollInterval);
+
+            // Mark all stages completed
+            const sttEl2 = document.getElementById('stage-stt');
+            const transEl2 = document.getElementById('stage-translate');
+            const ttsEl2 = document.getElementById('stage-tts');
+            const arr1b = document.getElementById('arrow-1');
+            const arr2b = document.getElementById('arrow-2');
+            if (sttEl2)   sttEl2.className   = 'stage-badge completed';
+            if (transEl2) transEl2.className = 'stage-badge completed';
+            if (ttsEl2)   ttsEl2.className   = 'stage-badge completed';
+            if (arr1b)    arr1b.className     = 'stage-arrow active';
+            if (arr2b)    arr2b.className     = 'stage-arrow active';
+
             if (data.timings) {
-                if (data.timings.stt !== null) document.getElementById('time-stt').textContent = data.timings.stt.toFixed(1) + '秒';
-                if (data.timings.translate !== null) document.getElementById('time-translate').textContent = data.timings.translate.toFixed(1) + '秒';
-                if (data.timings.tts !== null) document.getElementById('time-tts').textContent = data.timings.tts.toFixed(1) + '秒';
+                if (data.timings.stt       !== null) document.getElementById('time-stt').textContent       = data.timings.stt.toFixed(1) + ' 秒';
+                if (data.timings.translate !== null) document.getElementById('time-translate').textContent = data.timings.translate.toFixed(1) + ' 秒';
+                if (data.timings.tts       !== null) document.getElementById('time-tts').textContent       = data.timings.tts.toFixed(1) + ' 秒';
+            }
+            if (data.engines) {
+                const e = data.engines;
+                if (e.stt)       document.getElementById('engine-stt').textContent       = e.stt;
+                if (e.translate) document.getElementById('engine-translate').textContent = e.translate;
+                if (e.tts)       document.getElementById('engine-tts').textContent       = e.tts;
             }
             renderSegments(data);
         }
