@@ -131,10 +131,12 @@ class TranslatorPilotPipeline:
 
             # 4. TTS Phase
             trigger_progress("Synthesizing localized Chinese voiceovers...", 75)
-            
+            threshold = self.settings.get("align", {}).get("warning_threshold_ratio", 1.3)
+
             def on_tts_done(idx, total):
                 percent = 75 + int(20 * (idx / total))
-                dump_state("running", f"Synthesizing audio segments: {idx}/{total}", percent)
+                temp_report = check_alignment(segments, self.output_dir, threshold)
+                dump_state("running", f"Synthesizing audio segments: {idx}/{total}", percent, report=temp_report)
 
             segments = tts_provider.synthesize(segments, self.output_dir, on_segment_done=on_tts_done)
             current_segments = segments
