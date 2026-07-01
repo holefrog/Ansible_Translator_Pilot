@@ -162,6 +162,54 @@
             font-weight: 400;
         }
 
+        .duration-bars {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-color);
+        }
+        .bar-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.75rem;
+        }
+        .bar-label {
+            color: var(--text-secondary);
+            width: 20px;
+            font-weight: 600;
+        }
+        .bar-track {
+            flex: 1;
+            height: 6px;
+            background-color: var(--border-color);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+        .en-fill {
+            background-color: #3b82f6; /* Blue for English */
+            opacity: 0.8;
+        }
+        .cn-fill {
+            background-color: var(--success-color);
+        }
+        .cn-fill.warning-fill {
+            background-color: var(--warning-color);
+        }
+        .bar-time {
+            width: 36px;
+            text-align: right;
+            color: var(--text-secondary);
+            font-family: monospace;
+        }
+
         .target-text {
             color: var(--text-primary);
             font-size: 1.25rem;
@@ -342,11 +390,10 @@
     </div>
 
     <div id="content" style="display: none;">
-        <div id="fallback-alert" class="fallback-banner" style="display: none;">
-            <strong>⚠️ API 密钥配置问题，当前运行在演示（Fallback）模式！</strong>
-            由于缺少有效的 API 密钥，程序无法调用真实的 AI 服务。<br>
-            下面展示的是测试用的模拟文本和音频占位符，<span>点击播放不会有真实声音</span>。<br>
-            请在部署配置中填写真实的 API Key 并重新运行。
+        <div id="fallback-alert" class="fallback-alert">
+            <strong>⚠️ 部分 AI 服务受限或触发降级（Fallback）模式</strong>
+            <p>由于免费 API 触发了并发限流 (例如 Azure TTS 429) 或缺少对应密钥，部分生成使用了降级占位符 (例如纯静音的音频或模拟翻译)。这不影响管线继续运行。</p>
+            <p style="font-size: 0.85rem; opacity: 0.8;">稍后刷新或填入付费密钥即可恢复完整体验。</p>
         </div>
 
         <div class="dashboard">
@@ -463,13 +510,27 @@
         }
 
         const container = document.getElementById('segments-container');
+        container.innerHTML = '';
         
+        let maxDuration = 1;
+        segments.forEach(seg => {
+            const report = reportMap[seg.segment_id];
+            if (report) {
+                if (report.original_duration > maxDuration) maxDuration = report.original_duration;
+                if (report.synthesized_duration > maxDuration) maxDuration = report.synthesized_duration;
+            }
+        });
+
         segments.forEach((seg, index) => {
             const report = reportMap[seg.segment_id] || {};
             const isWarning = report.warning;
             const ratioStr = report.ratio ? report.ratio.toFixed(2) + 'x' : 'N/A';
             const durationStr = report.synthesized_duration ? report.synthesized_duration.toFixed(2) + 's' : '0.0s';
+            const originalDurationStr = report.original_duration ? report.original_duration.toFixed(2) + 's' : '0.0s';
             
+            const enWidth = report.original_duration ? (report.original_duration / maxDuration) * 100 : 0;
+            const cnWidth = report.synthesized_duration ? (report.synthesized_duration / maxDuration) * 100 : 0;
+
             const badgeClass = isWarning ? 'warning' : 'perfect';
             const badgeText = isWarning ? 'Too Long' : 'Aligned';
 
@@ -497,11 +558,27 @@
                         <span>#${index + 1}</span>
                         ${report.ratio ? `
                         <span>&bull;</span>
-                        <span>${durationStr}</span>
-                        <span>&bull;</span>
                         <span class="badge ${badgeClass}">${badgeText} (${ratioStr})</span>
                         ` : ''}
                     </div>
+                    ${report.ratio ? `
+                    <div class="duration-bars" title="EN: ${originalDurationStr} | CN: ${durationStr}">
+                        <div class="bar-container">
+                            <span class="bar-label">EN</span>
+                            <div class="bar-track">
+                                <div class="bar-fill en-fill" style="width: ${enWidth}%;"></div>
+                            </div>
+                            <span class="bar-time">${originalDurationStr}</span>
+                        </div>
+                        <div class="bar-container">
+                            <span class="bar-label">CN</span>
+                            <div class="bar-track">
+                                <div class="bar-fill cn-fill ${isWarning ? 'warning-fill' : ''}" style="width: ${cnWidth}%;"></div>
+                            </div>
+                            <span class="bar-time">${durationStr}</span>
+                        </div>
+                    </div>
+                    ` : ''}
                 </div>
                 <div class="play-controls">
                     ${playButtonHTML}

@@ -1,9 +1,9 @@
 # Translator-Pilot Settings Configured dynamically via Ansible deployment template
 
 [provider]
-stt = "{{ stt_provider }}"
-translate = "{{ translate_provider }}"
-tts = "{{ tts_provider }}"
+stt = "groq_whisper"
+translate = "groq_llm"
+tts = "azure_speech"
 
 [stt.groq_whisper]
 api_key = "{{ groq_api_key }}"

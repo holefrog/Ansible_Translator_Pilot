@@ -9,5 +9,5 @@ class TTSProvider(ABC):
         pass
 
     @abstractmethod
-    def synthesize(self, segments: List[Segment], output_dir: str) -> List[Segment]:
+    def synthesize(self, segments: List[Segment], output_dir: str, on_segment_done: Optional[Callable[[int, int], None]] = None) -> List[Segment]:
         pass

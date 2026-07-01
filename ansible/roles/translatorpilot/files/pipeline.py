@@ -5,7 +5,7 @@ import logging
 from typing import Callable, Optional
 from contracts import Segment
 from stt import GroqWhisperSTT, GeminiSTT
-from translate import GeminiTranslate
+from translate import TranslateProvider, GeminiTranslate, GroqTranslate
 from tts import AzureSpeechTTS, GeminiTTS
 from align_check import check_alignment
 
@@ -72,7 +72,11 @@ class TranslatorPilotPipeline:
             else:
                 stt_provider = GeminiSTT(self.settings.get("stt", {}).get("gemini", {}), retry_cfg)
 
-            translate_provider = GeminiTranslate(self.settings.get("translate", {}).get("gemini", {}), retry_cfg)
+            translate_name = self.settings.get("provider", {}).get("translate", "groq_llm")
+            if translate_name == "groq_llm":
+                translate_provider = GroqTranslate(self.settings.get("translate", {}).get("groq_llm", {}), retry_cfg)
+            else:
+                translate_provider = GeminiTranslate(self.settings.get("translate", {}).get("gemini", {}), retry_cfg)
 
             tts_name = self.settings.get("provider", {}).get("tts", "azure_speech")
             if tts_name == "azure_speech":
@@ -98,8 +102,13 @@ class TranslatorPilotPipeline:
             trigger_progress("Translation Phase completed successfully.", 75)
 
             # 4. TTS Phase
-            trigger_progress("Synthesizing localized Chinese voiceovers...", 85)
-            segments = tts_provider.synthesize(segments, self.output_dir)
+            trigger_progress("Synthesizing localized Chinese voiceovers...", 75)
+            
+            def on_tts_done(idx, total):
+                percent = 75 + int(20 * (idx / total))
+                dump_state("running", f"Synthesizing audio segments: {idx}/{total}", percent)
+
+            segments = tts_provider.synthesize(segments, self.output_dir, on_segment_done=on_tts_done)
             current_segments = segments
             trigger_progress("TTS Phase audio clips fully rendered.", 95)
 

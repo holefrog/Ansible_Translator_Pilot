@@ -18,7 +18,7 @@ class AzureSpeechTTS(TTSProvider):
     def name(self) -> str:
         return "azure_speech"
 
-    def synthesize(self, segments: List[Segment], output_dir: str) -> List[Segment]:
+    def synthesize(self, segments: List[Segment], output_dir: str, on_segment_done=None) -> List[Segment]:
         if not segments:
             return []
             
@@ -80,6 +80,8 @@ class AzureSpeechTTS(TTSProvider):
                 seg.is_fallback = True
 
             updated_segments.append(seg)
+            if on_segment_done:
+                on_segment_done(len(updated_segments), len(segments))
 
         return updated_segments
 
@@ -118,7 +120,7 @@ class GeminiTTS(TTSProvider):
     def name(self) -> str:
         return "gemini_tts"
 
-    def synthesize(self, segments: List[Segment], output_dir: str) -> List[Segment]:
+    def synthesize(self, segments: List[Segment], output_dir: str, on_segment_done=None) -> List[Segment]:
         if not segments:
             return []
             
@@ -181,5 +183,7 @@ class GeminiTTS(TTSProvider):
                 seg.audio_path = f"/output/{audio_filename}"
 
             updated_segments.append(seg)
+            if on_segment_done:
+                on_segment_done(len(updated_segments), len(segments))
 
         return updated_segments
