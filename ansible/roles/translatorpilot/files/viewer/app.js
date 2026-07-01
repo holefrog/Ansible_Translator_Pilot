@@ -25,80 +25,70 @@ let currentAudio = null;
     }
 
     function handleState(data) {
-        // Show progress UI if running
-        if (data.status === 'running') {
-            document.getElementById('status').style.display = 'block';
-            
-            // Handle error state gracefully
-            if (data.status === 'error') {
-                document.getElementById('loading-text').textContent = '⚠️ 运行出错: ' + (data.message || 'Unknown error');
-                document.getElementById('loading-text').style.color = '#dc2626';
-                document.getElementById('progress-msg').textContent = '请查看终端日志以获取详细错误信息。';
-                document.getElementById('loader').style.display = 'none';
-                
-                const sttEl = document.getElementById('stage-stt');
-                const transEl = document.getElementById('stage-translate');
-                const ttsEl = document.getElementById('stage-tts');
-                if (sttEl) sttEl.className = 'stage-badge pending';
-                if (transEl) transEl.className = 'stage-badge pending';
-                if (ttsEl) ttsEl.className = 'stage-badge pending';
-                
-                return;
-            }
-
-            if (data.status === 'running') {
-                document.getElementById('loading-text').textContent = '流水线运行中...';
-                document.getElementById('progress-msg').textContent = data.message || '正在处理...';
-                document.getElementById('progress-container').style.display = 'block';
-                const p = data.progress || 0;
-                document.getElementById('progress-bar').style.width = p + '%';
-                
-                // Update Pipeline Stages Status
-                const sttEl = document.getElementById('stage-stt');
-                const transEl = document.getElementById('stage-translate');
-                const ttsEl = document.getElementById('stage-tts');
-                const arr1 = document.getElementById('arrow-1');
-                const arr2 = document.getElementById('arrow-2');
-                
-                if (sttEl && transEl && ttsEl) {
-                    const msg = (data.message || '').toLowerCase();
-                    
-                    if (msg.includes('transcrib') || p < 40) {
-                        sttEl.className = 'stage-badge active';
-                    } else if (p >= 40) {
-                        sttEl.className = 'stage-badge completed';
-                        if (arr1) arr1.className = 'stage-arrow active';
-                    }
-                    
-                    if (msg.includes('translat') || (p >= 40 && p < 75)) {
-                        transEl.className = 'stage-badge active';
-                    } else if (p >= 75) {
-                        transEl.className = 'stage-badge completed';
-                        if (arr2) arr2.className = 'stage-arrow active';
-                    }
-                    
-                    if (msg.includes('synthesiz') || p >= 75) {
-                        ttsEl.className = 'stage-badge active';
-                    }
-                }
-            } else if (data.status === 'completed') {
-                document.getElementById('status').style.display = 'none';
-                document.getElementById('content').style.display = 'block';
-                clearInterval(pollInterval);
-                renderSegments(data);
-            }
-        } else if (data.status === 'error') {
+        if (data.status === 'error') {
             document.getElementById('status').style.display = 'block';
             document.getElementById('loader').style.display = 'none';
-            document.getElementById('progress-container').style.display = 'none';
-            document.getElementById('loading-text').innerHTML = `<span style="color:var(--error-color)">Pipeline Error</span>`;
-            document.getElementById('progress-msg').textContent = data.error || data.message || 'Unknown error occurred.';
+            document.getElementById('progress-container').style.display = 'block';
+            document.getElementById('progress-bar').style.backgroundColor = '#dc2626';
+            document.getElementById('progress-bar').style.width = '100%';
+            document.getElementById('loading-text').innerHTML = `<span style="color:#dc2626; font-weight: bold;">⚠️ 运行出错: Pipeline Error</span>`;
+            document.getElementById('progress-msg').innerHTML = `<span style="color:#dc2626;">${data.error || data.message || 'Unknown error occurred.'}</span>`;
+            
+            const sttEl = document.getElementById('stage-stt');
+            const transEl = document.getElementById('stage-translate');
+            const ttsEl = document.getElementById('stage-tts');
+            if (sttEl) sttEl.className = 'stage-badge pending';
+            if (transEl) transEl.className = 'stage-badge pending';
+            if (ttsEl) ttsEl.className = 'stage-badge pending';
+            
             hasFinished = true;
+            window.pipelineCompletedTriggered = true;
             clearInterval(pollInterval);
+            return;
+        }
+
+        if (data.status === 'running') {
+            document.getElementById('status').style.display = 'block';
+            document.getElementById('loading-text').textContent = '流水线运行中...';
+            document.getElementById('progress-msg').textContent = data.message || '正在处理...';
+            document.getElementById('progress-container').style.display = 'block';
+            const p = data.progress || 0;
+            document.getElementById('progress-bar').style.width = p + '%';
+
+            // Update Pipeline Stages Status
+            const sttEl = document.getElementById('stage-stt');
+            const transEl = document.getElementById('stage-translate');
+            const ttsEl = document.getElementById('stage-tts');
+            const arr1 = document.getElementById('arrow-1');
+            const arr2 = document.getElementById('arrow-2');
+
+            if (sttEl && transEl && ttsEl) {
+                const msg = (data.message || '').toLowerCase();
+
+                if (msg.includes('transcrib') || p < 40) {
+                    sttEl.className = 'stage-badge active';
+                } else if (p >= 40) {
+                    sttEl.className = 'stage-badge completed';
+                    if (arr1) arr1.className = 'stage-arrow active';
+                }
+
+                if (msg.includes('translat') || (p >= 40 && p < 75)) {
+                    transEl.className = 'stage-badge active';
+                } else if (p >= 75) {
+                    transEl.className = 'stage-badge completed';
+                    if (arr2) arr2.className = 'stage-arrow active';
+                }
+
+                if (msg.includes('synthesiz') || p >= 75) {
+                    ttsEl.className = 'stage-badge active';
+                }
+            }
         } else if (data.status === 'completed') {
+            document.getElementById('status').style.display = 'none';
+            document.getElementById('content').style.display = 'block';
             hasFinished = true;
             clearInterval(pollInterval);
-            renderData(data);
+            renderSegments(data);
         }
 
         // We can partially render segments even while running!
