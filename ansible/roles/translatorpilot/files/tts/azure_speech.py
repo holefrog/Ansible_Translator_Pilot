@@ -1,10 +1,10 @@
 import os
-import math
-import struct
+import wave
 import logging
 import xml.etree.ElementTree as ET
 from typing import List
-from core import Segment, with_retry
+from contracts import Segment
+from retry import with_retry
 from .base import TTSProvider
 
 logger = logging.getLogger("tts")
@@ -100,37 +100,13 @@ class AzureSpeechTTS(TTSProvider):
         return updated
 
     def generate_beep_wav(self, file_path: str, duration: float):
-        sample_rate = 8000
-        num_samples = int(sample_rate * duration)
-        frequency = 440.0
-        
-        # WAV container generation in pure Python using 'struct' package
-        with open(file_path, "wb") as f:
-            # 1. RIFF Header
-            f.write(b"RIFF")
-            f.write(struct.pack("<I", 36 + num_samples * 2))
-            f.write(b"WAVE")
-            
-            # 2. fmt Subchunk
-            f.write(b"fmt ")
-            f.write(struct.pack("<I", 16)) # Subchunk1Size
-            f.write(struct.pack("<H", 1))  # AudioFormat (PCM = 1)
-            f.write(struct.pack("<H", 1))  # NumChannels (Mono)
-            f.write(struct.pack("<I", sample_rate)) # SampleRate
-            f.write(struct.pack("<I", sample_rate * 2)) # ByteRate
-            f.write(struct.pack("<H", 2))  # BlockAlign
-            f.write(struct.pack("<H", 16)) # BitsPerSample
-            
-            # 3. data Subchunk
-            f.write(b"data")
-            f.write(struct.pack("<I", num_samples * 2))
-            
-            # Synthesize Sine Wave Tone
-            for i in range(num_samples):
-                t = float(i) / sample_rate
-                sample_value = math.sin(2.0 * math.pi * frequency * t)
-                int_sample = int(sample_value * 32767)
-                f.write(struct.pack("<h", int_sample))
+        sample_rate = 24000
+        with wave.open(file_path, "wb") as f:
+            f.setnchannels(1)
+            f.setsampwidth(2) # 16 bit
+            f.setframerate(sample_rate)
+            # Create completely silent audio of the required duration
+            f.writeframes(b'\x00' * int(sample_rate * duration * 2))
 
 class GeminiTTS(TTSProvider):
     def __init__(self, retry_config: dict):

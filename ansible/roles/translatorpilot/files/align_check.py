@@ -1,8 +1,8 @@
 import os
-import struct
+import wave
 import logging
 from typing import List, dict
-from core import Segment
+from contracts import Segment
 
 logger = logging.getLogger("align_check")
 
@@ -12,58 +12,8 @@ def get_wav_duration(file_path: str) -> float:
         return 0.0
 
     try:
-        with open(file_path, "rb") as f:
-            header = f.read(44)
-            if len(header) < 44:
-                return 0.0
-
-            is_riff = header[0:4] == b"RIFF"
-            is_wave = header[8:12] == b"WAVE"
-
-            if not is_riff or not is_wave:
-                # Estimate based on file size and common Azure format (24kHz 16-bit mono = 48000 bytes/sec)
-                file_size = os.path.getsize(file_path)
-                return file_size / 48000.0
-
-            # Scan subchunks to find fmt and data
-            f.seek(12)
-            sample_rate = 24000
-            channels = 1
-            bits_per_sample = 16
-            data_size = 0
-            
-            # Simple chunk parsing
-            file_size = os.path.getsize(file_path)
-            pos = 12
-            while pos < file_size - 8:
-                f.seek(pos)
-                chunk_id = f.read(4)
-                chunk_size_bytes = f.read(4)
-                if len(chunk_size_bytes) < 4:
-                    break
-                chunk_size = struct.unpack("<I", chunk_size_bytes)[0]
-                
-                if chunk_id == b"fmt ":
-                    f.seek(pos + 8 + 2)
-                    channels = struct.unpack("<H", f.read(2))[0]
-                    sample_rate = struct.unpack("<I", f.read(4))[0]
-                    f.seek(pos + 8 + 14)
-                    bits_per_sample = struct.unpack("<H", f.read(2))[0]
-                elif chunk_id == b"data":
-                    data_size = chunk_size
-                    break
-                    
-                pos += 8 + chunk_size
-
-            if data_size == 0:
-                data_size = file_size - 44
-
-            bytes_per_second = sample_rate * channels * (bits_per_sample / 8)
-            if bytes_per_second == 0:
-                return 0.0
-                
-            return data_size / bytes_per_second
-            
+        with wave.open(file_path, "rb") as f:
+            return f.getnframes() / float(f.getframerate())
     except Exception as e:
         logger.error(f"[AlignCheck] Failed to parse WAV duration: {e}")
         # Default safety fallback calculation

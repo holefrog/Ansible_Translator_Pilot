@@ -3,7 +3,10 @@ import sys
 import json
 import logging
 from typing import Callable, Optional, dict
-from core import Segment, ProviderFactory
+from contracts import Segment
+from stt import GroqWhisperSTT, GeminiSTT
+from translate import GeminiTranslate
+from tts import AzureSpeechTTS, GeminiTTS
 from align_check import check_alignment
 
 # Set up logging configuration
@@ -28,9 +31,21 @@ class TranslatorPilotPipeline:
         try:
             # 1. Initialization
             trigger_progress("Initializing STT, Translation, and TTS providers...", 5)
-            stt_provider = ProviderFactory.create_stt(self.settings)
-            translate_provider = ProviderFactory.create_translate(self.settings)
-            tts_provider = ProviderFactory.create_tts(self.settings)
+            
+            retry_cfg = self.settings.get("retry", {})
+            stt_name = self.settings.get("provider", {}).get("stt", "groq_whisper")
+            if stt_name == "groq_whisper":
+                stt_provider = GroqWhisperSTT(self.settings.get("stt", {}).get("groq_whisper", {}), retry_cfg)
+            else:
+                stt_provider = GeminiSTT(self.settings.get("stt", {}).get("gemini", {}), retry_cfg)
+
+            translate_provider = GeminiTranslate(self.settings.get("translate", {}).get("gemini", {}), retry_cfg)
+
+            tts_name = self.settings.get("provider", {}).get("tts", "azure_speech")
+            if tts_name == "azure_speech":
+                tts_provider = AzureSpeechTTS(self.settings.get("tts", {}).get("azure_speech", {}), retry_cfg)
+            else:
+                tts_provider = GeminiTTS(retry_cfg)
             
             trigger_progress(f"Providers successfully loaded: STT=[{stt_provider.name}], TRANSLATE=[{translate_provider.name}], TTS=[{tts_provider.name}]", 10)
 
@@ -94,63 +109,15 @@ class TranslatorPilotPipeline:
             }
 
 def parse_toml_file(file_path: str) -> dict:
-    import re
-    result = {}
-    current_section = None
-    
     if not os.path.exists(file_path):
         return {}
-        
-    with open(file_path, "r", encoding="utf-8") as f:
-        for line in f:
-            line = line.strip()
-            if not line or line.startswith("#"):
-                continue
-                
-            # Match section e.g. [provider] or [stt.groq_whisper]
-            section_match = re.match(r"^\[([^]]+)\]$", line)
-            if section_match:
-                current_section = section_match.group(1)
-                continue
-                
-            # Match key = value
-            parts = line.split("=", 1)
-            if len(parts) == 2:
-                key = parts[0].strip()
-                val_str = parts[1].strip()
-                
-                # Strip quotes or parse number/bool
-                if (val_str.startswith('"') and val_str.endswith('"')) or (val_str.startswith("'") and val_str.endswith("'")):
-                    val = val_str[1:-1]
-                elif val_str.lower() in ("true", "yes", "on"):
-                    val = True
-                elif val_str.lower() in ("false", "no", "off"):
-                    val = False
-                else:
-                    try:
-                        if "." in val_str:
-                            val = float(val_str)
-                        else:
-                            val = int(val_str)
-                    except ValueError:
-                        val = val_str
-                
-                if current_section:
-                    # Handle nested section e.g. "stt.groq_whisper"
-                    section_parts = current_section.split(".")
-                    target = result
-                    for sec in section_parts[:-1]:
-                        if sec not in target:
-                            target[sec] = {}
-                        target = target[sec]
-                    last_sec = section_parts[-1]
-                    if last_sec not in target:
-                        target[last_sec] = {}
-                    target[last_sec][key] = val
-                else:
-                    result[key] = val
-                    
-    return result
+    try:
+        import tomllib
+        with open(file_path, "rb") as f:
+            return tomllib.load(f)
+    except ImportError:
+        logger.warning("tomllib not found (requires Python 3.11+). Using empty settings.")
+        return {}
 
 if __name__ == "__main__":
     # Allow execution directly from CLI command

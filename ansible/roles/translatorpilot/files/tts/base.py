@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import List
-from core import Segment
+from contracts import Segment
 
 class TTSProvider(ABC):
     @property
