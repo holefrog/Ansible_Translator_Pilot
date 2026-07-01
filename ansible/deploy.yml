@@ -1,0 +1,9 @@
+---
+- name: Deploy Translator Pilot Local Pipeline to ThinkPad T14
+  hosts: local_thinkpad
+  become: no
+  vars_files:
+    - group_vars/all.yml
+
+  roles:
+    - translatorpilot

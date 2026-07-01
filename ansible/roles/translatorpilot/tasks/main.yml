@@ -1,0 +1,84 @@
+---
+# Tasks for Translator Pilot Local Pipeline Deployment
+
+- name: Create deployment target directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+  loop:
+    - "{{ install_dir }}"
+    - "{{ install_dir }}/core"
+    - "{{ install_dir }}/stt"
+    - "{{ install_dir }}/translate"
+    - "{{ install_dir }}/tts"
+    - "{{ install_dir }}/output"
+
+- name: Create Python Virtual Environment (venv)
+  command: "python3 -m venv {{ venv_dir }}"
+  args:
+    creates: "{{ venv_dir }}/bin/activate"
+
+- name: Ensure pip is up to date inside virtual environment
+  pip:
+    name: pip
+    state: latest
+    virtualenv: "{{ venv_dir }}"
+
+- name: Install required Python dependencies inside virtual environment
+  pip:
+    name:
+      - requests
+      - toml
+    state: present
+    virtualenv: "{{ venv_dir }}"
+
+- name: Deploy Core Python files
+  copy:
+    src: "{{ item }}"
+    dest: "{{ install_dir }}/{{ item }}"
+    mode: '0644'
+  loop:
+    - "core/__init__.py"
+    - "core/contracts.py"
+    - "core/retry.py"
+    - "core/factory.py"
+    - "stt/__init__.py"
+    - "stt/base.py"
+    - "stt/groq_whisper.py"
+    - "translate/__init__.py"
+    - "translate/base.py"
+    - "translate/gemini.py"
+    - "tts/__init__.py"
+    - "tts/base.py"
+    - "tts/azure_speech.py"
+    - "align_check.py"
+    - "pipeline.py"
+  ignore_errors: yes  # Skip copy errors if source files are structured differently during local tests
+
+- name: Render dynamically compiled settings.toml
+  template:
+    src: settings.toml.j2
+    dest: "{{ install_dir }}/settings.toml"
+    mode: '0640'
+
+- name: Provide local execution helper shell script
+  copy:
+    dest: "{{ install_dir }}/run_pipeline.sh"
+    content: |
+      #!/bin/bash
+      # Automated Runner Script for Translator Pilot Pipeline
+      # Usage: ./run_pipeline.sh <path_to_audio_file>
+      
+      if [ -z "$1" ]; then
+        echo "Error: Missing input audio path."
+        echo "Usage: ./run_pipeline.sh <path_to_audio_file>"
+        exit 1
+      fi
+      
+      echo "[Runner] Activating virtual environment..."
+      source "{{ venv_dir }}/bin/activate"
+      
+      echo "[Runner] Executing Translator Pilot Python pipeline..."
+      python3 "{{ install_dir }}/pipeline.py" "$1" "{{ install_dir }}/settings.toml" "{{ install_dir }}/output"
+    mode: '0755'
