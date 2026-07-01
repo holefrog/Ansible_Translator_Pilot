@@ -24,6 +24,53 @@ let currentAudio = null;
         }
     }
 
+    function updateStageCards(timings, engines, p, msg) {
+        const dashboard = document.getElementById('dashboard');
+        if (dashboard) dashboard.style.display = '';
+
+        if (timings) {
+            if (timings.stt       !== null) document.getElementById('time-stt').textContent       = timings.stt.toFixed(1) + ' 秒';
+            if (timings.translate !== null) document.getElementById('time-translate').textContent = timings.translate.toFixed(1) + ' 秒';
+            if (timings.tts       !== null) document.getElementById('time-tts').textContent       = timings.tts.toFixed(1) + ' 秒';
+        }
+        if (engines) {
+            if (engines.stt)       document.getElementById('engine-stt').textContent       = engines.stt;
+            if (engines.translate) document.getElementById('engine-translate').textContent = engines.translate;
+            if (engines.tts)       document.getElementById('engine-tts').textContent       = engines.tts;
+        }
+
+        // Active / completed highlights on stage cards
+        const cardStt   = document.getElementById('card-stt');
+        const cardTrans = document.getElementById('card-translate');
+        const cardTts   = document.getElementById('card-tts');
+        if (!cardStt) return;
+
+        const lmsg = (msg || '').toLowerCase();
+
+        // STT
+        if (p >= 40) {
+            cardStt.className = 'stat-card stage-card completed';
+        } else {
+            cardStt.className = 'stat-card stage-card active';
+        }
+        // Translate
+        if (p >= 75) {
+            cardTrans.className = 'stat-card stage-card completed';
+        } else if (p >= 40) {
+            cardTrans.className = 'stat-card stage-card active';
+        } else {
+            cardTrans.className = 'stat-card stage-card';
+        }
+        // TTS
+        if (p >= 95) {
+            cardTts.className = 'stat-card stage-card completed';
+        } else if (p >= 75) {
+            cardTts.className = 'stat-card stage-card active';
+        } else {
+            cardTts.className = 'stat-card stage-card';
+        }
+    }
+
     function handleState(data) {
         if (data.status === 'error') {
             document.getElementById('status').style.display = 'block';
@@ -33,14 +80,6 @@ let currentAudio = null;
             document.getElementById('progress-bar').style.width = '100%';
             document.getElementById('loading-text').innerHTML = `<span style="color:#dc2626; font-weight: bold;">⚠️ 运行出错: Pipeline Error</span>`;
             document.getElementById('progress-msg').innerHTML = `<span style="color:#dc2626;">${data.error || data.message || 'Unknown error occurred.'}</span>`;
-            
-            const sttEl = document.getElementById('stage-stt');
-            const transEl = document.getElementById('stage-translate');
-            const ttsEl = document.getElementById('stage-tts');
-            if (sttEl) sttEl.className = 'stage-badge pending';
-            if (transEl) transEl.className = 'stage-badge pending';
-            if (ttsEl) ttsEl.className = 'stage-badge pending';
-            
             hasFinished = true;
             window.pipelineCompletedTriggered = true;
             clearInterval(pollInterval);
@@ -54,100 +93,28 @@ let currentAudio = null;
             document.getElementById('progress-container').style.display = 'block';
             const p = data.progress || 0;
             document.getElementById('progress-bar').style.width = p + '%';
-
-            if (data.timings) {
-                if (data.timings.stt !== null) document.getElementById('time-stt').textContent = data.timings.stt.toFixed(1) + ' 秒';
-                if (data.timings.translate !== null) document.getElementById('time-translate').textContent = data.timings.translate.toFixed(1) + ' 秒';
-                if (data.timings.tts !== null) document.getElementById('time-tts').textContent = data.timings.tts.toFixed(1) + ' 秒';
-            }
-
-            if (data.engines) {
-                const e = data.engines;
-                if (e.stt)       document.getElementById('engine-stt').textContent       = e.stt;
-                if (e.translate) document.getElementById('engine-translate').textContent = e.translate;
-                if (e.tts)       document.getElementById('engine-tts').textContent       = e.tts;
-            }
-
-            // Update Pipeline Stages Status
-            const sttEl = document.getElementById('stage-stt');
-            const transEl = document.getElementById('stage-translate');
-            const ttsEl = document.getElementById('stage-tts');
-            const arr1 = document.getElementById('arrow-1');
-            const arr2 = document.getElementById('arrow-2');
-
-            if (sttEl && transEl && ttsEl) {
-                const msg = (data.message || '').toLowerCase();
-
-                if (msg.includes('transcrib') || p < 40) {
-                    sttEl.className = 'stage-badge active';
-                } else if (p >= 40) {
-                    sttEl.className = 'stage-badge completed';
-                    if (arr1) arr1.className = 'stage-arrow active';
-                }
-
-                if (msg.includes('translat') || (p >= 40 && p < 75)) {
-                    transEl.className = 'stage-badge active';
-                } else if (p >= 75) {
-                    transEl.className = 'stage-badge completed';
-                    if (arr2) arr2.className = 'stage-arrow active';
-                }
-
-                if (msg.includes('synthesiz') || p >= 75) {
-                    ttsEl.className = 'stage-badge active';
-                }
-            }
+            updateStageCards(data.timings, data.engines, p, data.message);
         } else if (data.status === 'completed') {
-            // Keep status panel visible so timings remain readable — only stop the spinner
+            // Hide spinner, keep progress bar visible for reference
             document.getElementById('loader').style.display = 'none';
             document.getElementById('loading-text').style.display = 'none';
             document.getElementById('progress-msg').style.display = 'none';
             document.getElementById('content').style.display = 'block';
             hasFinished = true;
             clearInterval(pollInterval);
-
-            // Mark all stages completed
-            const sttEl2 = document.getElementById('stage-stt');
-            const transEl2 = document.getElementById('stage-translate');
-            const ttsEl2 = document.getElementById('stage-tts');
-            const arr1b = document.getElementById('arrow-1');
-            const arr2b = document.getElementById('arrow-2');
-            if (sttEl2)   sttEl2.className   = 'stage-badge completed';
-            if (transEl2) transEl2.className = 'stage-badge completed';
-            if (ttsEl2)   ttsEl2.className   = 'stage-badge completed';
-            if (arr1b)    arr1b.className     = 'stage-arrow active';
-            if (arr2b)    arr2b.className     = 'stage-arrow active';
-
-            if (data.timings) {
-                if (data.timings.stt       !== null) document.getElementById('time-stt').textContent       = data.timings.stt.toFixed(1) + ' 秒';
-                if (data.timings.translate !== null) document.getElementById('time-translate').textContent = data.timings.translate.toFixed(1) + ' 秒';
-                if (data.timings.tts       !== null) document.getElementById('time-tts').textContent       = data.timings.tts.toFixed(1) + ' 秒';
-            }
-            if (data.engines) {
-                const e = data.engines;
-                if (e.stt)       document.getElementById('engine-stt').textContent       = e.stt;
-                if (e.translate) document.getElementById('engine-translate').textContent = e.translate;
-                if (e.tts)       document.getElementById('engine-tts').textContent       = e.tts;
-            }
+            updateStageCards(data.timings, data.engines, 100, '');
             renderSegments(data);
         }
 
-        // We can partially render segments even while running!
+        // Partial real-time segment rendering while running
         if (data.segments && data.segments.length > 0 && !hasFinished && data.status !== 'error') {
-            // Only partially render if we want to stream visually. For now, let's keep it simple: 
-            // We can just show the real-time segments in the background, but UI might jump.
-            // Let's actually render them so user sees real-time progress!
             document.getElementById('content').style.display = 'block';
             renderSegments(data);
         }
     }
 
     function renderSegments(data) {
-        if (data.engines) {
-            const formatEngine = (label, provider) => `<span style="color: var(--accent-color);">${label}:</span> <span style="color: var(--primary-color); font-weight: bold;">${provider}</span>`;
-            document.getElementById('stat-stt').innerHTML = formatEngine('STT', data.engines.stt);
-            document.getElementById('stat-translate').innerHTML = formatEngine('Translate', data.engines.translate);
-            document.getElementById('stat-tts').innerHTML = formatEngine('TTS', data.engines.tts);
-        }
+        // Engine names and timings are now rendered by updateStageCards; nothing extra needed here.
 
         if (data.has_fallback) {
             document.getElementById('fallback-alert').style.display = 'block';
