@@ -58,10 +58,9 @@ let currentAudio = null;
 
     function renderSegments(data) {
         if (data.engines) {
-            document.getElementById('engine-badges').style.display = 'flex';
-            document.getElementById('badge-stt').textContent = `STT: ${data.engines.stt}`;
-            document.getElementById('badge-translate').textContent = `Translate: ${data.engines.translate}`;
-            document.getElementById('badge-tts').textContent = `TTS: ${data.engines.tts}`;
+            document.getElementById('stat-stt').textContent = `STT: ${data.engines.stt}`;
+            document.getElementById('stat-translate').textContent = `Translate: ${data.engines.translate}`;
+            document.getElementById('stat-tts').textContent = `TTS: ${data.engines.tts}`;
         }
 
         if (data.has_fallback) {
