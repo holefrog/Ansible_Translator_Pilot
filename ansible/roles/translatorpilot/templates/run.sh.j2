@@ -1,0 +1,59 @@
+#!/bin/bash
+# Translator Pilot Automated Pipeline & Viewer
+# Usage: ./run.sh <path_to_audio_file>
+
+if [ -z "$1" ]; then
+  echo "Error: Missing input audio path."
+  echo "Usage: ./run.sh <path_to_audio_file>"
+  exit 1
+fi
+
+PORT={{ viewer_port | default(8080) }}
+OUTPUT_DIR="{{ install_dir }}/output"
+
+# Ensure output dir exists
+mkdir -p "$OUTPUT_DIR"
+
+# 1. Start HTTP Server in background
+echo "[Viewer] Starting local HTTP server on port $PORT..."
+cd "$OUTPUT_DIR"
+python3 -m http.server $PORT > /dev/null 2>&1 &
+SERVER_PID=$!
+
+# 2. Set up trap to kill the server when this script exits
+cleanup() {
+    echo ""
+    echo "[Cleanup] Stopping HTTP server (PID $SERVER_PID)..."
+    kill $SERVER_PID 2>/dev/null
+    wait $SERVER_PID 2>/dev/null
+    echo "[Cleanup] Done."
+}
+trap cleanup EXIT
+
+# 3. Open browser automatically
+URL="http://localhost:$PORT/viewer.html"
+echo "[Viewer] Opening browser at $URL"
+if command -v xdg-open > /dev/null; then
+    xdg-open "$URL" > /dev/null 2>&1
+elif command -v open > /dev/null; then
+    open "$URL" > /dev/null 2>&1
+else
+    echo "Could not detect web browser opener. Please manually open: $URL"
+fi
+
+# 4. Activate VENV and Run Pipeline
+echo "[Runner] Activating virtual environment..."
+cd "{{ install_dir }}"
+source "{{ venv_dir }}/bin/activate"
+
+echo "[Runner] Executing Translator Pilot Python pipeline..."
+python3 "pipeline.py" "$1" "settings.toml" "output"
+
+echo "================================================================"
+echo "✅ Pipeline execution finished!"
+echo "You can view the results in the browser window that was opened."
+echo "Press Ctrl+C when you are done to exit and stop the web server."
+echo "================================================================"
+
+# Wait for the server (which keeps the script running until user interrupts)
+wait $SERVER_PID

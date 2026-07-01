@@ -23,8 +23,41 @@ class TranslatorPilotPipeline:
         self.output_dir = output_dir
 
     def run(self, audio_path: str, on_progress: Optional[Callable[[str, int], None]] = None) -> dict:
+        state_file = os.path.join(self.output_dir, "pipeline_state.json")
+        os.makedirs(self.output_dir, exist_ok=True)
+        current_segments = []
+        
+        def dump_state(status: str, message: str, percent: int, err: str = None, report: list = None):
+            has_fallback = any(getattr(s, 'is_fallback', False) for s in current_segments)
+            serialized = []
+            for seg in current_segments:
+                serialized.append({
+                    "segment_id": seg.segment_id,
+                    "start": seg.start,
+                    "end": seg.end,
+                    "source_text": seg.source_text,
+                    "target_text": seg.target_text,
+                    "audio_path": seg.audio_path,
+                    "is_fallback": getattr(seg, 'is_fallback', False)
+                })
+            state_data = {
+                "status": status,
+                "progress": percent,
+                "message": message,
+                "segments": serialized,
+                "alignmentReport": report or [],
+                "has_fallback": has_fallback,
+                "error": err
+            }
+            try:
+                with open(state_file, "w", encoding="utf-8") as f:
+                    json.dump(state_data, f, ensure_ascii=False)
+            except Exception as ex:
+                logger.error(f"Failed to write state: {ex}")
+
         def trigger_progress(message: str, percent: int):
             logger.info(f"[{percent}%] {message}")
+            dump_state("running", message, percent)
             if on_progress:
                 on_progress(message, percent)
                 
@@ -52,6 +85,7 @@ class TranslatorPilotPipeline:
             # 2. STT Phase
             trigger_progress("Transcribing original English audio file...", 20)
             segments = stt_provider.transcribe(audio_path)
+            current_segments = segments
             trigger_progress(f"STT Phase completed. Generated {len(segments)} segment transcription blocks.", 40)
 
             if not segments:
@@ -60,11 +94,13 @@ class TranslatorPilotPipeline:
             # 3. Translation Phase
             trigger_progress("Translating transcription segments to Chinese with sliding context...", 50)
             segments = translate_provider.translate(segments)
+            current_segments = segments
             trigger_progress("Translation Phase completed successfully.", 75)
 
             # 4. TTS Phase
             trigger_progress("Synthesizing localized Chinese voiceovers...", 85)
             segments = tts_provider.synthesize(segments, self.output_dir)
+            current_segments = segments
             trigger_progress("TTS Phase audio clips fully rendered.", 95)
 
             # 5. Alignment Timing Analysis
@@ -96,6 +132,7 @@ class TranslatorPilotPipeline:
                     "is_fallback": getattr(seg, 'is_fallback', False)
                 })
 
+            dump_state("completed", msg, 100, report=alignment_report)
             return {
                 "success": True,
                 "segments": serialized_segments,
@@ -106,6 +143,7 @@ class TranslatorPilotPipeline:
         except Exception as e:
             err_msg = str(e)
             trigger_progress(f"Pipeline crashed during execution: {err_msg}", 100)
+            dump_state("error", f"Crashed: {err_msg}", 100, err=err_msg)
             return {
                 "success": False,
                 "segments": [],
