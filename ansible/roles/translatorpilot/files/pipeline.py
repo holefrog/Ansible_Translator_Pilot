@@ -9,12 +9,34 @@ from translate import TranslateProvider, GeminiTranslate, GroqTranslate
 from tts import AzureSpeechTTS, GeminiTTS
 from align_check import check_alignment
 
+class ColorFormatter(logging.Formatter):
+    RED = '\033[91m'
+    YELLOW = '\033[93m'
+    RESET = '\033[0m'
+    
+    def format(self, record):
+        s = super().format(record)
+        
+        # Explicitly highlight specific error keywords in RED
+        s = s.replace("Pipeline Error", f"{self.RED}Pipeline Error{self.RESET}")
+        s = s.replace("Fatal pipeline error", f"{self.RED}Fatal pipeline error{self.RESET}")
+        
+        if record.levelno == logging.ERROR:
+            return f"{self.RED}{s}{self.RESET}"
+        elif record.levelno == logging.WARNING:
+            # If warning, yellow, but ensure red keywords stay red by re-applying yellow around them
+            s_colored = f"{self.YELLOW}{s}{self.RESET}"
+            s_colored = s_colored.replace(self.RESET, f"{self.RESET}{self.YELLOW}")
+            # The very end will have two resets or something harmless, but the keyword will be red
+            return s_colored
+        
+        return s
+
 # Set up logging configuration
-logging.basicConfig(
-    level=logging.WARNING,
-    format="[%(asctime)s] [%(levelname)s] %(message)s",
-    datefmt="%H:%M:%S"
-)
+handler = logging.StreamHandler(sys.stdout)
+handler.setFormatter(ColorFormatter("[%(asctime)s] [%(levelname)s] %(message)s", datefmt="%H:%M:%S"))
+logging.root.handlers = [handler]
+logging.root.setLevel(logging.WARNING)
 logger = logging.getLogger("pipeline")
 
 class TranslatorPilotPipeline:

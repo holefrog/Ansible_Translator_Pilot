@@ -44,6 +44,10 @@ class GeminiTranslate(TranslateProvider):
                 logger.error("[Translate] System prompt is missing from config.")
                 raise RuntimeError("Fatal pipeline error")
 
+            system_instruction += "\nOutput JSON format: {\"translations\": [{\"id\": \"...\", \"translated_text\": \"...\"}]}"
+            system_instruction += f"\nCRITICAL: You are given {len(items_to_translate)} segments. Your JSON array MUST contain exactly {len(items_to_translate)} items. DO NOT skip any IDs."
+            system_instruction += "\nCRITICAL: Output raw UTF-8 Chinese characters. DO NOT use \\uXXXX unicode escaping."
+
             user_instruction = self.config.get("user_prompt")
             if not user_instruction:
                 logger.error("[Translate] User prompt is missing from config.")

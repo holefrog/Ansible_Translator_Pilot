@@ -57,6 +57,8 @@ let currentAudio = null;
                 const sttEl = document.getElementById('stage-stt');
                 const transEl = document.getElementById('stage-translate');
                 const ttsEl = document.getElementById('stage-tts');
+                const arr1 = document.getElementById('arrow-1');
+                const arr2 = document.getElementById('arrow-2');
                 
                 if (sttEl && transEl && ttsEl) {
                     const msg = (data.message || '').toLowerCase();
@@ -65,12 +67,14 @@ let currentAudio = null;
                         sttEl.className = 'stage-badge active';
                     } else if (p >= 40) {
                         sttEl.className = 'stage-badge completed';
+                        if (arr1) arr1.className = 'stage-arrow active';
                     }
                     
                     if (msg.includes('translat') || (p >= 40 && p < 75)) {
                         transEl.className = 'stage-badge active';
                     } else if (p >= 75) {
                         transEl.className = 'stage-badge completed';
+                        if (arr2) arr2.className = 'stage-arrow active';
                     }
                     
                     if (msg.includes('synthesiz') || p >= 75) {
@@ -187,7 +191,11 @@ let currentAudio = null;
                 <button class="play-btn" onclick="toggleAudio(this, '${audioFilename}')" title="播放音频">
                     ${playIcon}
                 </button>
-            ` : `<div style="font-size: 0.8rem; color: var(--text-secondary); text-align:center;">合成中...</div>`;
+            ` : `
+                <button class="play-btn" disabled title="正在合成...">
+                    ${playIcon}
+                </button>
+            `;
 
             const card = document.createElement('div');
             card.className = 'segment-card';
