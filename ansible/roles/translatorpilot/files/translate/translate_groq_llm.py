@@ -30,80 +30,82 @@ class GroqTranslate(TranslateProvider):
 
         def run_api_call():
             import requests
-            
+            import hashlib
+            import os
+
             url = "https://api.groq.com/openai/v1/chat/completions"
             headers = {
                 "Authorization": f"Bearer {api_key}",
                 "Content-Type": "application/json"
             }
-            
-            items_to_translate = [
-                {"id": seg.segment_id, "text": seg.source_text}
-                for seg in segments
-            ]
 
-            system_instruction = self.config.get("system_prompt")
-            if not system_instruction:
-                logger.error("[Translate] System prompt is missing from config.")
-                raise RuntimeError("Fatal pipeline error")
-            
-            system_instruction += "\nOutput JSON format: {\"translations\": [{\"id\": \"...\", \"translated_text\": \"...\"}]}"
-            system_instruction += f"\nCRITICAL: You are given {len(items_to_translate)} segments. Your JSON array MUST contain exactly {len(items_to_translate)} items. DO NOT skip any IDs."
-            system_instruction += "\nCRITICAL: Output raw UTF-8 Chinese characters. DO NOT use \\uXXXX unicode escaping."
-
-            user_instruction = self.config.get("user_prompt")
-            if not user_instruction:
-                logger.error("[Translate] User prompt is missing from config.")
-                raise RuntimeError("Fatal pipeline error")
-
-            user_prompt = f"{user_instruction}\n{json.dumps(items_to_translate, indent=2)}"
-
-            import hashlib
-            import os
-            
-            # Use output_dir parameter to resolve cache dir (assuming we are in a pipeline, we need to locate cache dir)
-            # We can use os.getcwd() + /cache/translate or similar.
-            # But we don't have output_dir in this method. We can use a global or relative path.
             cache_dir = os.path.join(os.getcwd(), "cache", "translate")
             os.makedirs(cache_dir, exist_ok=True)
-            
-            cache_string = system_instruction + user_prompt + model
-            cache_key = hashlib.md5(cache_string.encode("utf-8")).hexdigest()
-            cache_filepath = os.path.join(cache_dir, f"{cache_key}.json")
 
-            if os.path.exists(cache_filepath):
-                logger.info("[Translate] Translation cache hit!")
-                with open(cache_filepath, "r", encoding="utf-8") as f:
-                    parsed_translations = json.load(f)
-            else:
-                payload = {
-                    "model": model,
-                    "messages": [
-                        {"role": "system", "content": system_instruction},
-                        {"role": "user", "content": user_prompt}
-                    ],
-                    "response_format": {"type": "json_object"},
-                    "temperature": 0.3
-                }
+            translation_map = {}
+            batch_size = 20
 
-                response = requests.post(url, headers=headers, json=payload, timeout=60)
-                if response.status_code != 200:
-                    raise Exception(f"Groq Translate API Error {response.status_code}: {response.text}")
+            for i in range(0, len(segments), batch_size):
+                batch = segments[i:i+batch_size]
+                items_to_translate = [
+                    {"id": seg.segment_id, "text": seg.source_text}
+                    for seg in batch
+                ]
 
-                resp_data = response.json()
-                candidate_text = resp_data["choices"][0]["message"]["content"]
+                system_instruction = self.config.get("system_prompt")
+                if not system_instruction:
+                    logger.error("[Translate] System prompt is missing from config.")
+                    raise RuntimeError("Fatal pipeline error")
 
-                try:
-                    parsed_json = json.loads(candidate_text)
-                    parsed_translations = parsed_json.get("translations", [])
-                    with open(cache_filepath, "w", encoding="utf-8") as f:
-                        json.dump(parsed_translations, f, ensure_ascii=False)
-                except json.JSONDecodeError as e:
-                    logger.error(f"Failed to parse Groq JSON: {candidate_text}")
-                    raise Exception(f"Groq Translate output is not valid JSON: {e}")
+                system_instruction += "\nOutput JSON format: {\"translations\": [{\"id\": \"...\", \"translated_text\": \"...\"}]}"
+                system_instruction += f"\nCRITICAL: You are given {len(items_to_translate)} segments. Your JSON array MUST contain exactly {len(items_to_translate)} items. DO NOT skip any IDs."
+                system_instruction += "\nCRITICAL: Output raw UTF-8 Chinese characters. DO NOT use \\uXXXX unicode escaping."
 
-            translation_map = {item["id"]: item["translated_text"] for item in parsed_translations}
-            
+                user_instruction = self.config.get("user_prompt")
+                if not user_instruction:
+                    logger.error("[Translate] User prompt is missing from config.")
+                    raise RuntimeError("Fatal pipeline error")
+
+                user_prompt = f"{user_instruction}\n{json.dumps(items_to_translate, indent=2)}"
+
+                cache_string = system_instruction + user_prompt + model
+                cache_key = hashlib.md5(cache_string.encode("utf-8")).hexdigest()
+                cache_filepath = os.path.join(cache_dir, f"{cache_key}.json")
+
+                if os.path.exists(cache_filepath):
+                    logger.info(f"[Translate] Translation cache hit for batch {i//batch_size + 1}!")
+                    with open(cache_filepath, "r", encoding="utf-8") as f:
+                        parsed_translations = json.load(f)
+                else:
+                    payload = {
+                        "model": model,
+                        "messages": [
+                            {"role": "system", "content": system_instruction},
+                            {"role": "user", "content": user_prompt}
+                        ],
+                        "response_format": {"type": "json_object"},
+                        "temperature": 0.3
+                    }
+
+                    response = requests.post(url, headers=headers, json=payload, timeout=60)
+                    if response.status_code != 200:
+                        raise Exception(f"Groq Translate API Error {response.status_code}: {response.text}")
+
+                    resp_data = response.json()
+                    candidate_text = resp_data["choices"][0]["message"]["content"]
+
+                    try:
+                        parsed_json = json.loads(candidate_text)
+                        parsed_translations = parsed_json.get("translations", [])
+                        with open(cache_filepath, "w", encoding="utf-8") as f:
+                            json.dump(parsed_translations, f, ensure_ascii=False)
+                    except json.JSONDecodeError as e:
+                        logger.error(f"Failed to parse Groq JSON: {candidate_text}")
+                        raise Exception(f"Groq Translate output is not valid JSON: {e}")
+
+                for item in parsed_translations:
+                    translation_map[item["id"]] = item["translated_text"]
+
             for seg in segments:
                 if seg.segment_id not in translation_map:
                     logger.error(f"[Translate] Missing translation for segment {seg.segment_id}")
