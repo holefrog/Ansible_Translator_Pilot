@@ -35,6 +35,8 @@ URL="http://localhost:$PORT/viewer.html"
 echo "[Viewer] Opening browser at $URL"
 if command -v xdg-open > /dev/null; then
     xdg-open "$URL" > /dev/null 2>&1
+    # Try to bring to front using wmctrl if available
+    (sleep 1 && command -v wmctrl > /dev/null && wmctrl -a "Translator") &
 elif command -v open > /dev/null; then
     open "$URL" > /dev/null 2>&1
 else
@@ -51,9 +53,10 @@ python3 "pipeline.py" "$1" "settings.toml" "output"
 
 echo "================================================================"
 echo "✅ Pipeline execution finished!"
-echo "You can view the results in the browser window that was opened."
-echo "Press Ctrl+C when you are done to exit and stop the web server."
+echo "You can view the results in the browser window."
+echo "Auto-exiting script..."
 echo "================================================================"
 
-# Wait for the server (which keeps the script running until user interrupts)
-wait $SERVER_PID
+# Auto-exit: The script will now naturally reach the end.
+# The 'trap cleanup EXIT' will automatically stop the HTTP server.
+exit 0
