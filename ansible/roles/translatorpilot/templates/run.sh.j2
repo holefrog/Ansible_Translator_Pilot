@@ -17,7 +17,7 @@ mkdir -p "$OUTPUT_DIR"
 # 1. Start HTTP Server in background
 echo "[Viewer] Starting local HTTP server on port $PORT..."
 cd "$OUTPUT_DIR"
-python3 -m http.server $PORT > /dev/null 2>&1 &
+python3 -m http.server $PORT > server.log 2>&1 &
 SERVER_PID=$!
 
 # 2. Set up trap to kill the server when this script exits

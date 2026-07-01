@@ -11,7 +11,7 @@ from align_check import check_alignment
 
 # Set up logging configuration
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.WARNING,
     format="[%(asctime)s] [%(levelname)s] %(message)s",
     datefmt="%H:%M:%S"
 )
@@ -218,19 +218,11 @@ if __name__ == "__main__":
             }
         }
     
-    print(f"Starting pipeline in CLI mode. Input: {input_audio}")
     pipeline = TranslatorPilotPipeline(settings, output_directory)
     result = pipeline.run(input_audio)
-    
-    # Print clean delimiter for parsing in JS
-    print("\n---PIPELINE_RESULT_JSON_START---")
-    print(json.dumps(result, ensure_ascii=False))
-    print("---PIPELINE_RESULT_JSON_END---")
     
     # Save formatted JSON to file for convenient manual viewing
     os.makedirs(output_directory, exist_ok=True)
     out_json = os.path.join(output_directory, "pipeline_result.json")
     with open(out_json, "w", encoding="utf-8") as f:
         json.dump(result, f, ensure_ascii=False, indent=2)
-    print(f"\n[INFO] Formatted JSON results saved to: {out_json}")
-
