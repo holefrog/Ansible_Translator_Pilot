@@ -28,10 +28,61 @@ let currentAudio = null;
         // Show progress UI if running
         if (data.status === 'running') {
             document.getElementById('status').style.display = 'block';
-            document.getElementById('progress-container').style.display = 'block';
-            document.getElementById('loading-text').textContent = 'Pipeline is Running...';
-            document.getElementById('progress-msg').textContent = data.message || 'Processing...';
-            document.getElementById('progress-bar').style.width = (data.progress || 0) + '%';
+            
+            // Handle error state gracefully
+            if (data.status === 'error') {
+                document.getElementById('loading-text').textContent = '⚠️ 运行出错: ' + (data.message || 'Unknown error');
+                document.getElementById('loading-text').style.color = '#dc2626';
+                document.getElementById('progress-msg').textContent = '请查看终端日志以获取详细错误信息。';
+                document.getElementById('loader').style.display = 'none';
+                
+                const sttEl = document.getElementById('stage-stt');
+                const transEl = document.getElementById('stage-translate');
+                const ttsEl = document.getElementById('stage-tts');
+                if (sttEl) sttEl.className = 'stage-badge pending';
+                if (transEl) transEl.className = 'stage-badge pending';
+                if (ttsEl) ttsEl.className = 'stage-badge pending';
+                
+                return;
+            }
+
+            if (data.status === 'running') {
+                document.getElementById('loading-text').textContent = '流水线运行中...';
+                document.getElementById('progress-msg').textContent = data.message || '正在处理...';
+                document.getElementById('progress-container').style.display = 'block';
+                const p = data.progress || 0;
+                document.getElementById('progress-bar').style.width = p + '%';
+                
+                // Update Pipeline Stages Status
+                const sttEl = document.getElementById('stage-stt');
+                const transEl = document.getElementById('stage-translate');
+                const ttsEl = document.getElementById('stage-tts');
+                
+                if (sttEl && transEl && ttsEl) {
+                    const msg = (data.message || '').toLowerCase();
+                    
+                    if (msg.includes('transcrib') || p < 40) {
+                        sttEl.className = 'stage-badge active';
+                    } else if (p >= 40) {
+                        sttEl.className = 'stage-badge completed';
+                    }
+                    
+                    if (msg.includes('translat') || (p >= 40 && p < 75)) {
+                        transEl.className = 'stage-badge active';
+                    } else if (p >= 75) {
+                        transEl.className = 'stage-badge completed';
+                    }
+                    
+                    if (msg.includes('synthesiz') || p >= 75) {
+                        ttsEl.className = 'stage-badge active';
+                    }
+                }
+            } else if (data.status === 'completed') {
+                document.getElementById('status').style.display = 'none';
+                document.getElementById('content').style.display = 'block';
+                clearInterval(pollInterval);
+                renderSegments(data);
+            }
         } else if (data.status === 'error') {
             document.getElementById('status').style.display = 'block';
             document.getElementById('loader').style.display = 'none';
@@ -124,7 +175,7 @@ let currentAudio = null;
             const cnWidth = report.synthesized_duration ? (report.synthesized_duration / maxDuration) * 100 : 0;
 
             const badgeClass = isWarning ? 'warning' : 'perfect';
-            const badgeText = isWarning ? 'Too Long' : 'Aligned';
+            const badgeText = isWarning ? '超出时长' : '完美对齐';
 
             let audioFilename = seg.audio_path;
             if (audioFilename && audioFilename.includes('/')) {
@@ -133,10 +184,10 @@ let currentAudio = null;
             
             // Only show play button if we have an audio path
             const playButtonHTML = audioFilename ? `
-                <button class="play-btn" onclick="toggleAudio(this, '${audioFilename}')" title="Play Audio">
+                <button class="play-btn" onclick="toggleAudio(this, '${audioFilename}')" title="播放音频">
                     ${playIcon}
                 </button>
-            ` : `<div style="font-size: 0.8rem; color: var(--text-secondary); text-align:center;">Rendering...</div>`;
+            ` : `<div style="font-size: 0.8rem; color: var(--text-secondary); text-align:center;">合成中...</div>`;
 
             const card = document.createElement('div');
             card.className = 'segment-card';

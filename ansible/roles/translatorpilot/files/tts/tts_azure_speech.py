@@ -30,8 +30,7 @@ class AzureSpeechTTS(TTSProvider):
 
         if not api_key:
             logger.error("[TTS] Azure Subscription Key is missing. Cannot proceed.")
-            import sys
-            sys.exit(1)
+            raise RuntimeError("Fatal pipeline error")
 
         updated_segments = []
         for seg in segments:
@@ -92,8 +91,7 @@ class AzureSpeechTTS(TTSProvider):
                 with_retry(run_api_call, self.retry_config, f"AzureTTS-{seg.segment_id}")
             except Exception as e:
                 logger.error(f"[TTS] Failed Azure synthesis for {seg.segment_id}: {e}.")
-                import sys
-                sys.exit(1)
+                raise RuntimeError("Fatal pipeline error")
 
             updated_segments.append(seg)
             if on_segment_done:
@@ -123,8 +121,7 @@ class GeminiTTS(TTSProvider):
 
         if not api_key:
             logger.error("[TTS] Gemini API Key is missing for TTS. Cannot proceed.")
-            import sys
-            sys.exit(1)
+            raise RuntimeError("Fatal pipeline error")
 
         updated_segments = []
         for seg in segments:
@@ -174,8 +171,7 @@ class GeminiTTS(TTSProvider):
                 with_retry(run_api_call, self.retry_config, f"GeminiTTS-{seg.segment_id}")
             except Exception as e:
                 logger.error(f"[TTS] Gemini TTS synthesis failed for {seg.segment_id}: {e}")
-                import sys
-                sys.exit(1)
+                raise RuntimeError("Fatal pipeline error")
 
             updated_segments.append(seg)
             if on_segment_done:

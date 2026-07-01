@@ -26,8 +26,7 @@ class GroqTranslate(TranslateProvider):
 
         if not api_key:
             logger.error("[Translate] Groq API Key is missing. Cannot proceed.")
-            import sys
-            sys.exit(1)
+            raise RuntimeError("Fatal pipeline error")
 
         def run_api_call():
             import requests
@@ -46,16 +45,14 @@ class GroqTranslate(TranslateProvider):
             system_instruction = self.config.get("system_prompt")
             if not system_instruction:
                 logger.error("[Translate] System prompt is missing from config.")
-                import sys
-                sys.exit(1)
+                raise RuntimeError("Fatal pipeline error")
             
             system_instruction += "\nOutput JSON format: {\"translations\": [{\"id\": \"...\", \"translated_text\": \"...\"}]}"
 
             user_instruction = self.config.get("user_prompt")
             if not user_instruction:
                 logger.error("[Translate] User prompt is missing from config.")
-                import sys
-                sys.exit(1)
+                raise RuntimeError("Fatal pipeline error")
 
             user_prompt = f"{user_instruction}\n{json.dumps(items_to_translate, indent=2)}"
 
@@ -108,8 +105,7 @@ class GroqTranslate(TranslateProvider):
             for seg in segments:
                 if seg.segment_id not in translation_map:
                     logger.error(f"[Translate] Missing translation for segment {seg.segment_id}")
-                    import sys
-                    sys.exit(1)
+                    raise RuntimeError("Fatal pipeline error")
                 seg.target_text = translation_map[seg.segment_id]
 
             return segments
@@ -118,11 +114,9 @@ class GroqTranslate(TranslateProvider):
             return with_retry(run_api_call, self.retry_config, "GroqTranslate")
         except ImportError:
             logger.error("[Translate] 'requests' library not found.")
-            import sys
-            sys.exit(1)
+            raise RuntimeError("Fatal pipeline error")
         except Exception as e:
             logger.error(f"[Translate] Failed Groq translation: {e}.")
-            import sys
-            sys.exit(1)
+            raise RuntimeError("Fatal pipeline error")
 
 

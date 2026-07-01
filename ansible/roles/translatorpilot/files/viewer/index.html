@@ -14,14 +14,23 @@
 <div class="container">
     <header>
         <h1>Translator Pilot</h1>
-        <div class="subtitle">Translation Results Viewer</div>
+        <div class="subtitle">翻译结果预览终端</div>
     </header>
 
     <div id="status" class="status-message">
         <div class="loader" id="loader"></div>
-        <p id="loading-text" style="margin-top: 20px; font-weight: 600;">Waiting for pipeline to start...</p>
-        <div class="progress-message" id="progress-msg">Connecting to pipeline_state.json...</div>
-        <div class="progress-container" id="progress-container" style="display: none;">
+        <p id="loading-text" style="margin-top: 20px; font-weight: 600;">正在等待管线启动...</p>
+        <div class="progress-message" id="progress-msg">正在连接 pipeline_state.json...</div>
+        
+        <div class="pipeline-stages" id="pipeline-stages" style="margin-top: 15px; display: flex; justify-content: center; align-items: center; gap: 10px; font-size: 0.9rem;">
+            <span id="stage-stt" class="stage-badge pending">语音识别 (STT)</span>
+            <span style="color: #94a3b8;">➔</span>
+            <span id="stage-translate" class="stage-badge pending">翻译 (Translate)</span>
+            <span style="color: #94a3b8;">➔</span>
+            <span id="stage-tts" class="stage-badge pending">语音合成 (TTS)</span>
+        </div>
+
+        <div class="progress-container" id="progress-container" style="display:none; margin-top: 20px;">
             <div class="progress-bar" id="progress-bar"></div>
         </div>
     </div>
@@ -49,19 +58,19 @@
                     <div id="stat-translate"><span style="color: var(--accent-color);">Translate:</span> <span style="color: var(--primary-color); font-weight: bold;">-</span></div>
                     <div id="stat-tts"><span style="color: var(--accent-color);">TTS:</span> <span style="color: var(--primary-color); font-weight: bold;">-</span></div>
                 </div>
-                <div class="stat-label">Active Engines</div>
+                <div class="stat-label">运行引擎</div>
             </div>
             <div class="stat-card">
                 <div class="stat-value" id="stat-segments">0</div>
-                <div class="stat-label">Total Segments</div>
+                <div class="stat-label">分段总数</div>
             </div>
             <div class="stat-card">
                 <div class="stat-value" id="stat-duration">0.0s</div>
-                <div class="stat-label">Total Audio Duration</div>
+                <div class="stat-label">总音频时长</div>
             </div>
             <div class="stat-card">
                 <div class="stat-value" id="stat-warnings">0</div>
-                <div class="stat-label">Alignment Warnings</div>
+                <div class="stat-label">对齐警告</div>
             </div>
         </div>
 

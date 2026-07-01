@@ -363,3 +363,32 @@
                 height: 48px;
             }
         }
+/* Pipeline Stages */
+.pipeline-stages {
+    margin-top: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+.stage-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    background: #e2e8f0;
+    color: #64748b;
+    border: 1px solid #cbd5e1;
+    transition: all 0.3s;
+}
+.stage-badge.active {
+    background: #eff6ff;
+    color: #2563eb;
+    border-color: #bfdbfe;
+    box-shadow: 0 0 8px rgba(37, 99, 235, 0.2);
+}
+.stage-badge.completed {
+    background: #f0fdf4;
+    color: #16a34a;
+    border-color: #bbf7d0;
+}
