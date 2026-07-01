@@ -31,7 +31,7 @@ cleanup() {
 trap cleanup EXIT
 
 # 3. Open browser automatically
-URL="http://localhost:$PORT/viewer.html"
+URL="http://localhost:$PORT/index.html"
 echo "[Viewer] Opening browser at $URL"
 if command -v xdg-open > /dev/null; then
     xdg-open "$URL" > /dev/null 2>&1

@@ -62,8 +62,8 @@
 
 - name: Deploy Viewer Web UI
   copy:
-    src: "viewer.html"
-    dest: "{{ install_dir }}/output/viewer.html"
+    src: "viewer/"
+    dest: "{{ install_dir }}/output/"
     mode: '0644'
 
 - name: Provide integrated automated runner script (run.sh)

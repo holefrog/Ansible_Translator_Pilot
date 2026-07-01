@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Translator Pilot - Results Viewer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Translator Pilot</h1>
+        <div class="subtitle">Translation Results Viewer</div>
+    </header>
+
+    <div id="status" class="status-message">
+        <div class="loader" id="loader"></div>
+        <p id="loading-text" style="margin-top: 20px; font-weight: 600;">Waiting for pipeline to start...</p>
+        <div class="progress-message" id="progress-msg">Connecting to pipeline_state.json...</div>
+        <div class="progress-container" id="progress-container" style="display: none;">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+    </div>
+
+    <div id="content" style="display: none;">
+        <div id="fallback-alert" class="fallback-alert" style="display: none;">
+            <strong>⚠️ 部分 AI 服务受限或触发降级（Fallback）模式</strong>
+            <p>由于免费 API 触发了并发限流 (例如 Azure TTS 429) 或缺少对应密钥，部分生成使用了降级占位符 (例如纯静音的音频或模拟翻译)。这不影响管线继续运行。</p>
+            <p style="font-size: 0.85rem; opacity: 0.8;">稍后刷新或填入付费密钥即可恢复完整体验。</p>
+        </div>
+
+        <div id="completion-banner" class="fallback-alert" style="display: none; background-color: #ecfdf5; color: #065f46; border-color: #34d399; margin-bottom: 20px;">
+            <strong>🎉 翻译与语音合成全部完成！</strong>
+            <p>你现在可以自由地反复播放每一句中文配音。<strong>请先不要关闭终端运行窗口。</strong></p>
+            <p style="font-size: 0.9rem; margin-top: 6px;">当你的验收和测试结束后，只需<strong>直接关闭本网页</strong>（或整个浏览器），后台 HTTP 服务器就会被自动通知关闭，终端脚本也会随之安全退出。</p>
+            <div style="margin-top: 12px;">
+                <button class="primary-btn" style="background-color: #ef4444; border:none; padding: 6px 12px; font-size: 0.85rem;" onclick="shutdownServer()">手动停止服务并退出</button>
+            </div>
+        </div>
+
+        <div class="dashboard">
+            <div class="stat-card">
+                <div class="stat-value" id="stat-segments">0</div>
+                <div class="stat-label">Total Segments</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="stat-duration">0.0s</div>
+                <div class="stat-label">Total Audio Duration</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="stat-warnings">0</div>
+                <div class="stat-label">Alignment Warnings</div>
+            </div>
+        </div>
+
+        <div class="segments-container" id="segments-container">
+            <!-- Segments will be injected here via JS -->
+        </div>
+    </div>
+</div>
+
+<script src="app.js"></script>
+
+</body>
+</html>
