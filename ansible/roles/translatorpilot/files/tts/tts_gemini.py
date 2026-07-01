@@ -59,15 +59,48 @@ class GeminiTTS(TTSProvider):
                     }
                 }
 
-                response = requests.post(url, headers=headers, json=payload, timeout=30)
-                if response.status_code != 200:
-                    raise Exception(f"Gemini TTS API Error {response.status_code}: {response.text}")
+                import time
+                
+                max_rate_retries = 10
+                for attempt in range(max_rate_retries):
+                    response = requests.post(url, headers=headers, json=payload, timeout=30)
+                    if response.status_code == 429:
+                        delay = 30
+                        try:
+                            err_data = response.json()
+                            for detail in err_data.get("error", {}).get("details", []):
+                                if "retryDelay" in detail:
+                                    delay = int(detail["retryDelay"].replace("s", "")) + 1
+                        except Exception:
+                            pass
+                        
+                        logger.warning(f"[TTS] Gemini API rate limit (3 RPM) hit. Sleeping for {delay} seconds before retry...")
+                        time.sleep(delay)
+                        continue
+                        
+                    if response.status_code != 200:
+                        raise Exception(f"Gemini TTS API Error {response.status_code}: {response.text}")
+                    break
+                else:
+                    raise Exception("Gemini TTS API Error: Exceeded max retries for rate limit (429)")
+
+                import wave
+                import io
 
                 resp_data = response.json()
                 base64_audio = resp_data["candidates"][0]["content"]["parts"][0]["inlineData"]["data"]
+                pcm_data = base64.b64decode(base64_audio)
+                
+                # Gemini TTS returns raw PCM (24kHz, 16-bit, mono). We need to add a WAV header.
+                wav_io = io.BytesIO()
+                with wave.open(wav_io, 'wb') as wav_file:
+                    wav_file.setnchannels(1)
+                    wav_file.setsampwidth(2)
+                    wav_file.setframerate(24000)
+                    wav_file.writeframes(pcm_data)
                 
                 with open(full_output_path, "wb") as f:
-                    f.write(base64.b64decode(base64_audio))
+                    f.write(wav_io.getvalue())
 
                 seg.audio_path = f"/output/{audio_filename}"
 
