@@ -59,23 +59,20 @@
     dest: "{{ install_dir }}/settings.toml"
     mode: '0640'
 
-- name: Provide local execution helper shell script
+- name: Deploy Viewer Web UI
   copy:
+    src: "viewer.html"
+    dest: "{{ install_dir }}/output/viewer.html"
+    mode: '0644'
+
+- name: Deploy Viewer Server Script
+  template:
+    src: "serve_viewer.sh.j2"
+    dest: "{{ install_dir }}/output/serve_viewer.sh"
+    mode: '0755'
+
+- name: Provide local execution helper shell script
+  template:
+    src: "run_pipeline.sh.j2"
     dest: "{{ install_dir }}/run_pipeline.sh"
-    content: |
-      #!/bin/bash
-      # Automated Runner Script for Translator Pilot Pipeline
-      # Usage: ./run_pipeline.sh <path_to_audio_file>
-      
-      if [ -z "$1" ]; then
-        echo "Error: Missing input audio path."
-        echo "Usage: ./run_pipeline.sh <path_to_audio_file>"
-        exit 1
-      fi
-      
-      echo "[Runner] Activating virtual environment..."
-      source "{{ venv_dir }}/bin/activate"
-      
-      echo "[Runner] Executing Translator Pilot Python pipeline..."
-      python3 "{{ install_dir }}/pipeline.py" "$1" "{{ install_dir }}/settings.toml" "{{ install_dir }}/output"
     mode: '0755'

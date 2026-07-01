@@ -1,0 +1,15 @@
+#!/bin/bash
+# Automated Runner Script for Translator Pilot Pipeline
+# Usage: ./run_pipeline.sh <path_to_audio_file>
+
+if [ -z "$1" ]; then
+  echo "Error: Missing input audio path."
+  echo "Usage: ./run_pipeline.sh <path_to_audio_file>"
+  exit 1
+fi
+
+echo "[Runner] Activating virtual environment..."
+source "{{ venv_dir }}/bin/activate"
+
+echo "[Runner] Executing Translator Pilot Python pipeline..."
+python3 "{{ install_dir }}/pipeline.py" "$1" "{{ install_dir }}/settings.toml" "{{ install_dir }}/output"

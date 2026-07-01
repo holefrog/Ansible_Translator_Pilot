@@ -168,4 +168,11 @@ if __name__ == "__main__":
     print("\n---PIPELINE_RESULT_JSON_START---")
     print(json.dumps(result, ensure_ascii=False))
     print("---PIPELINE_RESULT_JSON_END---")
+    
+    # Save formatted JSON to file for convenient manual viewing
+    os.makedirs(output_directory, exist_ok=True)
+    out_json = os.path.join(output_directory, "pipeline_result.json")
+    with open(out_json, "w", encoding="utf-8") as f:
+        json.dump(result, f, ensure_ascii=False, indent=2)
+    print(f"\n[INFO] Formatted JSON results saved to: {out_json}")
 
