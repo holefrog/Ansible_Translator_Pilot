@@ -1,2 +1,2 @@
 from .base import STTProvider
-from .groq_whisper import GroqWhisperSTT, GeminiSTT
+from .stt_groq_whisper import GroqWhisperSTT, GeminiSTT

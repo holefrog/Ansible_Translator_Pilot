@@ -1,3 +1,3 @@
 from .base import TranslateProvider
-from .gemini import GeminiTranslate
-from .groq_llm import GroqTranslate
+from .translate_gemini import GeminiTranslate
+from .translate_groq_llm import GroqTranslate

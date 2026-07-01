@@ -1,2 +1,2 @@
 from .base import TTSProvider
-from .azure_speech import AzureSpeechTTS, GeminiTTS
+from .tts_azure_speech import AzureSpeechTTS, GeminiTTS
