@@ -82,20 +82,25 @@ class TranslatorPilotPipeline:
 
             # Map segments back to standard dictionaries for JSON serialization
             serialized_segments = []
+            has_fallback = False
             for seg in segments:
+                if getattr(seg, 'is_fallback', False):
+                    has_fallback = True
                 serialized_segments.append({
                     "segment_id": seg.segment_id,
                     "start": seg.start,
                     "end": seg.end,
                     "source_text": seg.source_text,
                     "target_text": seg.target_text,
-                    "audio_path": seg.audio_path
+                    "audio_path": seg.audio_path,
+                    "is_fallback": getattr(seg, 'is_fallback', False)
                 })
 
             return {
                 "success": True,
                 "segments": serialized_segments,
-                "alignmentReport": alignment_report
+                "alignmentReport": alignment_report,
+                "has_fallback": has_fallback
             }
 
         except Exception as e:

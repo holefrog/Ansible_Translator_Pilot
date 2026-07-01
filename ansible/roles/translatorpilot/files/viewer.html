@@ -257,6 +257,24 @@
             animation: spin 1s ease-in-out infinite;
         }
 
+        .fallback-banner {
+            background-color: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--error-color);
+            color: #fca5a5;
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 1.05rem;
+            line-height: 1.5;
+        }
+        .fallback-banner strong {
+            color: #f87171;
+            font-size: 1.15rem;
+            display: block;
+            margin-bottom: 4px;
+        }
+
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
@@ -294,6 +312,13 @@
     </div>
 
     <div id="content" style="display: none;">
+        <div id="fallback-alert" class="fallback-banner" style="display: none;">
+            <strong>⚠️ API 密钥配置问题，当前运行在演示（Fallback）模式！</strong>
+            由于缺少有效的 API 密钥，程序无法调用真实的 AI 服务。<br>
+            下面展示的是测试用的模拟文本和音频占位符，<span>点击播放不会有真实声音</span>。<br>
+            请在部署配置中填写真实的 API Key 并重新运行。
+        </div>
+
         <div class="dashboard">
             <div class="stat-card">
                 <div class="stat-value" id="stat-segments">0</div>
@@ -345,6 +370,10 @@
     function renderData(data) {
         document.getElementById('status').style.display = 'none';
         document.getElementById('content').style.display = 'block';
+
+        if (data.has_fallback) {
+            document.getElementById('fallback-alert').style.display = 'block';
+        }
 
         const segments = data.segments || [];
         const alignmentReport = data.alignmentReport || [];

@@ -11,3 +11,4 @@ class Segment:
     target_text: Optional[str] = None
     audio_path: Optional[str] = None
     context_window: Optional[List[str]] = None
+    is_fallback: bool = False

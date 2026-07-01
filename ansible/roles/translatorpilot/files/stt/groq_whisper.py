@@ -74,22 +74,26 @@ class GroqWhisperSTT(STTProvider):
             Segment(
                 start=0.0,
                 end=5.5,
-                source_text="Welcome to the future of translation technology with Translator Pilot."
+                source_text="Welcome to the future of translation technology with Translator Pilot.",
+                is_fallback=True
             ),
             Segment(
                 start=6.2,
                 end=12.8,
-                source_text="This pipeline runs Whisper for transcription, Gemini for translation, and Azure for speech synthesis."
+                source_text="This pipeline runs Whisper for transcription, Gemini for translation, and Azure for speech synthesis.",
+                is_fallback=True
             ),
             Segment(
                 start=13.5,
                 end=19.4,
-                source_text="It is designed to be extremely fast, robust, and running entirely offline or hybrid."
+                source_text="It is designed to be extremely fast, robust, and running entirely offline or hybrid.",
+                is_fallback=True
             ),
             Segment(
                 start=20.0,
                 end=26.5,
-                source_text="Let's perform a length check to ensure the Chinese dubbed audio aligns nicely with the original English timing."
+                source_text="Let's perform a length check to ensure the Chinese dubbed audio aligns nicely with the original English timing.",
+                is_fallback=True
             )
         ]
 

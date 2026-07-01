@@ -107,4 +107,5 @@ class GeminiTranslate(TranslateProvider):
     def get_mock_translations(self, segments: List[Segment]) -> List[Segment]:
         for seg in segments:
             seg.target_text = self.fallback_translate_text(seg.source_text)
+            seg.is_fallback = True
         return segments

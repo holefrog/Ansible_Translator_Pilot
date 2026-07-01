@@ -4,6 +4,7 @@
   become: no
   vars_files:
     - group_vars/all.yml
+    - group_vars/secrets.yml
 
   roles:
     - translatorpilot

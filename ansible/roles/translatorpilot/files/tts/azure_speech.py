@@ -77,6 +77,7 @@ class AzureSpeechTTS(TTSProvider):
                 logger.error(f"[TTS] Failed Azure synthesis for {seg.segment_id}: {e}. Falling back to synthetic wave.")
                 self.generate_beep_wav(full_output_path, max(1.5, min(seg.end - seg.start, len(seg.target_text or "") * 0.25)))
                 seg.audio_path = f"/output/{audio_filename}"
+                seg.is_fallback = True
 
             updated_segments.append(seg)
 
@@ -96,6 +97,7 @@ class AzureSpeechTTS(TTSProvider):
             
             self.generate_beep_wav(full_output_path, target_duration)
             seg.audio_path = f"/output/{audio_filename}"
+            seg.is_fallback = True
             updated.append(seg)
         return updated
 
