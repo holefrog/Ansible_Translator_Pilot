@@ -19,6 +19,12 @@ model = "{{ groq_llm_model | mandatory }}"
 system_prompt = """{{ llm_system_prompt | mandatory | trim }}"""
 user_prompt = """{{ llm_user_prompt | mandatory | trim }}"""
 
+[translate.nvidia_llm]
+api_key = "{{ nvidia_api_key | mandatory }}"
+model = "{{ nvidia_llm_model | mandatory }}"
+system_prompt = """{{ llm_system_prompt | mandatory | trim }}"""
+user_prompt = """{{ llm_user_prompt | mandatory | trim }}"""
+
 [translate.gemini]
 api_key = "{{ gemini_api_key | mandatory }}"
 model = "{{ gemini_model | mandatory }}"
@@ -34,6 +40,12 @@ voice = "{{ azure_speech_voice | mandatory }}"
 api_key = "{{ gemini_api_key | mandatory }}"
 model = "{{ gemini_tts_model | mandatory }}"
 voice = "{{ gemini_tts_voice | mandatory }}"
+
+[tts.nvidia_magpie]
+api_key = "{{ nvidia_api_key | mandatory }}"
+language = "{{ nvidia_tts_language | mandatory }}"
+voice = "{{ nvidia_tts_voice | mandatory }}"
+sample_rate_hz = {{ nvidia_tts_sample_rate_hz | mandatory }}
 
 [tts.sherpa_onnx]
 model_dir = "{{ tts_sherpa_onnx_model_dir | mandatory }}"

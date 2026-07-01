@@ -6,8 +6,8 @@ import logging
 from typing import Callable, Optional
 from contracts import Segment
 from stt import GroqWhisperSTT, GeminiSTT
-from translate import TranslateProvider, GeminiTranslate, GroqTranslate
-from tts import AzureSpeechTTS, GeminiTTS, SherpaOnnxTTS
+from translate import TranslateProvider, GeminiTranslate, GroqTranslate, NvidiaTranslate
+from tts import AzureSpeechTTS, GeminiTTS, SherpaOnnxTTS, NvidiaMagpieTTS
 from align_check import check_alignment
 
 class ColorFormatter(logging.Formatter):
@@ -106,6 +106,8 @@ class TranslatorPilotPipeline:
             translate_name = self.settings["provider"]["translate"]
             if translate_name == "groq_llm":
                 translate_provider = GroqTranslate(self.settings["translate"]["groq_llm"], retry_cfg)
+            elif translate_name == "nvidia_llm":
+                translate_provider = NvidiaTranslate(self.settings["translate"]["nvidia_llm"], retry_cfg)
             else:
                 translate_provider = GeminiTranslate(self.settings["translate"]["gemini"], retry_cfg)
 
@@ -114,6 +116,8 @@ class TranslatorPilotPipeline:
                 tts_provider = AzureSpeechTTS(self.settings["tts"]["azure_speech"], retry_cfg)
             elif tts_name == "sherpa_onnx":
                 tts_provider = SherpaOnnxTTS(self.settings["tts"]["sherpa_onnx"])
+            elif tts_name == "nvidia_magpie":
+                tts_provider = NvidiaMagpieTTS(self.settings["tts"]["nvidia_magpie"], retry_cfg)
             else:
                 tts_provider = GeminiTTS(self.settings["tts"]["gemini_tts"], retry_cfg)
             
