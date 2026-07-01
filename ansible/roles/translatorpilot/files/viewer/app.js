@@ -58,7 +58,7 @@ let currentAudio = null;
 
     function renderSegments(data) {
         if (data.engines) {
-            const formatEngine = (label, provider) => `<span style="color: var(--text-secondary);">${label}:</span> <span style="color: var(--primary-color); font-weight: bold;">${provider}</span>`;
+            const formatEngine = (label, provider) => `<span style="color: var(--accent-color);">${label}:</span> <span style="color: var(--primary-color); font-weight: bold;">${provider}</span>`;
             document.getElementById('stat-stt').innerHTML = formatEngine('STT', data.engines.stt);
             document.getElementById('stat-translate').innerHTML = formatEngine('Translate', data.engines.translate);
             document.getElementById('stat-tts').innerHTML = formatEngine('TTS', data.engines.tts);

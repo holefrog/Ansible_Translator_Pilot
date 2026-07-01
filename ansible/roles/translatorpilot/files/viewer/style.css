@@ -1,14 +1,15 @@
 :root {
-            --bg-color: #0f111a;
-            --card-bg: rgba(255, 255, 255, 0.03);
-            --card-border: rgba(255, 255, 255, 0.08);
-            --text-primary: #f8f9fa;
-            --text-secondary: #a0aabf;
-            --accent-color: #3b82f6;
-            --accent-hover: #60a5fa;
-            --success-color: #10b981;
-            --warning-color: #f59e0b;
-            --error-color: #ef4444;
+            --bg-color: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-primary: #111827;
+            --text-secondary: #4b5563;
+            --card-border: #e5e7eb;
+            --primary-color: #3b82f6;
+            --accent-color: #10b981;
+            --badge-bg: #d1fae5;
+            --badge-text: #047857;
+            --danger-bg: #fee2e2;
+            --danger-text: #b91c1c;
         }
 
         body {
