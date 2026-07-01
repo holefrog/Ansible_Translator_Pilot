@@ -1,6 +1,0 @@
-{
-  "name": "Translator-Pilot",
-  "description": "Local offline audio translation engine pipeline (STT -> Translate -> TTS) with duration alignment check",
-  "requestFramePermissions": ["microphone"],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}

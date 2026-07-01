@@ -4,7 +4,12 @@
 # e.g., ansible-vault encrypt_string 'secret' --name 'groq_api_key'
 
 # Target Installation directories on the local machine
-install_dir: "{{ ansible_env.HOME }}/translator-pilot"
+install_dir: "{{ ansible_facts['env']['HOME'] }}/translator-pilot"
+
+# API Keys (Provide via ansible-vault for real deployments)
+groq_api_key: ""
+gemini_api_key: ""
+azure_speech_key: ""
 venv_dir: "{{ install_dir }}/.venv"
 
 # Provider Settings

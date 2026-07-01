@@ -8,7 +8,6 @@
     mode: '0755'
   loop:
     - "{{ install_dir }}"
-    - "{{ install_dir }}/core"
     - "{{ install_dir }}/stt"
     - "{{ install_dir }}/translate"
     - "{{ install_dir }}/tts"
@@ -39,10 +38,8 @@
     dest: "{{ install_dir }}/{{ item }}"
     mode: '0644'
   loop:
-    - "core/__init__.py"
-    - "core/contracts.py"
-    - "core/retry.py"
-    - "core/factory.py"
+    - "contracts.py"
+    - "retry.py"
     - "stt/__init__.py"
     - "stt/base.py"
     - "stt/groq_whisper.py"
