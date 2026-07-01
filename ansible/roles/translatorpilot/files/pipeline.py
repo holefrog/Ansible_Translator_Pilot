@@ -3,8 +3,7 @@ import sys
 import json
 import logging
 from typing import Callable, Optional, dict
-from core.contracts import Segment
-from core.factory import ProviderFactory
+from core import Segment, ProviderFactory
 from align_check import check_alignment
 
 # Set up logging configuration

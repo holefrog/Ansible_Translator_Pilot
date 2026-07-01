@@ -2,7 +2,7 @@ import os
 import struct
 import logging
 from typing import List, dict
-from core.contracts import Segment
+from core import Segment
 
 logger = logging.getLogger("align_check")
 

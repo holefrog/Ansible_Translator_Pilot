@@ -2,9 +2,8 @@ import os
 import json
 import logging
 from typing import List
-from core.contracts import Segment
-from core.retry import with_retry
-from translate.base import TranslateProvider
+from core import Segment, with_retry
+from .base import TranslateProvider
 
 logger = logging.getLogger("translate")
 

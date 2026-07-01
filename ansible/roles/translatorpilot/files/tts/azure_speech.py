@@ -4,9 +4,8 @@ import struct
 import logging
 import xml.etree.ElementTree as ET
 from typing import List
-from core.contracts import Segment
-from core.retry import with_retry
-from tts.base import TTSProvider
+from core import Segment, with_retry
+from .base import TTSProvider
 
 logger = logging.getLogger("tts")
 

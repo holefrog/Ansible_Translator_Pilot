@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import List
-from core.contracts import Segment
+from core import Segment
 
 class TranslateProvider(ABC):
     @property

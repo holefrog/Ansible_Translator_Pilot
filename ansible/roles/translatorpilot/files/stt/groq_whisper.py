@@ -2,9 +2,8 @@ import os
 import json
 import logging
 from typing import List
-from core.contracts import Segment
-from core.retry import with_retry
-from stt.base import STTProvider
+from core import Segment, with_retry
+from .base import STTProvider
 
 logger = logging.getLogger("stt")
 

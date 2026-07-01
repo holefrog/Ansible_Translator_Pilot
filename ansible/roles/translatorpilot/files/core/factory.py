@@ -1,6 +1,6 @@
-from stt.groq_whisper import GroqWhisperSTT, GeminiSTT
-from translate.gemini import GeminiTranslate
-from tts.azure_speech import AzureSpeechTTS, GeminiTTS
+from stt import GroqWhisperSTT, GeminiSTT
+from translate import GeminiTranslate
+from tts import AzureSpeechTTS, GeminiTTS
 
 class ProviderFactory:
     @staticmethod
