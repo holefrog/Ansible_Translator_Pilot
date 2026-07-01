@@ -53,10 +53,17 @@ python3 "pipeline.py" "$1" "settings.toml" "output"
 
 echo "================================================================"
 echo "✅ Pipeline execution finished!"
-echo "You can view the results in the browser window."
-echo "Auto-exiting script..."
+echo "等待中... 请在浏览器中试听，听完后【直接关闭网页】即可自动退出脚本。"
 echo "================================================================"
 
-# Auto-exit: The script will now naturally reach the end.
-# The 'trap cleanup EXIT' will automatically stop the HTTP server.
+# Wait for the browser to send the SHUTDOWN_SERVER beacon upon closing
+touch "$OUTPUT_DIR/server.log"
+tail -n 0 -f "$OUTPUT_DIR/server.log" | while read -r line; do
+    if [[ "$line" == *"SHUTDOWN_SERVER"* ]]; then
+        echo "[Viewer] Received shutdown signal from browser."
+        break
+    fi
+done
+
+echo "关闭后台服务器并退出脚本..."
 exit 0
