@@ -17,35 +17,52 @@
         <div class="subtitle">翻译结果预览终端</div>
     </header>
 
-    <!-- Progress / Status panel — stays visible even after completion -->
+    <!-- Spinner + progress bar — hidden once completed -->
     <div id="status" class="status-message">
         <div class="loader" id="loader"></div>
         <p id="loading-text" style="margin-top: 20px; font-weight: 600;">正在等待管线启动...</p>
         <div class="progress-message" id="progress-msg">正在连接 pipeline_state.json...</div>
-
-        <!-- Pipeline stages — each badge shows stage name + engine + elapsed time -->
-        <div class="pipeline-stages" id="pipeline-stages">
-            <div style="display: flex; flex-direction: column; align-items: center; gap: 5px;">
-                <span id="stage-stt" class="stage-badge pending">语音识别 (STT)</span>
-                <span id="engine-stt" style="font-size: 0.78rem; color: #64748b; font-family: monospace; min-height: 14px;"></span>
-                <span id="time-stt"   style="font-size: 0.85rem; color: #94a3b8; font-family: monospace; min-height: 16px;"></span>
-            </div>
-            <span id="arrow-1" class="stage-arrow" style="margin-bottom: 38px;">➔</span>
-            <div style="display: flex; flex-direction: column; align-items: center; gap: 5px;">
-                <span id="stage-translate" class="stage-badge pending">机器翻译 (Translate)</span>
-                <span id="engine-translate" style="font-size: 0.78rem; color: #64748b; font-family: monospace; min-height: 14px;"></span>
-                <span id="time-translate"   style="font-size: 0.85rem; color: #94a3b8; font-family: monospace; min-height: 16px;"></span>
-            </div>
-            <span id="arrow-2" class="stage-arrow" style="margin-bottom: 38px;">➔</span>
-            <div style="display: flex; flex-direction: column; align-items: center; gap: 5px;">
-                <span id="stage-tts" class="stage-badge pending">语音合成 (TTS)</span>
-                <span id="engine-tts" style="font-size: 0.78rem; color: #64748b; font-family: monospace; min-height: 14px;"></span>
-                <span id="time-tts"   style="font-size: 0.85rem; color: #94a3b8; font-family: monospace; min-height: 16px;"></span>
-            </div>
-        </div>
-
         <div class="progress-container" id="progress-container" style="display:none; margin-top: 20px;">
             <div class="progress-bar" id="progress-bar"></div>
+        </div>
+    </div>
+
+    <!-- Unified 6-card dashboard — shown once pipeline starts -->
+    <div class="dashboard" id="dashboard" style="display:none;">
+        <!-- Stage cards (left 3) -->
+        <div class="stat-card stage-card" id="card-stt">
+            <div class="stat-value stage-timing" id="time-stt">-</div>
+            <div class="stat-label">
+                语音识别 (STT)
+                <div class="engine-name" id="engine-stt"></div>
+            </div>
+        </div>
+        <div class="stat-card stage-card" id="card-translate">
+            <div class="stat-value stage-timing" id="time-translate">-</div>
+            <div class="stat-label">
+                机器翻译
+                <div class="engine-name" id="engine-translate"></div>
+            </div>
+        </div>
+        <div class="stat-card stage-card" id="card-tts">
+            <div class="stat-value stage-timing" id="time-tts">-</div>
+            <div class="stat-label">
+                语音合成 (TTS)
+                <div class="engine-name" id="engine-tts"></div>
+            </div>
+        </div>
+        <!-- Result stat cards (right 3) -->
+        <div class="stat-card">
+            <div class="stat-value" id="stat-segments">0</div>
+            <div class="stat-label">分段总数</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="stat-duration">0.0s</div>
+            <div class="stat-label">总音频时长</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="stat-warnings">0</div>
+            <div class="stat-label">对齐警告</div>
         </div>
     </div>
 
@@ -62,21 +79,6 @@
             <p style="font-size: 0.9rem; margin-top: 6px; text-align:center;">当你的验收和测试结束后，只需<strong>直接关闭当前网页标签</strong>，后台服务就会自动退出。</p>
             <div style="margin-top: 12px; text-align: center;">
                 <button class="primary-btn" style="background-color: #ef4444; border:none; padding: 6px 16px; font-size: 0.9rem;" onclick="shutdownServer()">关闭标签页并停止服务</button>
-            </div>
-        </div>
-
-        <div class="dashboard">
-            <div class="stat-card">
-                <div class="stat-value" id="stat-segments">0</div>
-                <div class="stat-label">分段总数</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="stat-duration">0.0s</div>
-                <div class="stat-label">总音频时长</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="stat-warnings">0</div>
-                <div class="stat-label">对齐警告</div>
             </div>
         </div>
 
