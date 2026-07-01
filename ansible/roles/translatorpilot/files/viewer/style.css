@@ -10,6 +10,9 @@
             --badge-text: #047857;
             --danger-bg: #fee2e2;
             --danger-text: #b91c1c;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
         }
 
         body {
