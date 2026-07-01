@@ -11,7 +11,7 @@ venv_dir: "{{ install_dir }}/.venv"
 
 # Provider Settings
 stt_provider: "groq_whisper"
-translate_provider: "nvidia_llm"
+translate_provider: "groq_llm"
 tts_provider: "nvidia_magpie"
 
 # Azure Speech Settings
