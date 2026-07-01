@@ -2,6 +2,7 @@ import os
 import sys
 import json
 import logging
+import time
 from typing import Callable, Optional
 from contracts import Segment
 from stt import GroqWhisperSTT, GeminiSTT
