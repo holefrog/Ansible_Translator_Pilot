@@ -45,3 +45,6 @@ llm_system_prompt: |
   3. Keep any tech/industry acronyms natural.
   4. Output exactly matching translated objects for each ID.
   5. CRITICAL: DO NOT merge translations across segments! You MUST strictly translate ONLY the exact English words present within each specific segment's 'text', even if that text is an incomplete fragment. Never pull meaning from the next segment into the current segment.
+
+llm_user_prompt: |
+  Please translate these segments and return ONLY JSON:

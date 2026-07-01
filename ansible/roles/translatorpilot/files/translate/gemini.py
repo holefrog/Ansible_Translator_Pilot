@@ -46,7 +46,13 @@ class GeminiTranslate(TranslateProvider):
                 import sys
                 sys.exit(1)
 
-            user_prompt = f"Please translate these segments:\n{json.dumps(items_to_translate, indent=2)}"
+            user_instruction = self.config.get("user_prompt")
+            if not user_instruction:
+                logger.error("[Translate] User prompt is missing from config.")
+                import sys
+                sys.exit(1)
+
+            user_prompt = f"{user_instruction}\n{json.dumps(items_to_translate, indent=2)}"
             
             import hashlib
             import os
