@@ -50,6 +50,23 @@
         .subtitle {
             color: var(--text-secondary);
             font-size: 1.1rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .engine-badges {
+            display: flex;
+        }
+        .engine-badges .badge {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .dashboard {

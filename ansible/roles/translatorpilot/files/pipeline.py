@@ -40,6 +40,11 @@ class TranslatorPilotPipeline:
                     "audio_path": seg.audio_path,
                     "is_fallback": getattr(seg, 'is_fallback', False)
                 })
+            engines_info = {
+                "stt": self.settings.get("provider", {}).get("stt", "groq_whisper"),
+                "translate": self.settings.get("provider", {}).get("translate", "groq_llm"),
+                "tts": self.settings.get("provider", {}).get("tts", "azure_speech")
+            }
             state_data = {
                 "status": status,
                 "progress": percent,
@@ -47,6 +52,7 @@ class TranslatorPilotPipeline:
                 "segments": serialized,
                 "alignmentReport": report or [],
                 "has_fallback": has_fallback,
+                "engines": engines_info,
                 "error": err
             }
             try:
