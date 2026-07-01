@@ -55,6 +55,12 @@ let currentAudio = null;
             const p = data.progress || 0;
             document.getElementById('progress-bar').style.width = p + '%';
 
+            if (data.timings) {
+                if (data.timings.stt !== null) document.getElementById('time-stt').textContent = data.timings.stt.toFixed(1) + '秒';
+                if (data.timings.translate !== null) document.getElementById('time-translate').textContent = data.timings.translate.toFixed(1) + '秒';
+                if (data.timings.tts !== null) document.getElementById('time-tts').textContent = data.timings.tts.toFixed(1) + '秒';
+            }
+
             // Update Pipeline Stages Status
             const sttEl = document.getElementById('stage-stt');
             const transEl = document.getElementById('stage-translate');
@@ -88,6 +94,11 @@ let currentAudio = null;
             document.getElementById('content').style.display = 'block';
             hasFinished = true;
             clearInterval(pollInterval);
+            if (data.timings) {
+                if (data.timings.stt !== null) document.getElementById('time-stt').textContent = data.timings.stt.toFixed(1) + '秒';
+                if (data.timings.translate !== null) document.getElementById('time-translate').textContent = data.timings.translate.toFixed(1) + '秒';
+                if (data.timings.tts !== null) document.getElementById('time-tts').textContent = data.timings.tts.toFixed(1) + '秒';
+            }
             renderSegments(data);
         }
 

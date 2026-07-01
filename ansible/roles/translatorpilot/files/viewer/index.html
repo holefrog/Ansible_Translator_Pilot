@@ -23,11 +23,20 @@
         <div class="progress-message" id="progress-msg">正在连接 pipeline_state.json...</div>
         
         <div class="pipeline-stages" id="pipeline-stages">
-            <span id="stage-stt" class="stage-badge pending">语音识别 (STT)</span>
-            <span id="arrow-1" class="stage-arrow">➔</span>
-            <span id="stage-translate" class="stage-badge pending">机器翻译 (Translate)</span>
-            <span id="arrow-2" class="stage-arrow">➔</span>
-            <span id="stage-tts" class="stage-badge pending">语音合成 (TTS)</span>
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                <span id="stage-stt" class="stage-badge pending">语音识别 (STT)</span>
+                <span id="time-stt" style="font-size: 0.85rem; color: #94a3b8; font-family: monospace; height: 16px;"></span>
+            </div>
+            <span id="arrow-1" class="stage-arrow" style="margin-bottom: 22px;">➔</span>
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                <span id="stage-translate" class="stage-badge pending">机器翻译 (Translate)</span>
+                <span id="time-translate" style="font-size: 0.85rem; color: #94a3b8; font-family: monospace; height: 16px;"></span>
+            </div>
+            <span id="arrow-2" class="stage-arrow" style="margin-bottom: 22px;">➔</span>
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                <span id="stage-tts" class="stage-badge pending">语音合成 (TTS)</span>
+                <span id="time-tts" style="font-size: 0.85rem; color: #94a3b8; font-family: monospace; height: 16px;"></span>
+            </div>
         </div>
 
         <div class="progress-container" id="progress-container" style="display:none; margin-top: 20px;">

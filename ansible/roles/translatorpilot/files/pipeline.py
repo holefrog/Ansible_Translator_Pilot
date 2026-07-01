@@ -75,6 +75,7 @@ class TranslatorPilotPipeline:
                 "alignmentReport": report or [],
                 "has_fallback": has_fallback,
                 "engines": engines_info,
+                "timings": timings,
                 "error": err
             }
             try:
@@ -91,6 +92,7 @@ class TranslatorPilotPipeline:
                 
         try:
             # 1. Initialization
+            timings = {"stt": None, "translate": None, "tts": None}
             trigger_progress("Initializing STT, Translation, and TTS providers...", 5)
             
             retry_cfg = self.settings["retry"]
@@ -116,7 +118,9 @@ class TranslatorPilotPipeline:
 
             # 2. STT Phase
             trigger_progress("Transcribing original English audio file...", 20)
+            t0_stt = time.time()
             segments = stt_provider.transcribe(audio_path)
+            timings["stt"] = round(time.time() - t0_stt, 1)
             current_segments = segments
             trigger_progress(f"STT Phase completed. Generated {len(segments)} segment transcription blocks.", 40)
 
@@ -125,7 +129,9 @@ class TranslatorPilotPipeline:
 
             # 3. Translation Phase
             trigger_progress("Translating transcription segments to Chinese with sliding context...", 50)
+            t0_translate = time.time()
             segments = translate_provider.translate(segments)
+            timings["translate"] = round(time.time() - t0_translate, 1)
             current_segments = segments
             trigger_progress("Translation Phase completed successfully.", 75)
 
@@ -133,7 +139,9 @@ class TranslatorPilotPipeline:
             trigger_progress("Synthesizing localized Chinese voiceovers...", 75)
             threshold = self.settings["align"]["warning_threshold_ratio"]
 
+            t0_tts = time.time()
             def on_tts_done(idx, total):
+                timings["tts"] = round(time.time() - t0_tts, 1)
                 percent = 75 + int(20 * (idx / total))
                 temp_report = check_alignment(segments, self.output_dir, threshold)
                 dump_state("running", f"Synthesizing audio segments: {idx}/{total}", percent, report=temp_report)
