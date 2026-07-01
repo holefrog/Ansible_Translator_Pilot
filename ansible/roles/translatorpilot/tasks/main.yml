@@ -50,6 +50,7 @@
     - "tts/__init__.py"
     - "tts/base.py"
     - "tts/tts_azure_speech.py"
+    - "tts/tts_gemini.py"
     - "align_check.py"
     - "pipeline.py"
   ignore_errors: yes  # Skip copy errors if source files are structured differently during local tests
