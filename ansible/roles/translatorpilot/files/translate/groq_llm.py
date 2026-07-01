@@ -43,17 +43,11 @@ class GroqTranslate(TranslateProvider):
                 for seg in segments
             ]
 
-            system_instruction = self.config.get("system_prompt", (
-                "You are a professional video translator translating a sequence of English audio transcripts into Chinese spoken dubbing.\n"
-                "CRITICAL RULES:\n"
-                "1. Maintain extreme context coherence. Read all segments together to understand the full meaning.\n"
-                "2. The translations must be concise, natural, and match the tempo of spoken Chinese.\n"
-                "3. Keep any tech/industry acronyms natural.\n"
-                "4. You MUST output ONLY a valid JSON array of objects. Do not include markdown code blocks or any other text.\n"
-                "5. Each object must have exactly two string fields: 'id' and 'translated_text'.\n"
-                "6. Output exactly matching translated objects for each ID.\n"
-                "7. CRITICAL: DO NOT merge translations across segments! You MUST strictly translate ONLY the exact English words present within each specific segment's 'text', even if that text is an incomplete fragment. Never pull meaning from the next segment into the current segment."
-            ))
+            system_instruction = self.config.get("system_prompt")
+            if not system_instruction:
+                logger.error("[Translate] System prompt is missing from config.")
+                import sys
+                sys.exit(1)
             
             system_instruction += "\nOutput JSON format: {\"translations\": [{\"id\": \"...\", \"translated_text\": \"...\"}]}"
 
