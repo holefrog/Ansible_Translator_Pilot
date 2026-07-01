@@ -65,14 +65,8 @@
     dest: "{{ install_dir }}/output/viewer.html"
     mode: '0644'
 
-- name: Deploy Viewer Server Script
+- name: Provide integrated automated runner script (run.sh)
   template:
-    src: "serve_viewer.sh.j2"
-    dest: "{{ install_dir }}/output/serve_viewer.sh"
-    mode: '0755'
-
-- name: Provide local execution helper shell script
-  template:
-    src: "run_pipeline.sh.j2"
-    dest: "{{ install_dir }}/run_pipeline.sh"
+    src: "run.sh.j2"
+    dest: "{{ install_dir }}/run.sh"
     mode: '0755'

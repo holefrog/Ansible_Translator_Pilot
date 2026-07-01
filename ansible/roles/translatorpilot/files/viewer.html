@@ -279,6 +279,32 @@
             to { transform: rotate(360deg); }
         }
 
+        .progress-container {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            height: 12px;
+            margin-top: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--accent-color);
+            width: 0%;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px var(--accent-color);
+        }
+
+        .progress-message {
+            margin-top: 10px;
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            font-family: monospace;
+        }
+
+
         /* Responsive */
         @media (max-width: 768px) {
             .segment-card {
@@ -307,8 +333,12 @@
     </header>
 
     <div id="status" class="status-message">
-        <div class="loader"></div>
-        <p style="margin-top: 20px;">Loading pipeline results...</p>
+        <div class="loader" id="loader"></div>
+        <p id="loading-text" style="margin-top: 20px; font-weight: 600;">Waiting for pipeline to start...</p>
+        <div class="progress-message" id="progress-msg">Connecting to pipeline_state.json...</div>
+        <div class="progress-container" id="progress-container" style="display: none;">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
     </div>
 
     <div id="content" style="display: none;">
@@ -346,33 +376,64 @@
 
     const playIcon = `<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`;
     const stopIcon = `<svg viewBox="0 0 24 24"><path d="M6 6h12v12H6z"/></svg>`;
+    
+    let pollInterval = null;
+    let hasFinished = false;
 
-    async function loadData() {
+    async function pollState() {
+        if (hasFinished) return;
         try {
-            const response = await fetch('pipeline_result.json');
+            // Add cache-buster to ensure we get the latest state
+            const response = await fetch('pipeline_state.json?t=' + new Date().getTime());
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                // If it's a 404, it might just mean the pipeline hasn't created the file yet.
+                // We keep polling.
+                return;
             }
             const data = await response.json();
-            renderData(data);
+            handleState(data);
         } catch (e) {
-            console.error(e);
-            document.getElementById('status').innerHTML = `
-                <div style="color: var(--error-color);">
-                    <svg style="width: 48px; height: 48px; margin-bottom: 16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                    <p>Failed to load pipeline_result.json</p>
-                    <p style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 8px;">Ensure you run this via an HTTP server (e.g. python -m http.server)</p>
-                </div>
-            `;
+            // Ignore fetch errors during early boot
         }
     }
 
-    function renderData(data) {
-        document.getElementById('status').style.display = 'none';
-        document.getElementById('content').style.display = 'block';
+    function handleState(data) {
+        // Show progress UI if running
+        if (data.status === 'running') {
+            document.getElementById('status').style.display = 'block';
+            document.getElementById('progress-container').style.display = 'block';
+            document.getElementById('loading-text').textContent = 'Pipeline is Running...';
+            document.getElementById('progress-msg').textContent = data.message || 'Processing...';
+            document.getElementById('progress-bar').style.width = (data.progress || 0) + '%';
+        } else if (data.status === 'error') {
+            document.getElementById('status').style.display = 'block';
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('progress-container').style.display = 'none';
+            document.getElementById('loading-text').innerHTML = `<span style="color:var(--error-color)">Pipeline Error</span>`;
+            document.getElementById('progress-msg').textContent = data.error || data.message || 'Unknown error occurred.';
+            hasFinished = true;
+            clearInterval(pollInterval);
+        } else if (data.status === 'completed') {
+            hasFinished = true;
+            clearInterval(pollInterval);
+            renderData(data);
+        }
 
+        // We can partially render segments even while running!
+        if (data.segments && data.segments.length > 0 && !hasFinished && data.status !== 'error') {
+            // Only partially render if we want to stream visually. For now, let's keep it simple: 
+            // We can just show the real-time segments in the background, but UI might jump.
+            // Let's actually render them so user sees real-time progress!
+            document.getElementById('content').style.display = 'block';
+            renderSegments(data);
+        }
+    }
+
+    function renderSegments(data) {
         if (data.has_fallback) {
             document.getElementById('fallback-alert').style.display = 'block';
+        } else {
+            document.getElementById('fallback-alert').style.display = 'none';
         }
 
         const segments = data.segments || [];
@@ -412,13 +473,17 @@
             const badgeClass = isWarning ? 'warning' : 'perfect';
             const badgeText = isWarning ? 'Too Long' : 'Aligned';
 
-            // We need to resolve the audio path relative to the viewer.html
-            // The pipeline returns something like /output/segment_xxx.wav
-            // Since viewer.html is IN output/, the relative path is just the filename.
             let audioFilename = seg.audio_path;
             if (audioFilename && audioFilename.includes('/')) {
                 audioFilename = audioFilename.split('/').pop();
             }
+            
+            // Only show play button if we have an audio path
+            const playButtonHTML = audioFilename ? `
+                <button class="play-btn" onclick="toggleAudio(this, '${audioFilename}')" title="Play Audio">
+                    ${playIcon}
+                </button>
+            ` : `<div style="font-size: 0.8rem; color: var(--text-secondary); text-align:center;">Rendering...</div>`;
 
             const card = document.createElement('div');
             card.className = 'segment-card';
@@ -426,24 +491,30 @@
                 <div class="segment-content">
                     <div class="text-group">
                         <div class="source-text">${seg.source_text || ''}</div>
-                        <div class="target-text">${seg.target_text || ''}</div>
+                        <div class="target-text">${seg.target_text || '翻译中...'}</div>
                     </div>
                     <div class="segment-meta">
                         <span>#${index + 1}</span>
+                        ${report.ratio ? `
                         <span>&bull;</span>
                         <span>${durationStr}</span>
                         <span>&bull;</span>
                         <span class="badge ${badgeClass}">${badgeText} (${ratioStr})</span>
+                        ` : ''}
                     </div>
                 </div>
                 <div class="play-controls">
-                    <button class="play-btn" onclick="toggleAudio(this, '${audioFilename}')" title="Play Audio">
-                        ${playIcon}
-                    </button>
+                    ${playButtonHTML}
                 </div>
             `;
             container.appendChild(card);
         });
+    }
+
+    function renderData(data) {
+        document.getElementById('status').style.display = 'none';
+        document.getElementById('content').style.display = 'block';
+        renderSegments(data);
     }
 
     function toggleAudio(btn, src) {
@@ -493,8 +564,12 @@
         }
     }
 
-    // Initialize
-    window.addEventListener('DOMContentLoaded', loadData);
+    // Initialize Polling
+    window.addEventListener('DOMContentLoaded', () => {
+        // Clear any old data
+        pollState();
+        pollInterval = setInterval(pollState, 1000);
+    });
 </script>
 
 </body>
