@@ -20,7 +20,7 @@ class NvidiaMagpieTTS(TTSProvider):
     
     Supports Chinese (zh-CN) and many other languages.
     Voice format: Magpie-Multilingual.ZH-CN.<VoiceName>
-    Common Chinese voices: Li, Mei (check list_voices for full list)
+    Common Chinese voices: Aria, Diego, HouZhen, Isabela, Long, Louise, Mia, Pascal, Ray, Siwei
     """
 
     def __init__(self, config: dict, retry_config: dict):
