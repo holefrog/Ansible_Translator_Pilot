@@ -12,7 +12,7 @@ venv_dir: "{{ install_dir }}/.venv"
 # Provider Settings
 stt_provider: "groq_whisper"
 translate_provider: "openai"
-tts_provider: "sherpa_onnx"
+tts_provider: "azure_speech"
 
 # Azure Speech Settings
 azure_speech_region: "eastus"
