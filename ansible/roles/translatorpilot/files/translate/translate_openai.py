@@ -56,6 +56,9 @@ class OpenAITranslate(TranslateProvider):
                     logger.error("[Translate] System prompt is missing from config.")
                     raise RuntimeError("Fatal pipeline error")
 
+                # 使用原始 system_prompt 生成缓存 key（避免动态内容影响缓存）
+                base_system_instruction = self.config["system_prompt"]
+
                 system_instruction += "\nOutput JSON format: {\"translations\": [{\"id\": \"...\", \"translated_text\": \"...\"}]}"
                 system_instruction += f"\nCRITICAL: You are given {len(items_to_translate)} segments. Your JSON array MUST contain exactly {len(items_to_translate)} items. DO NOT skip any IDs."
                 system_instruction += "\nCRITICAL: Output raw UTF-8 Chinese characters. DO NOT use \\uXXXX unicode escaping."
@@ -67,8 +70,8 @@ class OpenAITranslate(TranslateProvider):
 
                 user_prompt = f"{user_instruction}\n{json.dumps(items_to_translate, indent=2)}"
 
-                # 生成缓存 key
-                cache_key = cache.get_cache_key(system_instruction, user_prompt, model)
+                # 生成缓存 key（使用稳定的参数）
+                cache_key = cache.get_cache_key(base_system_instruction, user_prompt, model)
 
                 if cache.exists(cache_key, ".json"):
                     logger.info(f"[Translate] Translation cache hit for batch {i//batch_size + 1}!")
