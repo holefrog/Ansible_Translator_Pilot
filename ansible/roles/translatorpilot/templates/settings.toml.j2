@@ -24,6 +24,7 @@ timeout = {{ api_timeout | mandatory }}
 batch_size = {{ api_batch_size | mandatory }}
 temperature = {{ api_temperature | mandatory }}
 max_tokens = {{ api_max_tokens | mandatory }}
+enable_cache = {{ 'true' if enable_translate_cache else 'false' }}
 
 [translate.nvidia_llm]
 api_key = "{{ nvidia_api_key | mandatory }}"
@@ -34,6 +35,7 @@ timeout = {{ api_timeout | mandatory }}
 batch_size = {{ api_batch_size | mandatory }}
 temperature = {{ api_temperature | mandatory }}
 max_tokens = {{ api_max_tokens | mandatory }}
+enable_cache = {{ 'true' if enable_translate_cache else 'false' }}
 
 [translate.gemini]
 api_key = "{{ gemini_api_key | mandatory }}"
@@ -44,6 +46,7 @@ timeout = {{ api_timeout | mandatory }}
 batch_size = {{ api_batch_size | mandatory }}
 temperature = {{ api_temperature | mandatory }}
 max_tokens = {{ api_max_tokens | mandatory }}
+enable_cache = {{ 'true' if enable_translate_cache else 'false' }}
 
 [translate.openai]
 api_key = "{{ openai_api_key | mandatory }}"
@@ -54,6 +57,7 @@ timeout = {{ api_timeout | mandatory }}
 batch_size = {{ api_batch_size | mandatory }}
 temperature = {{ api_temperature | mandatory }}
 max_tokens = {{ api_max_tokens | mandatory }}
+enable_cache = {{ 'true' if enable_translate_cache else 'false' }}
 
 [translate.mistral]
 api_key = "{{ mistral_api_key | mandatory }}"
@@ -64,20 +68,21 @@ timeout = {{ api_timeout | mandatory }}
 batch_size = {{ api_batch_size | mandatory }}
 temperature = {{ api_temperature | mandatory }}
 max_tokens = {{ api_max_tokens | mandatory }}
+enable_cache = {{ 'true' if enable_translate_cache else 'false' }}
 
 [tts.azure_speech]
 api_key = "{{ azure_speech_key | mandatory }}"
 region = "{{ azure_speech_region | mandatory }}"
 voice = "{{ azure_speech_voice | mandatory }}"
 timeout = {{ api_timeout | mandatory }}
-enable_cache = {{ enable_tts_cache | mandatory }}
+enable_cache = {{ 'true' if enable_tts_cache else 'false' }}
 
 [tts.gemini_tts]
 api_key = "{{ gemini_api_key | mandatory }}"
 model = "{{ gemini_tts_model | mandatory }}"
 voice = "{{ gemini_tts_voice | mandatory }}"
 timeout = {{ api_timeout | mandatory }}
-enable_cache = {{ enable_tts_cache | mandatory }}
+enable_cache = {{ 'true' if enable_tts_cache else 'false' }}
 
 [tts.nvidia_magpie]
 api_key = "{{ nvidia_api_key | mandatory }}"
@@ -85,7 +90,7 @@ language = "{{ nvidia_tts_language | mandatory }}"
 voice = "{{ nvidia_tts_voice | mandatory }}"
 sample_rate_hz = {{ nvidia_tts_sample_rate_hz | mandatory }}
 timeout = {{ api_timeout | mandatory }}
-enable_cache = {{ enable_tts_cache | mandatory }}
+enable_cache = {{ 'true' if enable_tts_cache else 'false' }}
 
 [tts.sherpa_onnx]
 model_dir = "{{ tts_sherpa_onnx_model_dir | mandatory }}"
@@ -95,7 +100,7 @@ volume_gain = {{ tts_sherpa_onnx_volume_gain | mandatory }}
 phone_fst = "{{ tts_sherpa_onnx_phone_fst | default('phone.fst') }}"
 date_fst = "{{ tts_sherpa_onnx_date_fst | default('date.fst') }}"
 number_fst = "{{ tts_sherpa_onnx_number_fst | default('number.fst') }}"
-enable_cache = {{ enable_tts_cache | mandatory }}
+enable_cache = {{ 'true' if enable_tts_cache else 'false' }}
 
 [retry]
 max_retries = {{ retry_max_retries | mandatory }}
@@ -104,8 +109,8 @@ backoff_factor = {{ retry_backoff_factor | mandatory }}
 max_delay = {{ retry_max_delay | mandatory }}
 
 [cache]
-enable_translate_cache = {{ enable_translate_cache | mandatory }}
-enable_tts_cache = {{ enable_tts_cache | mandatory }}
+enable_translate_cache = {{ 'true' if enable_translate_cache else 'false' }}
+enable_tts_cache = {{ 'true' if enable_tts_cache else 'false' }}
 
 [align]
 warning_threshold_ratio = {{ align_warning_threshold_ratio | mandatory }}

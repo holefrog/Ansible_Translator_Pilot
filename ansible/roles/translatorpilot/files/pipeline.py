@@ -246,7 +246,15 @@ if __name__ == "__main__":
     output_directory = sys.argv[3] if len(sys.argv) > 3 else "./output"
     
     # Load dynamic settings
-    settings = parse_toml_file(toml_path)
+    try:
+        settings = parse_toml_file(toml_path)
+    except SystemExit:
+        # parse_toml_file already called sys.exit, re-raise to ensure exit
+        sys.exit(1)
+    except Exception as e:
+        logger.error(f"Failed to load configuration: {e}")
+        sys.exit(1)
+
     if not settings:
         print(f"Error: Failed to load valid configuration from {toml_path}.")
         sys.exit(1)
