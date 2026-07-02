@@ -77,6 +77,8 @@
     - "translate/translate_gemini.py"
     - "translate/translate_groq_llm.py"
     - "translate/translate_nvidia_llm.py"
+    - "translate/translate_openai.py"
+    - "translate/translate_mistral.py"
     - "tts/__init__.py"
     - "tts/base.py"
     - "tts/tts_azure_speech.py"

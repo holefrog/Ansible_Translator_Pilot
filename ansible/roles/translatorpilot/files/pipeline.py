@@ -6,7 +6,7 @@ import logging
 from typing import Callable, Optional
 from contracts import Segment
 from stt import GroqWhisperSTT, GeminiSTT
-from translate import TranslateProvider, GeminiTranslate, GroqTranslate, NvidiaTranslate
+from translate import TranslateProvider, GeminiTranslate, GroqTranslate, NvidiaTranslate, OpenAITranslate, MistralTranslate
 from tts import AzureSpeechTTS, GeminiTTS, SherpaOnnxTTS, NvidiaMagpieTTS
 from align_check import check_alignment
 
@@ -108,6 +108,10 @@ class TranslatorPilotPipeline:
                 translate_provider = GroqTranslate(self.settings["translate"]["groq_llm"], retry_cfg)
             elif translate_name == "nvidia_llm":
                 translate_provider = NvidiaTranslate(self.settings["translate"]["nvidia_llm"], retry_cfg)
+            elif translate_name == "openai":
+                translate_provider = OpenAITranslate(self.settings["translate"]["openai"], retry_cfg)
+            elif translate_name == "mistral":
+                translate_provider = MistralTranslate(self.settings["translate"]["mistral"], retry_cfg)
             else:
                 translate_provider = GeminiTranslate(self.settings["translate"]["gemini"], retry_cfg)
 

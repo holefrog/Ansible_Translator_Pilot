@@ -31,6 +31,18 @@ model = "{{ gemini_model | mandatory }}"
 system_prompt = """{{ llm_system_prompt | mandatory | trim }}"""
 user_prompt = """{{ llm_user_prompt | mandatory | trim }}"""
 
+[translate.openai]
+api_key = "{{ openai_api_key | mandatory }}"
+model = "{{ openai_model | mandatory }}"
+system_prompt = """{{ llm_system_prompt | mandatory | trim }}"""
+user_prompt = """{{ llm_user_prompt | mandatory | trim }}"""
+
+[translate.mistral]
+api_key = "{{ mistral_api_key | mandatory }}"
+model = "{{ mistral_model | mandatory }}"
+system_prompt = """{{ llm_system_prompt | mandatory | trim }}"""
+user_prompt = """{{ llm_user_prompt | mandatory | trim }}"""
+
 [tts.azure_speech]
 api_key = "{{ azure_speech_key | mandatory }}"
 region = "{{ azure_speech_region | mandatory }}"
