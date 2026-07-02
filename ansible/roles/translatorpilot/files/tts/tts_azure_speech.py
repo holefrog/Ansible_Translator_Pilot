@@ -47,9 +47,10 @@ class AzureSpeechTTS(TTSProvider):
                 import requests
                 # 使用统一的缓存管理器
                 cache = CacheManager("wav", output_dir)
+                enable_cache = self.config.get("enable_cache", True)
                 cache_key = cache.get_cache_key(seg.target_text, voice)
 
-                if cache.exists(cache_key, ".wav"):
+                if enable_cache and cache.exists(cache_key, ".wav"):
                     logger.info(f"[TTS] Cache hit for segment {seg.segment_id}")
                     cache.copy_from_cache(cache_key, full_output_path, ".wav")
                     seg.audio_path = f"/output/{audio_filename}"
@@ -79,7 +80,8 @@ class AzureSpeechTTS(TTSProvider):
                 with open(full_output_path, "wb") as audio_file:
                     audio_file.write(response.content)
                 
-                cache.copy_file(cache_key, full_output_path, ".wav")
+                if enable_cache:
+                    cache.copy_file(cache_key, full_output_path, ".wav")
 
                 seg.audio_path = f"/output/{audio_filename}"
 

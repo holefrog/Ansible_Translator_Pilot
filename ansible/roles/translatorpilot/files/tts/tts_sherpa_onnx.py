@@ -102,6 +102,7 @@ class SherpaOnnxTTS(TTSProvider):
 
         # 使用统一的缓存管理器
         cache = CacheManager("wav", output_dir)
+        enable_cache = self.config.get("enable_cache", True)
 
         updated_segments = []
         for seg in segments:
@@ -117,7 +118,7 @@ class SherpaOnnxTTS(TTSProvider):
             cache_key = cache.get_cache_key(seg.target_text, self.volume_gain)
 
             # Check cache
-            if cache.exists(cache_key, ".wav"):
+            if enable_cache and cache.exists(cache_key, ".wav"):
                 logger.info(f"[TTS] Cache hit for segment {seg.segment_id}")
                 cache.copy_from_cache(cache_key, full_output_path, ".wav")
                 seg.audio_path = f"/output/{audio_filename}"
@@ -131,7 +132,8 @@ class SherpaOnnxTTS(TTSProvider):
                 self._write_wav(full_output_path, audio.samples, audio.sample_rate)
                 seg.audio_path = f"/output/{audio_filename}"
                 # Save to cache
-                cache.copy_file(cache_key, full_output_path, ".wav")
+                if enable_cache:
+                    cache.copy_file(cache_key, full_output_path, ".wav")
             except Exception as e:
                 logger.error(f"[TTS] Failed sherpa-onnx synthesis for {seg.segment_id}: {e}.")
                 raise RuntimeError("Fatal pipeline error")

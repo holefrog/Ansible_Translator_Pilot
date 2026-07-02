@@ -40,6 +40,7 @@ class MistralTranslate(TranslateProvider):
 
             # 使用统一的缓存管理器
             cache = CacheManager("translate", os.getcwd())
+            enable_cache = self.config.get("enable_cache", False)
 
             translation_map = {}
             batch_size = int(self.config.get("batch_size", 20))
@@ -73,7 +74,7 @@ class MistralTranslate(TranslateProvider):
                 # 生成缓存 key（使用稳定的参数）
                 cache_key = cache.get_cache_key(base_system_instruction, user_prompt, model)
 
-                if cache.exists(cache_key, ".json"):
+                if enable_cache and cache.exists(cache_key, ".json"):
                     logger.info(f"[Translate] Translation cache hit for batch {i//batch_size + 1}!")
                     parsed_translations = cache.load_json(cache_key)
                 else:
@@ -104,7 +105,8 @@ class MistralTranslate(TranslateProvider):
 
                         parsed_json = json.loads(candidate_text)
                         parsed_translations = parsed_json.get("translations", [])
-                        cache.save_json(cache_key, parsed_translations)
+                        if enable_cache:
+                            cache.save_json(cache_key, parsed_translations)
                     except json.JSONDecodeError as e:
                         logger.error(f"Failed to parse Mistral JSON: {candidate_text}")
                         raise Exception(f"Mistral output is not valid JSON: {e}")

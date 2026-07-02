@@ -49,6 +49,7 @@ class NvidiaMagpieTTS(TTSProvider):
 
         # 使用统一的缓存管理器
         cache = CacheManager("wav", output_dir)
+        enable_cache = self.config.get("enable_cache", True)
 
         updated_segments = []
         for seg in segments:
@@ -63,7 +64,7 @@ class NvidiaMagpieTTS(TTSProvider):
             cache_key = cache.get_cache_key(seg.target_text, voice, language, sample_rate)
 
             # Check cache
-            if cache.exists(cache_key, ".wav"):
+            if enable_cache and cache.exists(cache_key, ".wav"):
                 logger.info(f"[TTS] Cache hit for segment {seg.segment_id}")
                 cache.copy_from_cache(cache_key, full_output_path, ".wav")
                 seg.audio_path = f"/output/{audio_filename}"
@@ -119,7 +120,8 @@ class NvidiaMagpieTTS(TTSProvider):
             try:
                 with_retry(run_api_call, self.retry_config, f"NvidiaMagpieTTS-{seg.segment_id}")
                 # Save to cache after successful synthesis
-                cache.copy_file(cache_key, full_output_path, ".wav")
+                if enable_cache:
+                    cache.copy_file(cache_key, full_output_path, ".wav")
             except Exception as e:
                 logger.error(f"[TTS] NVIDIA Magpie TTS synthesis failed for {seg.segment_id}: {e}")
                 raise RuntimeError("Fatal pipeline error")
