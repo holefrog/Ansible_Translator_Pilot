@@ -40,23 +40,23 @@
     virtualenv: "{{ venv_dir }}"
   when: tts_provider == "sherpa_onnx"
 
-- name: Download sherpa-onnx Matcha-Icefall Chinese (baker voice) acoustic model archive
+- name: Download sherpa-onnx Matcha-Icefall Chinese-English bilingual acoustic model archive
   get_url:
-    url: "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/matcha-icefall-zh-baker.tar.bz2"
-    dest: "/tmp/matcha-icefall-zh-baker.tar.bz2"
+    url: "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/matcha-icefall-zh-en.tar.bz2"
+    dest: "/tmp/matcha-icefall-zh-en.tar.bz2"
   when: tts_provider == "sherpa_onnx"
 
 - name: Extract Matcha-Icefall acoustic model into models directory
   unarchive:
-    src: "/tmp/matcha-icefall-zh-baker.tar.bz2"
+    src: "/tmp/matcha-icefall-zh-en.tar.bz2"
     dest: "{{ install_dir }}/models/sherpa_onnx/"
     remote_src: yes
     creates: "{{ tts_sherpa_onnx_model_dir }}/model-steps-3.onnx"
   when: tts_provider == "sherpa_onnx"
 
-- name: Download sherpa-onnx univ vocoder (vocos-22khz)
+- name: Download sherpa-onnx univ vocoder (vocos-16khz)
   get_url:
-    url: "https://github.com/k2-fsa/sherpa-onnx/releases/download/vocoder-models/vocos-22khz-univ.onnx"
+    url: "https://github.com/k2-fsa/sherpa-onnx/releases/download/vocoder-models/vocos-16khz-univ.onnx"
     dest: "{{ tts_sherpa_onnx_vocoder }}"
   when: tts_provider == "sherpa_onnx"
 

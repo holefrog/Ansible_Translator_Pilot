@@ -12,7 +12,7 @@ venv_dir: "{{ install_dir }}/.venv"
 # Provider Settings
 stt_provider: "groq_whisper"
 translate_provider: "openai"
-tts_provider: "azure_speech"
+tts_provider: "sherpa_onnx"
 
 # Azure Speech Settings
 azure_speech_region: "eastus"
@@ -32,8 +32,8 @@ nvidia_tts_voice: "Magpie-Multilingual.ZH-CN.Aria"
 nvidia_tts_sample_rate_hz: 44100
 
 # Sherpa-ONNX Local TTS Settings (fully offline, no quota, no API key)
-tts_sherpa_onnx_model_dir: "{{ install_dir }}/models/sherpa_onnx/matcha-icefall-zh-baker"
-tts_sherpa_onnx_vocoder: "{{ install_dir }}/models/sherpa_onnx/vocos-22khz-univ.onnx"
+tts_sherpa_onnx_model_dir: "{{ install_dir }}/models/sherpa_onnx/matcha-icefall-zh-en"
+tts_sherpa_onnx_vocoder: "{{ install_dir }}/models/sherpa_onnx/vocos-16khz-univ.onnx"
 tts_sherpa_onnx_num_threads: 4
 tts_sherpa_onnx_volume_gain: 2.0
 
