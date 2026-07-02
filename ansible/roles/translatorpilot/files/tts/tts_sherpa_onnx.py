@@ -54,6 +54,12 @@ class SherpaOnnxTTS(TTSProvider):
 
         rule_fsts = ",".join([phone_fst, date_fst, number_fst])
 
+        # 中英混合模型需要 data_dir（espeak-ng-data 目录）
+        data_dir = os.path.join(model_dir, "espeak-ng-data")
+        if not os.path.exists(data_dir):
+            # 如果没有 espeak-ng-data，使用空字符串（纯中文模型）
+            data_dir = ""
+
         for required_path in (acoustic_model, lexicon, tokens, vocoder_path):
             if not os.path.exists(required_path):
                 raise FileNotFoundError(
@@ -68,6 +74,7 @@ class SherpaOnnxTTS(TTSProvider):
                     vocoder=vocoder_path,
                     lexicon=lexicon,
                     tokens=tokens,
+                    data_dir=data_dir,
                 ),
                 provider="cpu",
                 debug=False,
