@@ -39,7 +39,8 @@ class GroqWhisperSTT(STTProvider):
             }
             data = {
                 "model": model,
-                "response_format": "verbose_json"
+                "response_format": "verbose_json",
+                "prompt": self.config.get("prompt", "")
             }
             
             response = requests.post(url, headers=headers, files=files, data=data, timeout=int(self.config.get("timeout", 60)))

@@ -12,7 +12,7 @@ venv_dir: "{{ install_dir }}/.venv"
 # Provider Settings
 stt_provider: "groq_whisper"
 translate_provider: "openai"
-tts_provider: "sherpa_onnx"
+tts_provider: "azure_speech"
 
 # Azure Speech Settings
 azure_speech_region: "eastus"
@@ -62,7 +62,8 @@ align_warning_threshold_ratio: 1.3
 
 # STT Prompt (for guiding transcription accuracy)
 stt_prompt: |
-  Please transcribe this audio accurately. Pay special attention to proper nouns, place names, and technical terms. If you encounter unfamiliar names, transcribe them phonetically rather than guessing common words.
+  This is a transcript about energy infrastructure in western China. Key place names include: Yumen (玉门), Xinjiang (新疆), Gansu (甘肃), Dunhuang (敦煌), Turpan (吐鲁番), Hami (哈密).
+  CRITICAL: Transcribe place names phonetically as they sound. For example, "Yumen" should be transcribed as "Yumen", NOT "human" or any common word. Do not guess common words when you hear unfamiliar place names.
 
 # Translation Prompt
 llm_system_prompt: |
@@ -73,8 +74,9 @@ llm_system_prompt: |
   3. NO MERGING: DO NOT pull meaning or words from segment N+1 into segment N. If segment N is an incomplete sentence fragment, its Chinese translation MUST also be an incomplete fragment! Leave the rest of the sentence for the next segment.
   4. NATURAL CHINESE NUMBERS: Translate numbers into proper Chinese phrasing (e.g., "twelve thousand" -> "一万两千" not "十二千", "One thousand thousand" -> "一百万").
   5. PERCENTAGE FORMAT: Translate percentages as "百分之X" (e.g., "60%" -> "百分之六十", "25%" -> "百分之二十五"). DO NOT use the % symbol or "percent" in Chinese output.
-  6. COMPLETE TRANSLATION: Translate ALL English words to Chinese, including verbs like "scrambling", "rushing", "struggling". DO NOT leave any English words in the output unless they are proper nouns (names, places, organizations) that have no standard Chinese translation.
-  7. Keep any tech/industry acronyms natural and keep the length concise to match original spoken tempo.
+  6. PLACE NAMES: Translate place names directly to their standard Chinese names (e.g., "Yumen" -> "玉门", "Xinjiang" -> "新疆", "Gansu" -> "甘肃", "Dunhuang" -> "敦煌"). DO NOT leave place names in English.
+  7. COMPLETE TRANSLATION: Translate ALL English words to Chinese, including verbs like "scrambling", "rushing", "struggling". DO NOT leave any English words in the output unless they are proper nouns (names, places, organizations) that have no standard Chinese translation.
+  8. Keep any tech/industry acronyms natural and keep the length concise to match original spoken tempo.
 
 llm_user_prompt: |
   Please translate these segments and return ONLY JSON:
