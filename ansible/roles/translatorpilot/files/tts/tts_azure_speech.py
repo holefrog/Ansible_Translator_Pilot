@@ -6,6 +6,7 @@ from typing import List
 from contracts import Segment
 from retry import with_retry
 from .base import TTSProvider
+from cache import CacheManager
 
 logger = logging.getLogger("tts")
 
@@ -44,18 +45,13 @@ class AzureSpeechTTS(TTSProvider):
 
             def run_api_call():
                 import requests
-                import hashlib
-                import shutil
+                # 使用统一的缓存管理器
+                cache = CacheManager("wav", output_dir)
+                cache_key = cache.get_cache_key(seg.target_text, voice)
 
-                cache_dir = os.path.join(os.path.dirname(output_dir), "cache", "wav")
-                os.makedirs(cache_dir, exist_ok=True)
-
-                cache_key = hashlib.md5(f"{seg.target_text}_{voice}".encode("utf-8")).hexdigest()
-                cache_filepath = os.path.join(cache_dir, f"{cache_key}.wav")
-
-                if os.path.exists(cache_filepath):
+                if cache.exists(cache_key, ".wav"):
                     logger.info(f"[TTS] Cache hit for segment {seg.segment_id}")
-                    shutil.copy2(cache_filepath, full_output_path)
+                    cache.copy_from_cache(cache_key, full_output_path, ".wav")
                     seg.audio_path = f"/output/{audio_filename}"
                     return
                 
@@ -83,7 +79,7 @@ class AzureSpeechTTS(TTSProvider):
                 with open(full_output_path, "wb") as audio_file:
                     audio_file.write(response.content)
                 
-                shutil.copy2(full_output_path, cache_filepath)
+                cache.copy_file(cache_key, full_output_path, ".wav")
 
                 seg.audio_path = f"/output/{audio_filename}"
 

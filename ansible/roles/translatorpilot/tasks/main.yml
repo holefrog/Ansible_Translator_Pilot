@@ -68,6 +68,7 @@
   loop:
     - "contracts.py"
     - "retry.py"
+    - "cache.py"
     - "stt/__init__.py"
     - "stt/base.py"
     - "stt/stt_groq_whisper.py"

@@ -5,6 +5,7 @@ from typing import List
 from contracts import Segment
 from retry import with_retry
 from .base import TranslateProvider
+from cache import CacheManager
 
 logger = logging.getLogger("translate")
 
@@ -45,8 +46,8 @@ class NvidiaTranslate(TranslateProvider):
                 "Content-Type": "application/json"
             }
 
-            cache_dir = os.path.join(os.getcwd(), "cache", "translate")
-            os.makedirs(cache_dir, exist_ok=True)
+            # 使用统一的缓存管理器
+            cache = CacheManager("translate", os.getcwd())
 
             translation_map = {}
             batch_size = 20
@@ -74,14 +75,12 @@ class NvidiaTranslate(TranslateProvider):
 
                 user_prompt = f"{user_instruction}\n{json.dumps(items_to_translate, indent=2)}"
 
-                cache_string = system_instruction + user_prompt + model
-                cache_key = hashlib.md5(cache_string.encode("utf-8")).hexdigest()
-                cache_filepath = os.path.join(cache_dir, f"{cache_key}.json")
+                # 生成缓存 key
+                cache_key = cache.get_cache_key(system_instruction, user_prompt, model)
 
-                if os.path.exists(cache_filepath):
+                if cache.exists(cache_key, ".json"):
                     logger.info(f"[Translate] Translation cache hit for batch {i // batch_size + 1}!")
-                    with open(cache_filepath, "r", encoding="utf-8") as f:
-                        parsed_translations = json.load(f)
+                    parsed_translations = cache.load_json(cache_key)
                 else:
                     payload = {
                         "model": model,
@@ -104,8 +103,7 @@ class NvidiaTranslate(TranslateProvider):
                     try:
                         parsed_json = json.loads(candidate_text)
                         parsed_translations = parsed_json.get("translations", [])
-                        with open(cache_filepath, "w", encoding="utf-8") as f:
-                            json.dump(parsed_translations, f, ensure_ascii=False)
+                        cache.save_json(cache_key, parsed_translations)
                     except json.JSONDecodeError as e:
                         logger.error(f"Failed to parse NVIDIA LLM JSON: {candidate_text}")
                         raise Exception(f"NVIDIA LLM Translate output is not valid JSON: {e}")

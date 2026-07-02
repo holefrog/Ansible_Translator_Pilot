@@ -5,6 +5,7 @@ import logging
 from typing import List
 from contracts import Segment
 from .base import TTSProvider
+from cache import CacheManager
 
 logger = logging.getLogger("tts")
 
@@ -86,6 +87,9 @@ class SherpaOnnxTTS(TTSProvider):
         os.makedirs(output_dir, exist_ok=True)
         tts = self._load_engine()
 
+        # 使用统一的缓存管理器
+        cache = CacheManager("wav", output_dir)
+
         updated_segments = []
         for seg in segments:
             if not seg.target_text:
@@ -96,10 +100,25 @@ class SherpaOnnxTTS(TTSProvider):
             audio_filename = f"segment_{seg.segment_id}.wav"
             full_output_path = os.path.join(output_dir, audio_filename)
 
+            # Cache key based on text and volume gain
+            cache_key = cache.get_cache_key(seg.target_text, self.volume_gain)
+
+            # Check cache
+            if cache.exists(cache_key, ".wav"):
+                logger.info(f"[TTS] Cache hit for segment {seg.segment_id}")
+                cache.copy_from_cache(cache_key, full_output_path, ".wav")
+                seg.audio_path = f"/output/{audio_filename}"
+                updated_segments.append(seg)
+                if on_segment_done:
+                    on_segment_done(len(updated_segments), len(segments))
+                continue
+
             try:
                 audio = tts.generate(seg.target_text, sid=0, speed=1.0)
                 self._write_wav(full_output_path, audio.samples, audio.sample_rate)
                 seg.audio_path = f"/output/{audio_filename}"
+                # Save to cache
+                cache.copy_file(cache_key, full_output_path, ".wav")
             except Exception as e:
                 logger.error(f"[TTS] Failed sherpa-onnx synthesis for {seg.segment_id}: {e}.")
                 raise RuntimeError("Fatal pipeline error")

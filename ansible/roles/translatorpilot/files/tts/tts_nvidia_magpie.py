@@ -5,6 +5,7 @@ from typing import List
 from contracts import Segment
 from retry import with_retry
 from .base import TTSProvider
+from cache import CacheManager
 
 logger = logging.getLogger("tts")
 
@@ -43,8 +44,11 @@ class NvidiaMagpieTTS(TTSProvider):
             raise RuntimeError("Fatal pipeline error")
 
         language = self.config.get("language", "zh-CN")
-        voice = self.config.get("voice", "Magpie-Multilingual.ZH-CN.Mei")
+        voice = self.config.get("voice", "Magpie-Multilingual.ZH-CN.Aria")
         sample_rate = int(self.config.get("sample_rate_hz", 44100))
+
+        # 使用统一的缓存管理器
+        cache = CacheManager("wav", output_dir)
 
         updated_segments = []
         for seg in segments:
@@ -54,6 +58,19 @@ class NvidiaMagpieTTS(TTSProvider):
 
             audio_filename = f"segment_{seg.segment_id}.wav"
             full_output_path = os.path.join(output_dir, audio_filename)
+
+            # Cache key based on text, voice, language, and sample rate
+            cache_key = cache.get_cache_key(seg.target_text, voice, language, sample_rate)
+
+            # Check cache
+            if cache.exists(cache_key, ".wav"):
+                logger.info(f"[TTS] Cache hit for segment {seg.segment_id}")
+                cache.copy_from_cache(cache_key, full_output_path, ".wav")
+                seg.audio_path = f"/output/{audio_filename}"
+                updated_segments.append(seg)
+                if on_segment_done:
+                    on_segment_done(len(updated_segments), len(segments))
+                continue
 
             def run_api_call(
                 _seg=seg,
@@ -101,6 +118,8 @@ class NvidiaMagpieTTS(TTSProvider):
 
             try:
                 with_retry(run_api_call, self.retry_config, f"NvidiaMagpieTTS-{seg.segment_id}")
+                # Save to cache after successful synthesis
+                cache.copy_file(cache_key, full_output_path, ".wav")
             except Exception as e:
                 logger.error(f"[TTS] NVIDIA Magpie TTS synthesis failed for {seg.segment_id}: {e}")
                 raise RuntimeError("Fatal pipeline error")
