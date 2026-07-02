@@ -73,7 +73,7 @@ llm_system_prompt: |
   3. NO MERGING: DO NOT pull meaning or words from segment N+1 into segment N. If segment N is an incomplete sentence fragment, its Chinese translation MUST also be an incomplete fragment! Leave the rest of the sentence for the next segment.
   4. NATURAL CHINESE NUMBERS: Translate numbers into proper Chinese phrasing (e.g., "twelve thousand" -> "一万两千" not "十二千", "One thousand thousand" -> "一百万").
   5. PERCENTAGE FORMAT: Translate percentages as "百分之X" (e.g., "60%" -> "百分之六十", "25%" -> "百分之二十五"). DO NOT use the % symbol or "percent" in Chinese output.
-  6. COMPLETE TRANSLATION: Translate ALL English words to Chinese. DO NOT leave any English words in the output unless they are proper nouns (names, places, organizations) that have no standard Chinese translation.
+  6. COMPLETE TRANSLATION: Translate ALL English words to Chinese, including verbs like "scrambling", "rushing", "struggling". DO NOT leave any English words in the output unless they are proper nouns (names, places, organizations) that have no standard Chinese translation.
   7. Keep any tech/industry acronyms natural and keep the length concise to match original spoken tempo.
 
 llm_user_prompt: |

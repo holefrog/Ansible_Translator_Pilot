@@ -39,8 +39,7 @@ class GroqWhisperSTT(STTProvider):
             }
             data = {
                 "model": model,
-                "response_format": "verbose_json",
-                "prompt": self.config.get("prompt", "")
+                "response_format": "verbose_json"
             }
             
             response = requests.post(url, headers=headers, files=files, data=data, timeout=int(self.config.get("timeout", 60)))
@@ -129,10 +128,10 @@ class GeminiSTT(STTProvider):
             with open(audio_path, "rb") as f:
                 audio_data = base64.b64encode(f.read()).decode("utf-8")
                 
-            prompt = self.config.get("prompt", (
+            prompt = (
                 "Please transcribe this audio. Return a JSON array of transcription segments with timestamps. "
                 "Each segment must contain 'start' (float seconds), 'end' (float seconds), and 'text' (string transcription)."
-            ))
+            )
             
             payload = {
                 "contents": [{
