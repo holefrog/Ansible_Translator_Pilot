@@ -36,6 +36,9 @@ tts_sherpa_onnx_model_dir: "{{ install_dir }}/models/sherpa_onnx/matcha-icefall-
 tts_sherpa_onnx_vocoder: "{{ install_dir }}/models/sherpa_onnx/vocos-16khz-univ.onnx"
 tts_sherpa_onnx_num_threads: 4
 tts_sherpa_onnx_volume_gain: 2.0
+tts_sherpa_onnx_phone_fst: "phone-zh.fst"
+tts_sherpa_onnx_date_fst: "date-zh.fst"
+tts_sherpa_onnx_number_fst: "number-zh.fst"
 
 # Retry Policies
 retry_max_retries: 5

@@ -64,6 +64,9 @@ model_dir = "{{ tts_sherpa_onnx_model_dir | mandatory }}"
 vocoder_path = "{{ tts_sherpa_onnx_vocoder | mandatory }}"
 num_threads = {{ tts_sherpa_onnx_num_threads | mandatory }}
 volume_gain = {{ tts_sherpa_onnx_volume_gain | mandatory }}
+phone_fst = "{{ tts_sherpa_onnx_phone_fst | default('phone.fst') }}"
+date_fst = "{{ tts_sherpa_onnx_date_fst | default('date.fst') }}"
+number_fst = "{{ tts_sherpa_onnx_number_fst | default('number.fst') }}"
 
 [retry]
 max_retries = {{ retry_max_retries | mandatory }}

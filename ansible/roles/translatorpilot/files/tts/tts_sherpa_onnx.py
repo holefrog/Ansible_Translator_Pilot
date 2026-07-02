@@ -42,11 +42,17 @@ class SherpaOnnxTTS(TTSProvider):
         acoustic_model = os.path.join(model_dir, "model-steps-3.onnx")
         lexicon = os.path.join(model_dir, "lexicon.txt")
         tokens = os.path.join(model_dir, "tokens.txt")
-        rule_fsts = ",".join([
-            os.path.join(model_dir, "phone.fst"),
-            os.path.join(model_dir, "date.fst"),
-            os.path.join(model_dir, "number.fst"),
-        ])
+
+        # 从配置获取 fst 文件名，支持不同模型的文件名差异
+        phone_fst_name = self.config.get("phone_fst", "phone.fst")
+        date_fst_name = self.config.get("date_fst", "date.fst")
+        number_fst_name = self.config.get("number_fst", "number.fst")
+
+        phone_fst = os.path.join(model_dir, phone_fst_name)
+        date_fst = os.path.join(model_dir, date_fst_name)
+        number_fst = os.path.join(model_dir, number_fst_name)
+
+        rule_fsts = ",".join([phone_fst, date_fst, number_fst])
 
         for required_path in (acoustic_model, lexicon, tokens, vocoder_path):
             if not os.path.exists(required_path):
