@@ -169,6 +169,23 @@ function renderSegments(data) {
         const durationStr = report.synthesized_duration ? report.synthesized_duration.toFixed(2) + 's' : '0.0s';
         const originalDurationStr = report.original_duration ? report.original_duration.toFixed(2) + 's' : '0.0s';
 
+        // Format time as MM:SS or HH:MM:SS
+        const formatTime = (seconds) => {
+            if (!seconds) return '0:00';
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            const hours = Math.floor(mins / 60);
+            const displayMins = mins % 60;
+            if (hours > 0) {
+                return `${hours}:${displayMins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            }
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        };
+
+        const timeRange = seg.start !== undefined && seg.end !== undefined
+            ? `[${formatTime(seg.start)}-${formatTime(seg.end)}]`
+            : '';
+
         const enWidth = report.original_duration ? (report.original_duration / maxDuration) * 100 : 0;
         const cnWidth = report.synthesized_duration ? (report.synthesized_duration / maxDuration) * 100 : 0;
 
@@ -200,7 +217,7 @@ function renderSegments(data) {
                         <div class="target-text">${seg.target_text || '翻译中...'}</div>
                     </div>
                     <div class="segment-meta">
-                        <span>#${index + 1}</span>
+                        <span>#${index + 1} ${timeRange}</span>
                         ${report.ratio ? `
                         <span>&bull;</span>
                         <span class="badge ${badgeClass}">${badgeText} (${ratioStr})</span>

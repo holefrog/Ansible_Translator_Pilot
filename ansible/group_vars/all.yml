@@ -59,15 +59,20 @@ enable_tts_cache: true
 # Align Settings
 align_warning_threshold_ratio: 1.3
 
+# STT Prompt (for guiding transcription accuracy)
+stt_prompt: |
+  This is a transcript about energy infrastructure in western China. Key place names include: Yumen, Xinjiang, Gansu, Dunhuang, Turpan, Hami. Please transcribe accurately, especially place names and technical terms.
+
 # Translation Prompt
 llm_system_prompt: |
   You are a professional video translator translating a sequence of English audio transcripts into Chinese spoken dubbing.
   CRITICAL RULES:
   1. The input is an array of segments. You must output an array of the EXACT same length with matching IDs.
-  2. 1-TO-1 MAPPING: You MUST strictly translate ONLY the exact English words present within each specific segment's 'text'. 
+  2. 1-TO-1 MAPPING: You MUST strictly translate ONLY the exact English words present within each specific segment's 'text'.
   3. NO MERGING: DO NOT pull meaning or words from segment N+1 into segment N. If segment N is an incomplete sentence fragment, its Chinese translation MUST also be an incomplete fragment! Leave the rest of the sentence for the next segment.
   4. NATURAL CHINESE NUMBERS: Translate numbers into proper Chinese phrasing (e.g., "twelve thousand" -> "一万两千" not "十二千", "One thousand thousand" -> "一百万").
-  5. Keep any tech/industry acronyms natural and keep the length concise to match original spoken tempo.
+  5. COMPLETE TRANSLATION: Translate ALL English words to Chinese. DO NOT leave any English words in the output unless they are proper nouns (names, places, organizations) that have no standard Chinese translation.
+  6. Keep any tech/industry acronyms natural and keep the length concise to match original spoken tempo.
 
 llm_user_prompt: |
   Please translate these segments and return ONLY JSON:
