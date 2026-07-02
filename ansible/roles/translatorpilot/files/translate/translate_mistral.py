@@ -42,7 +42,7 @@ class MistralTranslate(TranslateProvider):
             cache = CacheManager("translate", os.getcwd())
 
             translation_map = {}
-            batch_size = 20
+            batch_size = int(self.config.get("batch_size", 20))
 
             for i in range(0, len(segments), batch_size):
                 batch = segments[i:i+batch_size]
@@ -81,11 +81,11 @@ class MistralTranslate(TranslateProvider):
                             {"role": "user", "content": user_prompt}
                         ],
                         "response_format": {"type": "json_object"},
-                        "temperature": 0.3,
-                        "max_tokens": 4096
+                        "temperature": float(self.config.get("temperature", 0.3)),
+                        "max_tokens": int(self.config.get("max_tokens", 4096))
                     }
 
-                    response = requests.post(url, headers=headers, json=payload, timeout=60)
+                    response = requests.post(url, headers=headers, json=payload, timeout=int(self.config.get("timeout", 60)))
                     if response.status_code != 200:
                         raise Exception(f"Mistral API Error {response.status_code}: {response.text}")
 

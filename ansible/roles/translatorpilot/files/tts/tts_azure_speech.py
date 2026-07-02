@@ -72,7 +72,7 @@ class AzureSpeechTTS(TTSProvider):
                     "User-Agent": "TranslatorPilot"
                 }
 
-                response = requests.post(endpoint, headers=headers, data=ssml.encode("utf-8"), timeout=30)
+                response = requests.post(endpoint, headers=headers, data=ssml.encode("utf-8"), timeout=int(self.config.get("timeout", 30)))
                 if response.status_code != 200:
                     raise Exception(f"Azure Speech TTS API Error {response.status_code}: {response.text}")
 

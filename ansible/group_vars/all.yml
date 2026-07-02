@@ -46,6 +46,12 @@ retry_base_delay: 2.0
 retry_backoff_factor: 2.0
 retry_max_delay: 60.0
 
+# API General Settings
+api_timeout: 60
+api_batch_size: 20
+api_temperature: 0.3
+api_max_tokens: 4096
+
 # Align Settings
 align_warning_threshold_ratio: 1.3
 

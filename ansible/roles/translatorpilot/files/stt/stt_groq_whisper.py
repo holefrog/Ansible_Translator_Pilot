@@ -42,7 +42,7 @@ class GroqWhisperSTT(STTProvider):
                 "response_format": "verbose_json"
             }
             
-            response = requests.post(url, headers=headers, files=files, data=data, timeout=60)
+            response = requests.post(url, headers=headers, files=files, data=data, timeout=int(self.config.get("timeout", 60)))
             if response.status_code != 200:
                 raise Exception(f"Groq API Error {response.status_code}: {response.text}")
                 
@@ -157,7 +157,7 @@ class GeminiSTT(STTProvider):
                 }
             }
             
-            response = requests.post(url, headers=headers, json=payload, timeout=90)
+            response = requests.post(url, headers=headers, json=payload, timeout=int(self.config.get("timeout", 90)))
             if response.status_code != 200:
                 raise Exception(f"Gemini API Error {response.status_code}: {response.text}")
                 

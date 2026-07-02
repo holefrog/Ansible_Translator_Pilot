@@ -98,7 +98,7 @@ class NvidiaMagpieTTS(TTSProvider):
                     NVIDIA_MAGPIE_TTS_URL,
                     headers=headers,
                     data=data,
-                    timeout=60
+                    timeout=int(self.config.get("timeout", 60))
                 )
 
                 if response.status_code != 200:

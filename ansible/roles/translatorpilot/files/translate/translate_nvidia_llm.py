@@ -50,7 +50,7 @@ class NvidiaTranslate(TranslateProvider):
             cache = CacheManager("translate", os.getcwd())
 
             translation_map = {}
-            batch_size = 20
+            batch_size = int(self.config.get("batch_size", 20))
 
             for i in range(0, len(segments), batch_size):
                 batch = segments[i:i + batch_size]
@@ -89,11 +89,11 @@ class NvidiaTranslate(TranslateProvider):
                             {"role": "system", "content": system_instruction},
                             {"role": "user", "content": user_prompt}
                         ],
-                        "temperature": 0.3,
-                        "max_tokens": 4096
+                        "temperature": float(self.config.get("temperature", 0.3)),
+                        "max_tokens": int(self.config.get("max_tokens", 4096))
                     }
 
-                    response = requests.post(url, headers=headers, json=payload, timeout=120)
+                    response = requests.post(url, headers=headers, json=payload, timeout=int(self.config.get("timeout", 120)))
                     if response.status_code != 200:
                         raise Exception(f"NVIDIA LLM Translate API Error {response.status_code}: {response.text}")
 

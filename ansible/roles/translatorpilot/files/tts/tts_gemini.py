@@ -64,7 +64,7 @@ class GeminiTTS(TTSProvider):
                 
                 max_rate_retries = 10
                 for attempt in range(max_rate_retries):
-                    response = requests.post(url, headers=headers, json=payload, timeout=30)
+                    response = requests.post(url, headers=headers, json=payload, timeout=int(self.config.get("timeout", 30)))
                     if response.status_code == 429:
                         delay = 30
                         try:
