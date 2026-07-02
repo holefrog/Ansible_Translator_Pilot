@@ -36,10 +36,10 @@ tts_sherpa_onnx_num_threads: 4
 tts_sherpa_onnx_volume_gain: 2.0
 
 # Retry Policies
-retry_max_retries: 3
-retry_base_delay: 1.0
+retry_max_retries: 5
+retry_base_delay: 2.0
 retry_backoff_factor: 2.0
-retry_max_delay: 30.0
+retry_max_delay: 60.0
 
 # Align Settings
 align_warning_threshold_ratio: 1.3

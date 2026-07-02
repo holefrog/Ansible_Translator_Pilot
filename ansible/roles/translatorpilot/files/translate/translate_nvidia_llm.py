@@ -123,7 +123,16 @@ class NvidiaTranslate(TranslateProvider):
             return with_retry(run_api_call, self.retry_config, "NvidiaTranslate")
         except ImportError:
             logger.error("[Translate] 'requests' library not found.")
-            raise RuntimeError("Fatal pipeline error")
+            raise RuntimeError("Fatal pipeline error: requests library missing")
         except Exception as e:
-            logger.error(f"[Translate] Failed NVIDIA LLM translation: {e}.")
-            raise RuntimeError("Fatal pipeline error")
+            err_msg = str(e)
+            logger.error(f"[Translate] Failed NVIDIA LLM translation: {err_msg}.")
+            # 提供更详细的错误信息
+            if "timeout" in err_msg.lower() or "timed out" in err_msg.lower():
+                raise RuntimeError(f"网络超时：NVIDIA API 响应超时。请检查网络连接或稍后重试。错误: {err_msg}")
+            elif "401" in err_msg or "unauthorized" in err_msg.lower():
+                raise RuntimeError(f"认证失败：NVIDIA API Key 无效或已过期。请检查配置。错误: {err_msg}")
+            elif "404" in err_msg or "not found" in err_msg.lower():
+                raise RuntimeError(f"模型不存在：配置的模型 '{model}' 在 NVIDIA API 上不可用。请检查模型名称。错误: {err_msg}")
+            else:
+                raise RuntimeError(f"翻译失败：{err_msg}")

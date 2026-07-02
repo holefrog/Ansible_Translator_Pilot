@@ -137,7 +137,13 @@ class TranslatorPilotPipeline:
             # 3. Translation Phase
             trigger_progress("Translating transcription segments to Chinese with sliding context...", 50)
             t0_translate = time.time()
-            segments = translate_provider.translate(segments)
+            try:
+                segments = translate_provider.translate(segments)
+            except Exception as e:
+                err_msg = str(e)
+                logger.error(f"Translation phase failed: {err_msg}")
+                dump_state("error", f"翻译阶段失败: {err_msg}", 60, err=err_msg)
+                raise
             timings["translate"] = round(time.time() - t0_translate, 1)
             current_segments = segments
             trigger_progress("Translation Phase completed successfully.", 75)
