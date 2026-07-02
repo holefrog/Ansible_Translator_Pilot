@@ -1,4 +1,5 @@
 import os
+import time
 import wave
 import logging
 from typing import List
@@ -27,6 +28,10 @@ class NvidiaMagpieTTS(TTSProvider):
     def __init__(self, config: dict, retry_config: dict):
         self.config = config
         self.retry_config = retry_config
+        self.last_request_time = 0
+        # 从全局配置读取限速，默认 2 RPS (0.5秒间隔)
+        rps = config.get("rate_limit", {}).get("tts_rps", 2)
+        self.min_request_interval = 1.0 / rps if rps > 0 else 0.5
 
     @property
     def name(self) -> str:
@@ -81,6 +86,15 @@ class NvidiaMagpieTTS(TTSProvider):
                 _sr=sample_rate
             ):
                 import requests
+
+                # 限速：确保不超过 2 RPS
+                current_time = time.time()
+                time_since_last_request = current_time - self.last_request_time
+                if time_since_last_request < self.min_request_interval:
+                    sleep_time = self.min_request_interval - time_since_last_request
+                    logger.debug(f"[TTS] Rate limiting: sleeping {sleep_time:.2f}s before request")
+                    time.sleep(sleep_time)
+                self.last_request_time = time.time()
 
                 headers = {
                     "Authorization": f"Bearer {api_key}"

@@ -1,4 +1,5 @@
 import os
+import time
 import logging
 from typing import List
 from contracts import Segment
@@ -12,6 +13,10 @@ class GeminiTTS(TTSProvider):
     def __init__(self, config: dict, retry_config: dict):
         self.config = config
         self.retry_config = retry_config
+        self.last_request_time = 0
+        # 从全局配置读取限速，默认 2 RPS (0.5秒间隔)
+        rps = config.get("rate_limit", {}).get("tts_rps", 2)
+        self.min_request_interval = 1.0 / rps if rps > 0 else 0.5
 
     @property
     def name(self) -> str:
@@ -56,11 +61,20 @@ class GeminiTTS(TTSProvider):
             def run_api_call():
                 import requests
                 import base64
-                
+
+                # 限速：确保不超过 2 RPS
+                current_time = time.time()
+                time_since_last_request = current_time - self.last_request_time
+                if time_since_last_request < self.min_request_interval:
+                    sleep_time = self.min_request_interval - time_since_last_request
+                    logger.debug(f"[TTS] Rate limiting: sleeping {sleep_time:.2f}s before request")
+                    time.sleep(sleep_time)
+                self.last_request_time = time.time()
+
                 model = self.config["model"]
                 url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
                 headers = {"Content-Type": "application/json"}
-                
+
                 payload = {
                     "contents": [{
                         "parts": [{"text": f"Read this in natural Chinese: {seg.target_text}"}]

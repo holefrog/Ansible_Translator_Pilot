@@ -110,6 +110,9 @@ base_delay = {{ retry_base_delay | mandatory }}
 backoff_factor = {{ retry_backoff_factor | mandatory }}
 max_delay = {{ retry_max_delay | mandatory }}
 
+[rate_limit]
+tts_rps = {{ tts_rate_limit_rps | mandatory }}
+
 [cache]
 enable_translate_cache = {{ 'true' if enable_translate_cache else 'false' }}
 enable_tts_cache = {{ 'true' if enable_tts_cache else 'false' }}

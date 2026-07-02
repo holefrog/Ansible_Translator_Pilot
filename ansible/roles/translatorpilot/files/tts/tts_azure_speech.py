@@ -1,4 +1,5 @@
 import os
+import time
 import wave
 import logging
 import xml.etree.ElementTree as ET
@@ -14,6 +15,10 @@ class AzureSpeechTTS(TTSProvider):
     def __init__(self, config: dict, retry_config: dict):
         self.config = config
         self.retry_config = retry_config
+        self.last_request_time = 0
+        # 从全局配置读取限速，默认 2 RPS (0.5秒间隔)
+        rps = config.get("rate_limit", {}).get("tts_rps", 2)
+        self.min_request_interval = 1.0 / rps if rps > 0 else 0.5
 
     @property
     def name(self) -> str:
@@ -55,7 +60,16 @@ class AzureSpeechTTS(TTSProvider):
                     cache.copy_from_cache(cache_key, full_output_path, ".wav")
                     seg.audio_path = f"/output/{audio_filename}"
                     return
-                
+
+                # 限速：确保不超过 Azure F0 的 2 RPS 限制
+                current_time = time.time()
+                time_since_last_request = current_time - self.last_request_time
+                if time_since_last_request < self.min_request_interval:
+                    sleep_time = self.min_request_interval - time_since_last_request
+                    logger.debug(f"[TTS] Rate limiting: sleeping {sleep_time:.2f}s before request")
+                    time.sleep(sleep_time)
+                self.last_request_time = time.time()
+
                 escaped_text = self.escape_xml(seg.target_text)
                 ssml = (
                     f"<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='zh-CN'>"
