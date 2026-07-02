@@ -67,6 +67,7 @@ class NvidiaTranslate(TranslateProvider):
                 system_instruction += "\nOutput JSON format: {\"translations\": [{\"id\": \"...\", \"translated_text\": \"...\"}]}"
                 system_instruction += f"\nCRITICAL: You are given {len(items_to_translate)} segments. Your JSON array MUST contain exactly {len(items_to_translate)} items. DO NOT skip any IDs."
                 system_instruction += "\nCRITICAL: Output raw UTF-8 Chinese characters. DO NOT use \\uXXXX unicode escaping."
+                system_instruction += "\nCRITICAL: Keep translations concise and natural. DO NOT repeat words."
 
                 user_instruction = self.config["user_prompt"]
                 if not user_instruction:
@@ -88,9 +89,8 @@ class NvidiaTranslate(TranslateProvider):
                             {"role": "system", "content": system_instruction},
                             {"role": "user", "content": user_prompt}
                         ],
-                        "response_format": {"type": "json_object"},
-                        "temperature": 0.3,
-                        "max_tokens": 4096
+                        "temperature": 0.1,
+                        "max_tokens": 2048
                     }
 
                     response = requests.post(url, headers=headers, json=payload, timeout=120)
