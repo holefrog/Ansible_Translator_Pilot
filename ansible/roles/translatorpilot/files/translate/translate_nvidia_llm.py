@@ -89,8 +89,9 @@ class NvidiaTranslate(TranslateProvider):
                             {"role": "system", "content": system_instruction},
                             {"role": "user", "content": user_prompt}
                         ],
-                        "temperature": 0.1,
-                        "max_tokens": 2048
+                        "response_format": {"type": "json_object"},
+                        "temperature": 0.3,
+                        "max_tokens": 4096
                     }
 
                     response = requests.post(url, headers=headers, json=payload, timeout=120)
