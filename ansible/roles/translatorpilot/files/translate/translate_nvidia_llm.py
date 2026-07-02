@@ -101,6 +101,12 @@ class NvidiaTranslate(TranslateProvider):
                     candidate_text = resp_data["choices"][0]["message"]["content"]
 
                     try:
+                        # 处理 markdown 代码块包装的 JSON
+                        if "```json" in candidate_text:
+                            candidate_text = candidate_text.split("```json")[1].split("```")[0].strip()
+                        elif "```" in candidate_text:
+                            candidate_text = candidate_text.split("```")[1].split("```")[0].strip()
+
                         parsed_json = json.loads(candidate_text)
                         parsed_translations = parsed_json.get("translations", [])
                         cache.save_json(cache_key, parsed_translations)

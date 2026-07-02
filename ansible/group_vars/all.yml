@@ -24,7 +24,7 @@ groq_llm_model: "openai/gpt-oss-120b"
 gemini_model: "gemini-3.5-flash"
 gemini_tts_model: "gemini-3.1-flash-tts-preview"
 gemini_tts_voice: "Kore"
-nvidia_llm_model: "qwen/qwen3.5-122b-a10b"
+nvidia_llm_model: "mistralai/mistral-small-4-119b-2603"
 nvidia_tts_language: "zh-CN"
 nvidia_tts_voice: "Magpie-Multilingual.ZH-CN.Aria"
 nvidia_tts_sample_rate_hz: 44100
