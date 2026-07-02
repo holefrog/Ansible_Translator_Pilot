@@ -107,8 +107,12 @@
             font-weight: 700;
             color: #38bdf8;
             text-transform: none;
-            letter-spacing: 0;
-            margin-top: 6px;
+            margin-top: 4px;
+        }
+
+        /* Model name in parentheses - different color */
+        .engine-name span {
+            color: #f59e0b;
         }
 
         /* Stage card active / completed highlight */

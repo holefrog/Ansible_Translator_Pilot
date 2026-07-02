@@ -34,9 +34,30 @@ function updateStageCards(timings, engines, p, msg) {
         if (timings.tts !== null) document.getElementById('time-tts').textContent = timings.tts.toFixed(1) + ' 秒';
     }
     if (engines) {
-        if (engines.stt) document.getElementById('engine-stt').textContent = engines.stt;
-        if (engines.translate) document.getElementById('engine-translate').textContent = engines.translate;
-        if (engines.tts) document.getElementById('engine-tts').textContent = engines.tts;
+        if (engines.stt) {
+            const sttMatch = engines.stt.match(/^(.+?)\s*\((.+?)\)$/);
+            if (sttMatch) {
+                document.getElementById('engine-stt').innerHTML = `${sttMatch[1]} <span>(${sttMatch[2]})</span>`;
+            } else {
+                document.getElementById('engine-stt').textContent = engines.stt;
+            }
+        }
+        if (engines.translate) {
+            const translateMatch = engines.translate.match(/^(.+?)\s*\((.+?)\)$/);
+            if (translateMatch) {
+                document.getElementById('engine-translate').innerHTML = `${translateMatch[1]} <span>(${translateMatch[2]})</span>`;
+            } else {
+                document.getElementById('engine-translate').textContent = engines.translate;
+            }
+        }
+        if (engines.tts) {
+            const ttsMatch = engines.tts.match(/^(.+?)\s*\((.+?)\)$/);
+            if (ttsMatch) {
+                document.getElementById('engine-tts').innerHTML = `${ttsMatch[1]} <span>(${ttsMatch[2]})</span>`;
+            } else {
+                document.getElementById('engine-tts').textContent = engines.tts;
+            }
+        }
     }
 
     // Active / completed highlights on stage cards

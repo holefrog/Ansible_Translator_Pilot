@@ -63,10 +63,24 @@ class TranslatorPilotPipeline:
                     "audio_path": seg.audio_path,
                     "is_fallback": getattr(seg, 'is_fallback', False)
                 })
+            # Get provider names
+            stt_provider = self.settings["provider"]["stt"]
+            translate_provider = self.settings["provider"]["translate"]
+            tts_provider = self.settings["provider"]["tts"]
+
+            # Get model names for display
+            stt_model = self.settings.get("stt", {}).get(stt_provider, {}).get("model", "")
+            translate_model = self.settings.get("translate", {}).get(translate_provider, {}).get("model", "")
+            tts_model = self.settings.get("tts", {}).get(tts_provider, {}).get("model", "")
+
+            # For Sherpa-ONNX, use model_dir as model name
+            if tts_provider == "sherpa_onnx":
+                tts_model = self.settings.get("tts", {}).get("sherpa_onnx", {}).get("model_dir", "").split("/")[-1] if self.settings.get("tts", {}).get("sherpa_onnx", {}).get("model_dir") else ""
+
             engines_info = {
-                "stt": self.settings["provider"]["stt"],
-                "translate": self.settings["provider"]["translate"],
-                "tts": self.settings["provider"]["tts"]
+                "stt": f"{stt_provider} ({stt_model})" if stt_model else stt_provider,
+                "translate": f"{translate_provider} ({translate_model})" if translate_model else translate_provider,
+                "tts": f"{tts_provider} ({tts_model})" if tts_model else tts_provider
             }
             state_data = {
                 "status": status,
