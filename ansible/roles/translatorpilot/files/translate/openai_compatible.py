@@ -69,8 +69,7 @@ class OpenAICompatibleTranslate(BatchedTranslateProvider):
             )
 
         resp_data = response.json()
+        with open("/home/david/translator-pilot/groq_debug.json", "w") as f:
+            json.dump(resp_data, f, indent=2)
         candidate_text = resp_data["choices"][0]["message"].get("content", "")
-        if not candidate_text:
-            with open("/home/david/translator-pilot/groq_debug.json", "w") as f:
-                json.dump(resp_data, f, indent=2)
         return self._parse_translation_json(candidate_text)
