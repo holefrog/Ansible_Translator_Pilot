@@ -32,7 +32,7 @@ class NvidiaMagpieTTS(HTTPRateLimitedTTS):
 
     @property
     def name(self) -> str:
-        return "nvidia_magpie_tts"
+        return "nvidia_magpie"
 
     def build_cache_key(self, segment: Segment) -> str:
         return CacheManager.make_cache_key(

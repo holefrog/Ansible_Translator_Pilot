@@ -11,7 +11,7 @@ venv_dir: "{{ install_dir }}/.venv"
 
 # Provider Settings
 stt_provider: "groq_whisper"
-translate_provider: "openai"
+translate_provider: "groq_llm"
 tts_provider: "azure_speech"
 
 # Azure Speech Settings

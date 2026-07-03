@@ -16,7 +16,7 @@ class GeminiSTT(HTTPSTTProvider):
     """
     @property
     def name(self) -> str:
-        return "gemini_stt"
+        return "gemini"
 
     def _call_api(self, audio_path: str) -> List[Segment]:
         import requests
