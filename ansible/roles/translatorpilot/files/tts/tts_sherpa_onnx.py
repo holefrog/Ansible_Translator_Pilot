@@ -1,11 +1,15 @@
 import os
-import wave
-import array
 import logging
-from typing import List
+from typing import List, Callable, Optional
 from contracts import Segment
 from .base import TTSProvider
 from cache import CacheManager
+from .common import (
+    generate_audio_filename,
+    get_audio_path,
+    should_skip_segment,
+    write_wav_from_samples
+)
 
 logger = logging.getLogger("tts")
 
@@ -93,26 +97,25 @@ class SherpaOnnxTTS(TTSProvider):
         self._tts = sherpa_onnx.OfflineTts(tts_config)
         return self._tts
 
-    def synthesize(self, segments: List[Segment], output_dir: str, on_segment_done=None) -> List[Segment]:
+    def synthesize(self, segments: List[Segment], output_dir: str, 
+                   on_segment_done: Optional[Callable[[int, int], None]] = None) -> List[Segment]:
         if not segments:
             return []
 
         os.makedirs(output_dir, exist_ok=True)
         tts = self._load_engine()
 
-        # 使用统一的缓存管理器
         cache = CacheManager("wav", output_dir)
         enable_cache = self.config.get("enable_cache", True)
 
         updated_segments = []
         for seg in segments:
-            if not seg.target_text:
+            if should_skip_segment(seg):
                 logger.warning(f"[TTS] Segment {seg.segment_id} has no target text. Skipping synthesis.")
                 updated_segments.append(seg)
                 continue
 
-            audio_filename = f"segment_{seg.segment_id}.wav"
-            full_output_path = os.path.join(output_dir, audio_filename)
+            full_output_path = get_audio_path(output_dir, seg.segment_id)
 
             # Cache key based on text and volume gain
             cache_key = cache.get_cache_key(seg.target_text, self.volume_gain)
@@ -121,7 +124,7 @@ class SherpaOnnxTTS(TTSProvider):
             if enable_cache and cache.exists(cache_key, ".wav"):
                 logger.info(f"[TTS] Cache hit for segment {seg.segment_id}")
                 cache.copy_from_cache(cache_key, full_output_path, ".wav")
-                seg.audio_path = f"/output/{audio_filename}"
+                seg.audio_path = f"/output/{generate_audio_filename(seg.segment_id)}"
                 updated_segments.append(seg)
                 if on_segment_done:
                     on_segment_done(len(updated_segments), len(segments))
@@ -129,8 +132,8 @@ class SherpaOnnxTTS(TTSProvider):
 
             try:
                 audio = tts.generate(seg.target_text, sid=0, speed=1.0)
-                self._write_wav(full_output_path, audio.samples, audio.sample_rate)
-                seg.audio_path = f"/output/{audio_filename}"
+                write_wav_from_samples(audio.samples, full_output_path, audio.sample_rate)
+                seg.audio_path = f"/output/{generate_audio_filename(seg.segment_id)}"
                 # Save to cache
                 if enable_cache:
                     cache.copy_file(cache_key, full_output_path, ".wav")
@@ -143,16 +146,3 @@ class SherpaOnnxTTS(TTSProvider):
                 on_segment_done(len(updated_segments), len(segments))
 
         return updated_segments
-
-    def _write_wav(self, path: str, samples, sample_rate: int):
-        # sherpa-onnx returns float32 samples in [-1.0, 1.0]; convert to 16-bit PCM.
-        # Apply volume gain to compensate for lower output level.
-        int_samples = array.array(
-            "h",
-            [max(-32768, min(32767, int(s * self.volume_gain * 32767))) for s in samples],
-        )
-        with wave.open(path, "wb") as wf:
-            wf.setnchannels(1)
-            wf.setsampwidth(2)
-            wf.setframerate(sample_rate)
-            wf.writeframes(int_samples.tobytes())

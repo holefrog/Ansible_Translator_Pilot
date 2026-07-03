@@ -1,153 +1,86 @@
-import os
-import time
 import logging
-from typing import List
+import time
+import wave
+import io
+import base64
 from contracts import Segment
-from retry import with_retry
-from .base import TTSProvider
+from .http_rate_limited import HTTPRateLimitedTTS
 from cache import CacheManager
+from .common import wrap_pcm_as_wav
 
 logger = logging.getLogger("tts")
 
-class GeminiTTS(TTSProvider):
+class GeminiTTS(HTTPRateLimitedTTS):
     def __init__(self, config: dict, retry_config: dict):
-        self.config = config
-        self.retry_config = retry_config
-        self.last_request_time = 0
-        # 从全局配置读取限速，默认 2 RPS (0.5秒间隔)
-        rps = config.get("rate_limit", {}).get("tts_rps", 2)
-        self.min_request_interval = 1.0 / rps if rps > 0 else 0.5
+        super().__init__(config, retry_config)
+        
+        api_key = self.config["api_key"]
+        if not api_key:
+            logger.error("[TTS] Gemini API Key is missing for TTS. Cannot proceed.")
+            raise RuntimeError("Fatal pipeline error")
 
     @property
     def name(self) -> str:
         return "gemini_tts"
 
-    def synthesize(self, segments: List[Segment], output_dir: str, on_segment_done=None) -> List[Segment]:
-        if not segments:
-            return []
-            
-        os.makedirs(output_dir, exist_ok=True)
+    def build_cache_key(self, segment: Segment) -> str:
+        cache = CacheManager("wav", "")
+        voice = self.config["voice"]
+        return cache.get_cache_key(segment.target_text, voice)
+
+    def synthesize_audio(self, segment: Segment, output_path: str) -> None:
+        import requests
+        
         api_key = self.config["api_key"]
+        model = self.config["model"]
+        voice = self.config["voice"]
+        
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
+        headers = {"Content-Type": "application/json"}
 
-        if not api_key:
-            logger.error("[TTS] Gemini API Key is missing for TTS. Cannot proceed.")
-            raise RuntimeError("Fatal pipeline error")
-
-        updated_segments = []
-        for seg in segments:
-            if not seg.target_text:
-                updated_segments.append(seg)
-                continue
-
-            audio_filename = f"segment_{seg.segment_id}.wav"
-            full_output_path = os.path.join(output_dir, audio_filename)
-
-            # 使用统一的缓存管理器
-            cache = CacheManager("wav", output_dir)
-            enable_cache = self.config.get("enable_cache", True)
-            voice = self.config["voice"]
-            cache_key = cache.get_cache_key(seg.target_text, voice)
-
-            # Check cache
-            if enable_cache and cache.exists(cache_key, ".wav"):
-                logger.info(f"[TTS] Cache hit for segment {seg.segment_id}")
-                cache.copy_from_cache(cache_key, full_output_path, ".wav")
-                seg.audio_path = f"/output/{audio_filename}"
-                updated_segments.append(seg)
-                if on_segment_done:
-                    on_segment_done(len(updated_segments), len(segments))
-                continue
-
-            def run_api_call():
-                import requests
-                import base64
-
-                # 限速：确保不超过 2 RPS
-                current_time = time.time()
-                time_since_last_request = current_time - self.last_request_time
-                if time_since_last_request < self.min_request_interval:
-                    sleep_time = self.min_request_interval - time_since_last_request
-                    logger.debug(f"[TTS] Rate limiting: sleeping {sleep_time:.2f}s before request")
-                    time.sleep(sleep_time)
-                self.last_request_time = time.time()
-
-                model = self.config["model"]
-                url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
-                headers = {"Content-Type": "application/json"}
-
-                payload = {
-                    "contents": [{
-                        "parts": [{"text": f"Read this in natural Chinese: {seg.target_text}"}]
-                    }],
-                    "generationConfig": {
-                        "responseModalities": ["AUDIO"],
-                        "speechConfig": {
-                            "voiceConfig": {
-                                "prebuiltVoiceConfig": {
-                                    "voiceName": self.config["voice"]
-                                }
-                            }
+        payload = {
+            "contents": [{
+                "parts": [{"text": f"Read this in natural Chinese: {segment.target_text}"}]
+            }],
+            "generationConfig": {
+                "responseModalities": ["AUDIO"],
+                "speechConfig": {
+                    "voiceConfig": {
+                        "prebuiltVoiceConfig": {
+                            "voiceName": voice
                         }
                     }
                 }
+            }
+        }
 
-                import time
+        # Gemini has a separate 3 RPM rate limit that needs special handling
+        max_rate_retries = 10
+        for attempt in range(max_rate_retries):
+            response = requests.post(url, headers=headers, json=payload, timeout=int(self.config.get("timeout", 30)))
+            if response.status_code == 429:
+                delay = 30
+                try:
+                    err_data = response.json()
+                    for detail in err_data.get("error", {}).get("details", []):
+                        if "retryDelay" in detail:
+                            delay = int(detail["retryDelay"].replace("s", "")) + 1
+                except Exception:
+                    pass
                 
-                max_rate_retries = 10
-                for attempt in range(max_rate_retries):
-                    response = requests.post(url, headers=headers, json=payload, timeout=int(self.config.get("timeout", 30)))
-                    if response.status_code == 429:
-                        delay = 30
-                        try:
-                            err_data = response.json()
-                            for detail in err_data.get("error", {}).get("details", []):
-                                if "retryDelay" in detail:
-                                    delay = int(detail["retryDelay"].replace("s", "")) + 1
-                        except Exception:
-                            pass
-                        
-                        logger.warning(f"[TTS] Gemini API rate limit (3 RPM) hit. Sleeping for {delay} seconds before retry...")
-                        time.sleep(delay)
-                        continue
-                        
-                    if response.status_code != 200:
-                        raise Exception(f"Gemini TTS API Error {response.status_code}: {response.text}")
-                    break
-                else:
-                    raise Exception("Gemini TTS API Error: Exceeded max retries for rate limit (429)")
-
-                import wave
-                import io
-
-                resp_data = response.json()
-                base64_audio = resp_data["candidates"][0]["content"]["parts"][0]["inlineData"]["data"]
-                pcm_data = base64.b64decode(base64_audio)
+                logger.warning(f"[TTS] Gemini API rate limit (3 RPM) hit. Sleeping for {delay} seconds before retry...")
+                time.sleep(delay)
+                continue
                 
-                # Gemini TTS returns raw PCM (24kHz, 16-bit, mono). We need to add a WAV header.
-                wav_io = io.BytesIO()
-                with wave.open(wav_io, 'wb') as wav_file:
-                    wav_file.setnchannels(1)
-                    wav_file.setsampwidth(2)
-                    wav_file.setframerate(24000)
-                    wav_file.writeframes(pcm_data)
-                
-                with open(full_output_path, "wb") as f:
-                    f.write(wav_io.getvalue())
+            if response.status_code != 200:
+                raise Exception(f"Gemini TTS API Error {response.status_code}: {response.text}")
+            break
+        else:
+            raise Exception("Gemini TTS API Error: Exceeded max retries for rate limit (429)")
 
-                # Save to cache
-                if enable_cache:
-                    cache.copy_file(cache_key, full_output_path, ".wav")
-
-                seg.audio_path = f"/output/{audio_filename}"
-
-            try:
-                with_retry(run_api_call, self.retry_config, f"GeminiTTS-{seg.segment_id}")
-            except Exception as e:
-                logger.error(f"[TTS] Gemini TTS synthesis failed for {seg.segment_id}: {e}")
-                raise RuntimeError("Fatal pipeline error")
-
-            updated_segments.append(seg)
-            if on_segment_done:
-                on_segment_done(len(updated_segments), len(segments))
-
-        return updated_segments
+        resp_data = response.json()
+        base64_audio = resp_data["candidates"][0]["content"]["parts"][0]["inlineData"]["data"]
+        pcm_data = base64.b64decode(base64_audio)
+        
+        # Gemini TTS returns raw PCM (24kHz, 16-bit, mono). Wrap in WAV container.
+        wrap_pcm_as_wav(pcm_data, output_path, sample_rate=24000)
