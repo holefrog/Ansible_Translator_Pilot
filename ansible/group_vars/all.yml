@@ -48,7 +48,7 @@ retry_max_delay: 60.0
 
 # API 通用设置
 api_timeout: 60
-api_batch_size: 100
+api_batch_size: 15
 api_temperature: 0.3
 api_max_tokens: 4096
 tts_rate_limit_rps: 2  # TTS 速率限制（每秒请求数，Azure F0 默认 2 RPS）
