@@ -9,9 +9,11 @@ logger = logging.getLogger("translate")
 
 
 class OpenAICompatibleTranslate(BatchedTranslateProvider):
-    """Base class for OpenAI-compatible translation providers.
-
-  Subclasses override base_url and optional API behavior properties.
+    """
+    兼容 OpenAI Chat API 标准格式的翻译提供商基类。
+    适用于包括 OpenAI, Groq, NVIDIA, Mistral 等遵循该规范的模型接口。
+    
+    子类需要覆盖 `base_url` 属性。
     """
 
     @property

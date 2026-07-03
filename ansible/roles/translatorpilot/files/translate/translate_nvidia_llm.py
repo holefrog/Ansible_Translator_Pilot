@@ -2,7 +2,10 @@ from .openai_compatible import OpenAICompatibleTranslate
 
 
 class NvidiaTranslate(OpenAICompatibleTranslate):
-    """Translation provider using NVIDIA NIM API (OpenAI-compatible)."""
+    """
+    基于 NVIDIA NIM (NVIDIA Inference Microservices) API 托管的大模型翻译提供商。
+    兼容 OpenAI API 规范。
+    """
 
     @property
     def name(self) -> str:

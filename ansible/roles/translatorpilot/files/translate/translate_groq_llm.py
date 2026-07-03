@@ -2,6 +2,10 @@ from .openai_compatible import OpenAICompatibleTranslate
 
 
 class GroqTranslate(OpenAICompatibleTranslate):
+    """
+    基于 Groq API 托管的开源大模型翻译提供商。
+    兼容 OpenAI API 规范，拥有极高的推理速度。
+    """
     @property
     def name(self) -> str:
         return "groq"

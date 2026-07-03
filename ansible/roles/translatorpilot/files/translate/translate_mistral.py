@@ -2,6 +2,10 @@ from .openai_compatible import OpenAICompatibleTranslate
 
 
 class MistralTranslate(OpenAICompatibleTranslate):
+    """
+    基于 Mistral AI 接口的大模型翻译提供商。
+    兼容 OpenAI API 规范。
+    """
     @property
     def name(self) -> str:
         return "mistral"

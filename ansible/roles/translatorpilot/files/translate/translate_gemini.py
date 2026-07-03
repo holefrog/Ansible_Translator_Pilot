@@ -7,6 +7,10 @@ logger = logging.getLogger("translate")
 
 
 class GeminiTranslate(BatchedTranslateProvider):
+    """
+    基于 Google Gemini 模型的批处理翻译提供商。
+    提供强大的上下文理解能力和原生支持结构化 JSON 响应功能。
+    """
     @property
     def name(self) -> str:
         return "gemini"
