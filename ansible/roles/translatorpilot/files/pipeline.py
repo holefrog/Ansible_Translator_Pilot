@@ -44,6 +44,38 @@ class TranslatorPilotPipeline:
     def __init__(self, settings: dict, output_dir: str):
         self.settings = settings
         self.output_dir = output_dir
+        self._validate_config()
+    
+    def _validate_config(self):
+        """Validate that all required configuration keys are present."""
+        required_keys = [
+            ("provider", ["stt", "translate", "tts"]),
+            ("retry", ["max_retries", "base_delay", "backoff_factor", "max_delay"]),
+        ]
+        
+        for section, keys in required_keys:
+            if section not in self.settings:
+                raise ValueError(f"Missing required configuration section: {section}")
+            for key in keys:
+                if key not in self.settings[section]:
+                    raise ValueError(f"Missing required configuration key: {section}.{key}")
+        
+        # Validate provider-specific API keys
+        stt_name = self.settings["provider"]["stt"]
+        translate_name = self.settings["provider"]["translate"]
+        tts_name = self.settings["provider"]["tts"]
+        
+        stt_cfg = self.settings.get("stt", {}).get(stt_name, {})
+        if "api_key" not in stt_cfg:
+            raise ValueError(f"Missing API key for STT provider: {stt_name}")
+        
+        translate_cfg = self.settings.get("translate", {}).get(translate_name, {})
+        if "api_key" not in translate_cfg:
+            raise ValueError(f"Missing API key for Translate provider: {translate_name}")
+        
+        tts_cfg = self.settings.get("tts", {}).get(tts_name, {})
+        if tts_name != "sherpa_onnx" and "api_key" not in tts_cfg:
+            raise ValueError(f"Missing API key for TTS provider: {tts_name}")
 
     def run(self, audio_path: str, on_progress: Optional[Callable[[str, int], None]] = None) -> dict:
         state_file = os.path.join(self.output_dir, "pipeline_state.json")

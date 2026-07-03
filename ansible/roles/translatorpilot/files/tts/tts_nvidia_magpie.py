@@ -25,11 +25,6 @@ class NvidiaMagpieTTS(HTTPRateLimitedTTS):
     def __init__(self, config: dict, retry_config: dict):
         super().__init__(config, retry_config)
         
-        api_key = self.config["api_key"]
-        if not api_key:
-            logger.error("[TTS] NVIDIA API Key is missing for TTS. Cannot proceed.")
-            raise RuntimeError("Fatal pipeline error")
-        
         self.language = self.config.get("language", "zh-CN")
         self.voice = self.config.get("voice", "Magpie-Multilingual.ZH-CN.Aria")
         self.sample_rate = int(self.config.get("sample_rate_hz", 44100))

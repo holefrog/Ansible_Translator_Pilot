@@ -13,11 +13,6 @@ logger = logging.getLogger("tts")
 class GeminiTTS(HTTPRateLimitedTTS):
     def __init__(self, config: dict, retry_config: dict):
         super().__init__(config, retry_config)
-        
-        api_key = self.config["api_key"]
-        if not api_key:
-            logger.error("[TTS] Gemini API Key is missing for TTS. Cannot proceed.")
-            raise RuntimeError("Fatal pipeline error")
 
     @property
     def name(self) -> str:

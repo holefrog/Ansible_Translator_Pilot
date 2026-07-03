@@ -9,11 +9,6 @@ logger = logging.getLogger("tts")
 class AzureSpeechTTS(HTTPRateLimitedTTS):
     def __init__(self, config: dict, retry_config: dict):
         super().__init__(config, retry_config)
-        
-        api_key = self.config["api_key"]
-        if not api_key:
-            logger.error("[TTS] Azure Subscription Key is missing. Cannot proceed.")
-            raise RuntimeError("Fatal pipeline error")
 
     @property
     def name(self) -> str:

@@ -36,10 +36,6 @@ class GeminiTranslate(TranslateProvider):
         api_key = self.config["api_key"]
         model = self.config["model"]
 
-        if not api_key:
-            logger.error("[Translate] Gemini API Key is missing. Cannot proceed.")
-            raise RuntimeError("Fatal pipeline error")
-
         def run_api_call():
             import requests
 
