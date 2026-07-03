@@ -8,7 +8,7 @@ class GroqTranslate(OpenAICompatibleTranslate):
     """
     @property
     def name(self) -> str:
-        return "groq"
+        return "groq_llm"
 
     @property
     def base_url(self) -> str:
