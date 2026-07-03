@@ -50,7 +50,7 @@ retry_max_delay: 60.0
 api_timeout: 60
 api_batch_size: 20
 api_temperature: 0.3
-api_max_tokens: 4096
+api_max_tokens: 1024
 tts_rate_limit_rps: 2  # TTS rate limit in requests per second (default 2 RPS for Azure F0)
 
 # Cache Settings
