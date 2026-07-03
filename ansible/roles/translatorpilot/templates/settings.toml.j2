@@ -19,7 +19,7 @@ model = "{{ gemini_model | mandatory }}"
 
 [translate.common]
 system_prompt = """{{ llm_system_prompt | mandatory | trim }}"""
-style_guide_path = "{{ llm_style_guide_path | mandatory }}"
+style_guide = {{ lookup('file', llm_style_guide_path) | to_json }}
 user_prompt = """{{ llm_user_prompt | mandatory | trim }}"""
 timeout = {{ api_timeout | mandatory }}
 batch_size = {{ api_batch_size | mandatory }}

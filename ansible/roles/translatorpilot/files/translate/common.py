@@ -1,4 +1,3 @@
-import os
 import json
 import logging
 from typing import List, Dict, Any
@@ -44,18 +43,12 @@ def build_system_prompt(config: dict, num_items: int) -> tuple[str, str]:
         logger.error("[Translate] System prompt is missing from config.")
         raise RuntimeError("Fatal pipeline error")
     
-    style_guide_path = config.get("style_guide_path")
-    if not style_guide_path:
-        logger.error("[Translate] Style guide path is missing from config.")
+    style_guide = config.get("style_guide")
+    if not style_guide:
+        logger.error("[Translate] Style guide is missing from config.")
         raise RuntimeError("Fatal pipeline error")
     
-    if not os.path.exists(style_guide_path):
-        logger.error(f"[Translate] Style guide file not found: {style_guide_path}")
-        raise RuntimeError("Fatal pipeline error")
-    
-    with open(style_guide_path, "r", encoding="utf-8") as f:
-        style_guide = f.read()
-        system_instruction += "\n\n" + style_guide
+    system_instruction += "\n\n" + style_guide
     
     # Store base for cache key (before adding dynamic content)
     base_system_instruction = system_instruction
