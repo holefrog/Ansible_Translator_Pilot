@@ -64,6 +64,18 @@ class OpenAICompatibleTranslate(BatchedTranslateProvider):
         )
 
         if response.status_code != 200:
+            # 记录错误响应到调试文件
+            debug_file = f"/home/david/translator-pilot/{self.name}_error.json"
+            try:
+                error_data = response.json() if response.headers.get('content-type', '').startswith('application/json') else {"raw_response": response.text}
+                with open(debug_file, "w") as f:
+                    json.dump(error_data, f, indent=2)
+                logger.info(f"[{self.provider_display_name}] Error response saved to {debug_file}")
+            except:
+                with open(debug_file, "w") as f:
+                    f.write(response.text)
+                logger.info(f"[{self.provider_display_name}] Error response saved to {debug_file}")
+            
             raise Exception(
                 f"{self.provider_display_name} API Error {response.status_code}: {response.text}"
             )
