@@ -6,6 +6,17 @@ from contracts import Segment
 from retry import with_retry
 from .base import TranslateProvider
 from cache import CacheManager
+from .common import (
+    strip_markdown_fences,
+    build_system_prompt,
+    build_user_prompt,
+    get_cache_key,
+    check_cache,
+    load_from_cache,
+    save_to_cache,
+    map_translations_to_segments,
+    format_friendly_error
+)
 
 logger = logging.getLogger("translate")
 
@@ -37,11 +48,8 @@ class GeminiTranslate(TranslateProvider):
                 "Content-Type": "application/json"
             }
 
-            # 使用统一的缓存管理器
             cache = CacheManager("translate", os.getcwd())
             enable_cache = self.config.get("enable_cache", False)
-
-            translation_map = {}
             batch_size = int(self.config.get("batch_size", 20))
 
             for i in range(0, len(segments), batch_size):
@@ -51,45 +59,19 @@ class GeminiTranslate(TranslateProvider):
                     for seg in batch
                 ]
 
-                system_instruction = self.config["system_prompt"]
-                if not system_instruction:
-                    logger.error("[Translate] System prompt is missing from config.")
-                    raise RuntimeError("Fatal pipeline error")
-                    
-                style_guide_path = self.config.get("style_guide_path")
-                if not style_guide_path:
-                    logger.error("[Translate] Style guide path is missing from config.")
-                    raise RuntimeError("Fatal pipeline error")
-                
-                if not os.path.exists(style_guide_path):
-                    logger.error(f"[Translate] Style guide file not found: {style_guide_path}")
-                    raise RuntimeError("Fatal pipeline error")
-                    
-                with open(style_guide_path, "r", encoding="utf-8") as f:
-                    style_guide = f.read()
-                    system_instruction += "\n\n" + style_guide
-                        
-                # 使用原始 system_prompt 和 style_guide 生成缓存 key（避免动态内容影响缓存）
-                base_system_instruction = system_instruction
+                # Build prompts using common utilities
+                base_system_instruction, system_instruction = build_system_prompt(
+                    self.config, len(items_to_translate)
+                )
+                user_prompt = build_user_prompt(self.config, items_to_translate)
+                cache_key = get_cache_key(cache, base_system_instruction, user_prompt, model)
 
-                system_instruction += "\nOutput JSON format: {\"translations\": [{\"id\": \"...\", \"translated_text\": \"...\"}]}"
-                system_instruction += f"\nCRITICAL: You are given {len(items_to_translate)} segments. Your JSON array MUST contain exactly {len(items_to_translate)} items. DO NOT skip any IDs."
-                system_instruction += "\nCRITICAL: Output raw UTF-8 Chinese characters. DO NOT use \\uXXXX unicode escaping."
-
-                user_instruction = self.config["user_prompt"]
-                if not user_instruction:
-                    logger.error("[Translate] User prompt is missing from config.")
-                    raise RuntimeError("Fatal pipeline error")
-
-                user_prompt = f"{user_instruction}\n{json.dumps(items_to_translate, indent=2)}"
-
-                # 生成缓存 key（使用稳定的参数）
-                cache_key = cache.get_cache_key(base_system_instruction, user_prompt, model)
-
-                if enable_cache and cache.exists(cache_key, ".json"):
+                # Check cache
+                if check_cache(cache, cache_key, enable_cache):
                     logger.info(f"[Translate] Translation cache hit for batch {i//batch_size + 1}!")
-                    parsed_translations = cache.load_json(cache_key)
+                    parsed_translations = load_from_cache(cache, cache_key)
                 else:
+                    # Build Gemini-specific payload
                     payload = {
                         "systemInstruction": {
                             "parts": [{"text": system_instruction}]
@@ -111,22 +93,17 @@ class GeminiTranslate(TranslateProvider):
                     
                     try:
                         candidate_text = resp_data["candidates"][0]["content"]["parts"][0]["text"]
+                        # Strip markdown fences (now applied to all providers)
+                        candidate_text = strip_markdown_fences(candidate_text)
                         parsed_json = json.loads(candidate_text)
                         parsed_translations = parsed_json.get("translations", [])
-                        if enable_cache:
-                            cache.save_json(cache_key, parsed_translations)
+                        save_to_cache(cache, cache_key, parsed_translations, enable_cache)
                     except (KeyError, IndexError, json.JSONDecodeError) as e:
                         logger.error(f"Failed to parse Gemini JSON: {resp_data}")
                         raise Exception(f"Gemini output is not valid JSON: {e}")
 
-                for item in parsed_translations:
-                    translation_map[item["id"]] = item["translated_text"]
-
-            for seg in segments:
-                if seg.segment_id not in translation_map:
-                    logger.error(f"[Translate] Missing translation for segment {seg.segment_id}")
-                    raise RuntimeError("Fatal pipeline error")
-                seg.target_text = translation_map[seg.segment_id]
+                # Map translations back to segments using common utility
+                map_translations_to_segments(batch, parsed_translations)
 
             return segments
 
@@ -137,4 +114,4 @@ class GeminiTranslate(TranslateProvider):
             raise RuntimeError("Fatal pipeline error")
         except Exception as e:
             logger.error(f"[Translate] Failed Gemini translation: {e}.")
-            raise RuntimeError("Fatal pipeline error")
+            raise format_friendly_error("Gemini", model, e)

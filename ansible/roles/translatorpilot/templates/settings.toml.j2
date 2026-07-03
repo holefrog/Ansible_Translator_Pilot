@@ -7,7 +7,7 @@ tts = "{{ tts_provider | mandatory }}"
 
 [stt.common]
 timeout = {{ api_timeout | mandatory }}
-prompt_path = "{{ stt_prompt_path | mandatory }}"
+prompt = {{ lookup('file', stt_prompt_path) | to_json }}
 
 [stt.groq_whisper]
 api_key = "{{ groq_api_key | mandatory }}"
