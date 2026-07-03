@@ -1,23 +1,19 @@
 import logging
-import xml.etree.ElementTree as ET
 from contracts import Segment
-from .http_rate_limited import HTTPRateLimitedTTS
 from cache import CacheManager
+from .http_rate_limited import HTTPRateLimitedTTS
 
 logger = logging.getLogger("tts")
 
-class AzureSpeechTTS(HTTPRateLimitedTTS):
-    def __init__(self, config: dict, retry_config: dict):
-        super().__init__(config, retry_config)
 
+class AzureSpeechTTS(HTTPRateLimitedTTS):
     @property
     def name(self) -> str:
         return "azure_speech"
 
     def build_cache_key(self, segment: Segment) -> str:
-        cache = CacheManager("wav", "")
         voice = self.config["voice"]
-        return cache.get_cache_key(segment.target_text, voice)
+        return CacheManager.make_cache_key(segment.target_text, voice)
 
     def synthesize_audio(self, segment: Segment, output_path: str) -> None:
         import requests

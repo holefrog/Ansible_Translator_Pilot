@@ -1,6 +1,6 @@
 import logging
-import wave
 from contracts import Segment
+from http_utils import bearer_headers
 from .http_rate_limited import HTTPRateLimitedTTS
 from cache import CacheManager
 from .common import wrap_pcm_as_wav
@@ -34,17 +34,14 @@ class NvidiaMagpieTTS(HTTPRateLimitedTTS):
         return "nvidia_magpie_tts"
 
     def build_cache_key(self, segment: Segment) -> str:
-        cache = CacheManager("wav", "")
-        return cache.get_cache_key(segment.target_text, self.voice, self.language, self.sample_rate)
+        return CacheManager.make_cache_key(
+            segment.target_text, self.voice, self.language, self.sample_rate
+        )
 
     def synthesize_audio(self, segment: Segment, output_path: str) -> None:
         import requests
         
-        api_key = self.config["api_key"]
-        
-        headers = {
-            "Authorization": f"Bearer {api_key}"
-        }
+        headers = bearer_headers(self.config["api_key"])
 
         # NVIDIA Riva HTTP TTS uses form data
         data = {

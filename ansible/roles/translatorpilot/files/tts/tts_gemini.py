@@ -1,27 +1,22 @@
 import logging
 import time
-import wave
-import io
 import base64
 from contracts import Segment
-from .http_rate_limited import HTTPRateLimitedTTS
 from cache import CacheManager
+from .http_rate_limited import HTTPRateLimitedTTS
 from .common import wrap_pcm_as_wav
 
 logger = logging.getLogger("tts")
 
-class GeminiTTS(HTTPRateLimitedTTS):
-    def __init__(self, config: dict, retry_config: dict):
-        super().__init__(config, retry_config)
 
+class GeminiTTS(HTTPRateLimitedTTS):
     @property
     def name(self) -> str:
         return "gemini_tts"
 
     def build_cache_key(self, segment: Segment) -> str:
-        cache = CacheManager("wav", "")
         voice = self.config["voice"]
-        return cache.get_cache_key(segment.target_text, voice)
+        return CacheManager.make_cache_key(segment.target_text, voice)
 
     def synthesize_audio(self, segment: Segment, output_path: str) -> None:
         import requests

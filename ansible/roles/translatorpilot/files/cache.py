@@ -22,18 +22,23 @@ class CacheManager:
         self.cache_dir = os.path.join(os.path.dirname(output_dir), "cache", cache_type)
         os.makedirs(self.cache_dir, exist_ok=True)
 
-    def get_cache_key(self, *args) -> str:
+    @staticmethod
+    def make_cache_key(*args) -> str:
         """
-        基于多个参数生成缓存 key
-        
+        基于多个参数生成缓存 key（无需实例化 CacheManager）
+
         Args:
             *args: 用于生成 key 的参数，会被转换为字符串拼接
-            
+
         Returns:
             MD5 哈希值作为缓存 key
         """
         cache_string = "_".join(str(arg) for arg in args)
         return hashlib.md5(cache_string.encode("utf-8")).hexdigest()
+
+    def get_cache_key(self, *args) -> str:
+        """基于多个参数生成缓存 key（实例方法，委托给 make_cache_key）。"""
+        return self.make_cache_key(*args)
 
     def get_file_path(self, cache_key: str, extension: str = "") -> str:
         """

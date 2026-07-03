@@ -48,34 +48,55 @@ class TranslatorPilotPipeline:
     
     def _validate_config(self):
         """Validate that all required configuration keys are present."""
-        required_keys = [
-            ("provider", ["stt", "translate", "tts"]),
-            ("retry", ["max_retries", "base_delay", "backoff_factor", "max_delay"]),
-        ]
-        
-        for section, keys in required_keys:
+        def require_section(section: str, keys: list):
             if section not in self.settings:
                 raise ValueError(f"Missing required configuration section: {section}")
             for key in keys:
                 if key not in self.settings[section]:
                     raise ValueError(f"Missing required configuration key: {section}.{key}")
-        
-        # Validate provider-specific API keys
+
+        def require_keys(data: dict, keys: list, path: str):
+            for key in keys:
+                if key not in data:
+                    raise ValueError(f"Missing required configuration key: {path}.{key}")
+
+        require_section("provider", ["stt", "translate", "tts"])
+        require_section("retry", ["max_retries", "base_delay", "backoff_factor", "max_delay"])
+        require_section("align", ["warning_threshold_ratio"])
+        require_section("rate_limit", ["tts_rps"])
+
         stt_name = self.settings["provider"]["stt"]
+        require_keys(self.settings.get("stt", {}).get("common", {}), ["timeout", "prompt"], "stt.common")
+        require_keys(self.settings.get("stt", {}).get(stt_name, {}), ["api_key", "model"], f"stt.{stt_name}")
+
         translate_name = self.settings["provider"]["translate"]
+        require_keys(
+            self.settings.get("translate", {}).get("common", {}),
+            ["system_prompt", "style_guide", "user_prompt", "timeout", "batch_size",
+             "temperature", "max_tokens", "enable_cache"],
+            "translate.common",
+        )
+        require_keys(
+            self.settings.get("translate", {}).get(translate_name, {}),
+            ["api_key", "model"],
+            f"translate.{translate_name}",
+        )
+
         tts_name = self.settings["provider"]["tts"]
-        
-        stt_cfg = self.settings.get("stt", {}).get(stt_name, {})
-        if "api_key" not in stt_cfg:
-            raise ValueError(f"Missing API key for STT provider: {stt_name}")
-        
-        translate_cfg = self.settings.get("translate", {}).get(translate_name, {})
-        if "api_key" not in translate_cfg:
-            raise ValueError(f"Missing API key for Translate provider: {translate_name}")
-        
-        tts_cfg = self.settings.get("tts", {}).get(tts_name, {})
-        if tts_name != "sherpa_onnx" and "api_key" not in tts_cfg:
-            raise ValueError(f"Missing API key for TTS provider: {tts_name}")
+        require_keys(self.settings.get("tts", {}).get("common", {}), ["timeout", "enable_cache"], "tts.common")
+        tts_provider_keys = {
+            "azure_speech": ["api_key", "region", "voice"],
+            "gemini_tts": ["api_key", "model", "voice"],
+            "nvidia_magpie": ["api_key", "language", "voice", "sample_rate_hz"],
+            "sherpa_onnx": ["model_dir", "vocoder_path", "num_threads", "volume_gain"],
+        }
+        if tts_name not in tts_provider_keys:
+            raise ValueError(f"Unknown TTS provider: {tts_name}")
+        require_keys(
+            self.settings.get("tts", {}).get(tts_name, {}),
+            tts_provider_keys[tts_name],
+            f"tts.{tts_name}",
+        )
 
     def run(self, audio_path: str, on_progress: Optional[Callable[[str, int], None]] = None) -> dict:
         state_file = os.path.join(self.output_dir, "pipeline_state.json")
