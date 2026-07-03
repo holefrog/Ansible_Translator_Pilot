@@ -61,35 +61,17 @@
     dest: "{{ tts_sherpa_onnx_vocoder }}"
   when: tts_provider == "sherpa_onnx"
 
-- name: Deploy Core Python files
+- name: Deploy Core Python and Prompt files
   copy:
     src: "{{ item }}"
-    dest: "{{ install_dir }}/{{ item }}"
+    dest: "{{ install_dir }}/{{ item | relpath(role_path + '/files') }}"
     mode: '0644'
-  loop:
-    - "contracts.py"
-    - "retry.py"
-    - "cache.py"
-    - "stt/__init__.py"
-    - "stt/base.py"
-    - "stt/stt_groq_whisper.py"
-    - "translate/__init__.py"
-    - "translate/base.py"
-    - "translate/translate_gemini.py"
-    - "translate/translate_groq_llm.py"
-    - "translate/translate_nvidia_llm.py"
-    - "translate/translate_openai.py"
-    - "translate/translate_mistral.py"
-    - "tts/__init__.py"
-    - "tts/base.py"
-    - "tts/tts_azure_speech.py"
-    - "tts/tts_gemini.py"
-    - "tts/tts_nvidia_magpie.py"
-    - "align_check.py"
-    - "pipeline.py"
-    - "tts/tts_sherpa_onnx.py"
-    - "prompts/zh_style_guide.md"
-    - "prompts/stt_prompt.md"
+  with_fileglob:
+    - "*.py"
+    - "stt/*.py"
+    - "translate/*.py"
+    - "tts/*.py"
+    - "prompts/*.md"
 
 - name: Render dynamically compiled settings.toml
   template:
