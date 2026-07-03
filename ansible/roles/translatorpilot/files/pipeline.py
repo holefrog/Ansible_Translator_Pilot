@@ -112,32 +112,44 @@ class TranslatorPilotPipeline:
             
             retry_cfg = self.settings["retry"]
             stt_name = self.settings["provider"]["stt"]
+            stt_common = self.settings.get("stt", {}).get("common", {})
+            stt_provider_cfg = self.settings.get("stt", {}).get(stt_name, {})
+            stt_cfg = {**stt_common, **stt_provider_cfg}
+            
             if stt_name == "groq_whisper":
-                stt_provider = GroqWhisperSTT(self.settings["stt"]["groq_whisper"], retry_cfg)
+                stt_provider = GroqWhisperSTT(stt_cfg, retry_cfg)
             else:
-                stt_provider = GeminiSTT(self.settings["stt"]["gemini"], retry_cfg)
+                stt_provider = GeminiSTT(stt_cfg, retry_cfg)
 
             translate_name = self.settings["provider"]["translate"]
+            translate_common = self.settings.get("translate", {}).get("common", {})
+            translate_provider_cfg = self.settings.get("translate", {}).get(translate_name, {})
+            translate_cfg = {**translate_common, **translate_provider_cfg}
+            
             if translate_name == "groq_llm":
-                translate_provider = GroqTranslate(self.settings["translate"]["groq_llm"], retry_cfg)
+                translate_provider = GroqTranslate(translate_cfg, retry_cfg)
             elif translate_name == "nvidia_llm":
-                translate_provider = NvidiaTranslate(self.settings["translate"]["nvidia_llm"], retry_cfg)
+                translate_provider = NvidiaTranslate(translate_cfg, retry_cfg)
             elif translate_name == "openai":
-                translate_provider = OpenAITranslate(self.settings["translate"]["openai"], retry_cfg)
+                translate_provider = OpenAITranslate(translate_cfg, retry_cfg)
             elif translate_name == "mistral":
-                translate_provider = MistralTranslate(self.settings["translate"]["mistral"], retry_cfg)
+                translate_provider = MistralTranslate(translate_cfg, retry_cfg)
             else:
-                translate_provider = GeminiTranslate(self.settings["translate"]["gemini"], retry_cfg)
+                translate_provider = GeminiTranslate(translate_cfg, retry_cfg)
 
             tts_name = self.settings["provider"]["tts"]
+            tts_common = self.settings.get("tts", {}).get("common", {})
+            tts_provider_cfg = self.settings.get("tts", {}).get(tts_name, {})
+            tts_cfg = {**tts_common, **tts_provider_cfg}
+            
             if tts_name == "azure_speech":
-                tts_provider = AzureSpeechTTS(self.settings["tts"]["azure_speech"], retry_cfg)
+                tts_provider = AzureSpeechTTS(tts_cfg, retry_cfg)
             elif tts_name == "sherpa_onnx":
-                tts_provider = SherpaOnnxTTS(self.settings["tts"]["sherpa_onnx"])
+                tts_provider = SherpaOnnxTTS(tts_cfg)
             elif tts_name == "nvidia_magpie":
-                tts_provider = NvidiaMagpieTTS(self.settings["tts"]["nvidia_magpie"], retry_cfg)
+                tts_provider = NvidiaMagpieTTS(tts_cfg, retry_cfg)
             else:
-                tts_provider = GeminiTTS(self.settings["tts"]["gemini_tts"], retry_cfg)
+                tts_provider = GeminiTTS(tts_cfg, retry_cfg)
             
             trigger_progress(f"Providers successfully loaded: STT=[{stt_provider.name}], TRANSLATE=[{translate_provider.name}], TTS=[{tts_provider.name}]", 10)
 

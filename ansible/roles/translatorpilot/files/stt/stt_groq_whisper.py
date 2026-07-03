@@ -37,10 +37,22 @@ class GroqWhisperSTT(STTProvider):
             files = {
                 "file": ("audio.mp3", open(audio_path, "rb"), "audio/mpeg")
             }
+            prompt_path = self.config.get("prompt_path")
+            if not prompt_path:
+                logger.error("[STT] Prompt path is missing from config.")
+                raise RuntimeError("Fatal pipeline error")
+                
+            if not os.path.exists(prompt_path):
+                logger.error(f"[STT] Prompt file not found: {prompt_path}")
+                raise RuntimeError("Fatal pipeline error")
+                
+            with open(prompt_path, "r", encoding="utf-8") as f:
+                prompt_text = f.read()
+
             data = {
                 "model": model,
                 "response_format": "verbose_json",
-                "prompt": self.config.get("prompt", "")
+                "prompt": prompt_text
             }
             
             response = requests.post(url, headers=headers, files=files, data=data, timeout=int(self.config.get("timeout", 60)))
@@ -129,7 +141,20 @@ class GeminiSTT(STTProvider):
             with open(audio_path, "rb") as f:
                 audio_data = base64.b64encode(f.read()).decode("utf-8")
                 
+            prompt_path = self.config.get("prompt_path")
+            if not prompt_path:
+                logger.error("[STT] Prompt path is missing from config.")
+                raise RuntimeError("Fatal pipeline error")
+                
+            if not os.path.exists(prompt_path):
+                logger.error(f"[STT] Prompt file not found: {prompt_path}")
+                raise RuntimeError("Fatal pipeline error")
+                
+            with open(prompt_path, "r", encoding="utf-8") as f:
+                custom_prompt = f.read()
+
             prompt = (
+                f"{custom_prompt}\n\n"
                 "Please transcribe this audio. Return a JSON array of transcription segments with timestamps. "
                 "Each segment must contain 'start' (float seconds), 'end' (float seconds), and 'text' (string transcription)."
             )

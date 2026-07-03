@@ -89,6 +89,7 @@
     - "pipeline.py"
     - "tts/tts_sherpa_onnx.py"
     - "prompts/zh_style_guide.md"
+    - "prompts/stt_prompt.md"
 
 - name: Render dynamically compiled settings.toml
   template:
