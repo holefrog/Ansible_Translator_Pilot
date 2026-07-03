@@ -56,9 +56,22 @@ class OpenAITranslate(TranslateProvider):
                 if not system_instruction:
                     logger.error("[Translate] System prompt is missing from config.")
                     raise RuntimeError("Fatal pipeline error")
-
-                # 使用原始 system_prompt 生成缓存 key（避免动态内容影响缓存）
-                base_system_instruction = self.config["system_prompt"]
+                    
+                style_guide_path = self.config.get("style_guide_path")
+                if not style_guide_path:
+                    logger.error("[Translate] Style guide path is missing from config.")
+                    raise RuntimeError("Fatal pipeline error")
+                
+                if not os.path.exists(style_guide_path):
+                    logger.error(f"[Translate] Style guide file not found: {style_guide_path}")
+                    raise RuntimeError("Fatal pipeline error")
+                    
+                with open(style_guide_path, "r", encoding="utf-8") as f:
+                    style_guide = f.read()
+                    system_instruction += "\n\n" + style_guide
+                        
+                # 使用原始 system_prompt 和 style_guide 生成缓存 key（避免动态内容影响缓存）
+                base_system_instruction = system_instruction
 
                 system_instruction += "\nOutput JSON format: {\"translations\": [{\"id\": \"...\", \"translated_text\": \"...\"}]}"
                 system_instruction += f"\nCRITICAL: You are given {len(items_to_translate)} segments. Your JSON array MUST contain exactly {len(items_to_translate)} items. DO NOT skip any IDs."

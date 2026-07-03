@@ -12,6 +12,7 @@
     - "{{ install_dir }}/translate"
     - "{{ install_dir }}/tts"
     - "{{ install_dir }}/output"
+    - "{{ install_dir }}/prompts"
     - "{{ install_dir }}/models/sherpa_onnx"
 
 - name: Create Python Virtual Environment (venv)
@@ -87,6 +88,7 @@
     - "align_check.py"
     - "pipeline.py"
     - "tts/tts_sherpa_onnx.py"
+    - "prompts/zh_style_guide.md"
 
 - name: Render dynamically compiled settings.toml
   template:
