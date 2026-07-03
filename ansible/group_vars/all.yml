@@ -11,7 +11,7 @@ venv_dir: "{{ install_dir }}/.venv"
 
 # 提供商设置
 stt_provider: "groq_whisper"
-translate_provider: "nvidia_llm"
+translate_provider: "mistral"
 tts_provider: "azure_speech"
 
 # Azure 语音设置
