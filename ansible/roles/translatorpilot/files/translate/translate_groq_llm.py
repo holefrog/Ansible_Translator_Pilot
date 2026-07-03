@@ -15,5 +15,9 @@ class GroqTranslate(OpenAICompatibleTranslate):
         return "https://api.groq.com/openai/v1/chat/completions"
 
     @property
-    def use_max_tokens(self) -> bool:
+    def use_response_format(self) -> bool:
         return False
+
+    @property
+    def use_max_tokens(self) -> bool:
+        return True
