@@ -1,10 +1,9 @@
-import os
-import json
 import logging
 from typing import List
 from contracts import Segment
 from retry import with_retry
 from .base import STTProvider
+from .common import validate_api_key, validate_audio_file
 
 logger = logging.getLogger("stt")
 
@@ -21,12 +20,8 @@ class GroqWhisperSTT(STTProvider):
         api_key = self.config["api_key"]
         model = self.config["model"]
 
-        if not api_key:
-            logger.error("[STT] Groq API key is missing.")
-            raise RuntimeError("Fatal pipeline error: Groq API key is missing")
-
-        if not os.path.exists(audio_path):
-            raise FileNotFoundError(f"Audio file to transcribe does not exist: {audio_path}")
+        validate_api_key(api_key, "Groq")
+        validate_audio_file(audio_path)
 
         def run_api_call():
             import requests
