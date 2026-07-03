@@ -8,9 +8,10 @@ logger = logging.getLogger("tts")
 
 
 class HTTPRateLimitedTTS(CachedSegmentTTS):
-    """HTTP-based TTS with rate limiting and per-segment retry.
-
-    Subclasses override build_cache_key() and synthesize_audio().
+    """
+    带有限流和按片段重试机制的 HTTP TTS 基类。
+    
+    子类需要实现 `build_cache_key()` 和 `synthesize_audio()` 方法。
     """
 
     def __init__(self, config: dict, retry_config: dict):

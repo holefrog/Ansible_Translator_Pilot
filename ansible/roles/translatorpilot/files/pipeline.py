@@ -11,6 +11,10 @@ from tts import AzureSpeechTTS, GeminiTTS, SherpaOnnxTTS, NvidiaMagpieTTS
 from align_check import check_alignment
 
 class ColorFormatter(logging.Formatter):
+    """
+    自定义的控制台日志格式化器，支持在终端输出带颜色的高亮文本。
+    特别针对错误和警告级别的日志添加红色或黄色以提升可读性。
+    """
     RED = '\033[91m'
     YELLOW = '\033[93m'
     RESET = '\033[0m'
@@ -41,13 +45,21 @@ logging.root.setLevel(logging.WARNING)
 logger = logging.getLogger("pipeline")
 
 class TranslatorPilotPipeline:
+    """
+    Translator Pilot 核心管道控制类。
+    负责协调语音识别 (STT)、大语言模型翻译 (Translate) 以及语音合成 (TTS) 三个阶段的工作流，
+    并维护状态的序列化与进度报告。
+    """
     def __init__(self, settings: dict, output_dir: str):
         self.settings = settings
         self.output_dir = output_dir
         self._validate_config()
     
     def _validate_config(self):
-        """Validate that all required configuration keys are present."""
+        """
+        验证配置文件中是否包含所有必需的配置项和提供商密钥。
+        如果配置缺失，将抛出 ValueError。
+        """
         def require_section(section: str, keys: list):
             if section not in self.settings:
                 raise ValueError(f"Missing required configuration section: {section}")
@@ -99,6 +111,23 @@ class TranslatorPilotPipeline:
         )
 
     def run(self, audio_path: str, on_progress: Optional[Callable[[str, int], None]] = None) -> dict:
+        """
+        执行完整的翻译管道工作流。
+        
+        流程:
+        1. 初始化 STT、Translate 和 TTS 提供商实例
+        2. 执行 STT：将英文语音转录为带时间戳的文本段落
+        3. 执行 Translate：使用大语言模型翻译字幕
+        4. 执行 TTS：合成中文配音音频
+        5. 运行对齐分析，检查配音音频是否过长
+        
+        参数:
+            audio_path (str): 输入的原始音频文件路径。
+            on_progress (Callable): 用于报告处理进度的回调函数 (可选)。
+            
+        返回:
+            dict: 包含执行结果、合成片段列表及对齐报告的字典。
+        """
         state_file = os.path.join(self.output_dir, "pipeline_state.json")
         os.makedirs(self.output_dir, exist_ok=True)
         current_segments = []
@@ -295,6 +324,10 @@ class TranslatorPilotPipeline:
             }
 
 def parse_toml_file(file_path: str) -> dict:
+    """
+    解析并加载 TOML 配置文件。
+    优先尝试 Python 3.11+ 内置的 tomllib，如果不存在则回退至第三方的 toml 库。
+    """
     if not os.path.exists(file_path):
         logger.error(f"Configuration file not found: {file_path}")
         sys.exit(1)

@@ -12,9 +12,12 @@ logger = logging.getLogger("tts")
 
 
 class CachedSegmentTTS(TTSProvider):
-    """Base class for per-segment TTS with caching and empty-text skipping.
-
-    Subclasses implement _synthesize_segment() to produce audio for one segment.
+    """
+    支持缓存和空文本跳过的分段 TTS 基类。
+    
+    子类需要实现 _synthesize_segment() 方法来生成单个语音片段。
+    此类负责调度并自动将成功生成的片段保存至缓存目录，
+    下次遇到相同文本时直接命中缓存以节省时间和费用。
     """
 
     def synthesize(

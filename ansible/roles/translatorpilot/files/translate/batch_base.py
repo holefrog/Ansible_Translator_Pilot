@@ -22,9 +22,11 @@ logger = logging.getLogger("translate")
 
 
 class BatchedTranslateProvider(TranslateProvider):
-    """Base class for batched translation providers with shared cache and prompt logic.
+    """
+    支持批处理的翻译提供商基类，内置了缓存、提示词组装和重试逻辑。
 
-    Subclasses implement _fetch_translations() to call their provider-specific API.
+    子类需要实现 `_fetch_translations()` 方法来真正调用提供商特有的 API。
+    通过分批翻译，既能降低大语言模型处理长上下文遗忘的几率，又能防止单次 API 负载过大。
     """
 
     def __init__(self, config: dict, retry_config: dict):
@@ -40,6 +42,16 @@ class BatchedTranslateProvider(TranslateProvider):
         return self.name
 
     def translate(self, segments: List[Segment]) -> List[Segment]:
+        """
+        分批翻译提取出的源文本。
+        
+        工作流:
+        1. 根据 config 中的 batch_size 切分分段列表。
+        2. 生成大语言模型专用的 JSON 系统提示词和用户提示词。
+        3. 检查是否有本地缓存（如果启用了缓存）。
+        4. 通过 API 调用语言模型，并强制要求返回严格的 JSON 对象。
+        5. 将翻译结果的 ID 映射回相应的 Segment 中。
+        """
         if not segments:
             return []
 
@@ -101,11 +113,11 @@ class BatchedTranslateProvider(TranslateProvider):
     def _fetch_translations(
         self, system_instruction: str, user_prompt: str, model: str
     ) -> List[Dict[str, Any]]:
-        """Call provider API and return a list of translation dicts."""
+        """调用服务商 API 执行翻译，并返回按 ID 对应的字典列表。必须由子类实现。"""
         pass
 
     def _parse_translation_json(self, candidate_text: str) -> List[Dict[str, Any]]:
-        """Parse model JSON output, stripping markdown fences if present."""
+        """解析模型输出的 JSON 文本，去除可能存在的 Markdown 代码块包裹符。"""
         import json
 
         try:

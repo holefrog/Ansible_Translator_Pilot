@@ -124,10 +124,13 @@ class CacheManager:
         shutil.copy2(cache_path, target_path)
 
     def clear(self) -> None:
-        """清空所有缓存"""
+        """
+        清空当前缓存管理器下的所有缓存文件。
+        遍历目录并删除所有的文件。
+        """
         if os.path.exists(self.cache_dir):
             for filename in os.listdir(self.cache_dir):
                 file_path = os.path.join(self.cache_dir, filename)
                 if os.path.isfile(file_path):
                     os.remove(file_path)
-            logger.info(f"[Cache] Cleared all cache in {self.cache_dir}")
+            logger.info(f"[Cache] 已清空目录 {self.cache_dir} 下的所有缓存。")

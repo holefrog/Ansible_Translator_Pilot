@@ -4,6 +4,22 @@ import logging
 logger = logging.getLogger("retry")
 
 def with_retry(fn, retry_config: dict, label: str = "Operation"):
+    """
+    执行带有指数退避 (Exponential Backoff) 机制的操作重试。
+    如果遇到由于鉴权失败等不可恢复的异常，将直接抛出错误并终止重试。
+
+    参数:
+        fn: 待执行的可调用无参闭包对象。
+        retry_config (dict): 包含重试相关参数的字典：
+            - max_retries (int): 最大重试次数。
+            - base_delay (float): 基础延迟等待时间 (秒)。
+            - backoff_factor (float): 每次重试等待的倍数因子。
+            - max_delay (float): 延迟等待的上限时间 (秒)。
+        label (str): 日志输出中的操作标签。
+        
+    返回:
+        fn() 执行成功的结果。
+    """
     max_retries = retry_config["max_retries"]
     base_delay = retry_config["base_delay"]
     backoff_factor = retry_config["backoff_factor"]

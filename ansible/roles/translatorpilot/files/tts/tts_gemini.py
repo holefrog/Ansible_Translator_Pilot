@@ -10,6 +10,10 @@ logger = logging.getLogger("tts")
 
 
 class GeminiTTS(HTTPRateLimitedTTS):
+    """
+    基于 Google Gemini 模型的语音合成 (TTS) 提供商。
+    调用 Gemini 模型的生成接口输出高质量的 24kHz 音频，内置了处理 3 RPM 速率限制的逻辑。
+    """
     @property
     def name(self) -> str:
         return "gemini_tts"

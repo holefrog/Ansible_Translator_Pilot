@@ -10,6 +10,10 @@ logger = logging.getLogger("stt")
 
 
 class GroqWhisperSTT(HTTPSTTProvider):
+    """
+    基于 Groq 云端托管的 Whisper 模型的语音识别 (STT) 提供商。
+    提供快速的 OpenAI 兼容 API 音频转录能力。
+    """
     @property
     def name(self) -> str:
         return "groq_whisper"

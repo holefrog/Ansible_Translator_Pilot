@@ -1,5 +1,17 @@
 def format_friendly_error(provider_name: str, model: str, error: Exception, operation: str = "翻译") -> RuntimeError:
-    """Format error message with friendly Chinese descriptions for common errors."""
+    """
+    将底层异常格式化为用户友好的中文错误信息。
+    主要针对网络超时、API 认证失败或模型不存在等常见异常进行人性化解释。
+
+    参数:
+        provider_name (str): 服务提供商名称 (例如: 'Groq', 'Gemini')。
+        model (str): 当前使用的模型名称。
+        error (Exception): 抛出的原始异常对象。
+        operation (str): 操作类型描述，默认为 '翻译'。
+    
+    返回:
+        RuntimeError: 包含格式化后中文错误提示的运行时异常对象。
+    """
     err_msg = str(error)
 
     if "timeout" in err_msg.lower() or "timed out" in err_msg.lower():

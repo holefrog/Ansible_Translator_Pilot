@@ -11,8 +11,9 @@ logger = logging.getLogger("tts")
 
 class SherpaOnnxTTS(CachedSegmentTTS):
     """
-    Fully local, offline Chinese TTS using sherpa-onnx
-    (Matcha-Icefall zh-baker acoustic model + Vocos vocoder).
+    完全本地化的离线中文语音合成 (TTS) 提供商，使用 sherpa-onnx 引擎
+    (基于 Matcha-Icefall zh-baker 声学模型 + Vocos 语音编码器)。
+    无需网络请求，速度极快。
     """
 
     def __init__(self, config: dict, retry_config: dict = None):

@@ -8,10 +8,11 @@ from .common import validate_audio_file
 
 
 class HTTPSTTProvider(STTProvider):
-    """Base class for HTTP-based STT providers.
-
-    Subclasses only need to implement _call_api() to perform the provider-specific
-    API request and return parsed segments.
+    """
+    基于 HTTP 接口的 STT 提供商基类。
+    
+    子类只需要实现 `_call_api()` 方法以执行特定的 API 请求并返回解析后的片段。
+    该基类会自动处理音频文件验证和 HTTP 网络请求重试逻辑。
     """
 
     def __init__(self, config: dict, retry_config: dict):
@@ -33,5 +34,8 @@ class HTTPSTTProvider(STTProvider):
 
     @abstractmethod
     def _call_api(self, audio_path: str) -> List[Segment]:
-        """Perform the provider-specific API call and return transcription segments."""
+        """
+        执行特定提供商的 API 请求，并返回解析后的语音片段列表。
+        必须由具体的提供商子类实现。
+        """
         pass

@@ -7,6 +7,10 @@ logger = logging.getLogger("tts")
 
 
 class AzureSpeechTTS(HTTPRateLimitedTTS):
+    """
+    基于微软 Azure Cognitive Speech 的语音合成提供商。
+    支持自定义 SSML 并生成高质量的 24kHz 音频。
+    """
     @property
     def name(self) -> str:
         return "azure_speech"

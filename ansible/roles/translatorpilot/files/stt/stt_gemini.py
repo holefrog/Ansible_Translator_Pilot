@@ -10,6 +10,10 @@ logger = logging.getLogger("stt")
 
 
 class GeminiSTT(HTTPSTTProvider):
+    """
+    基于 Google Gemini 模型的语音识别 (STT) 提供商。
+    通过调用 Gemini 生成大模型接口提取音频中的文本和时间戳。
+    """
     @property
     def name(self) -> str:
         return "gemini_stt"

@@ -9,7 +9,9 @@ logger = logging.getLogger("tts")
 
 
 class RateLimiter:
-    """Rate limiter for API requests to avoid hitting rate limits."""
+    """
+    用于 API 请求的速率限制器，防止因为请求过快而触发服务商限流。
+    """
     
     def __init__(self, rps: float = 2.0):
         """
@@ -33,7 +35,8 @@ class RateLimiter:
 
 
 def generate_audio_filename(segment_id: str) -> str:
-    """Generate audio filename for a segment.
+    """
+    根据片段 ID 生成音频文件名 (例如: 'segment_1.wav')。
     
     Args:
         segment_id: Segment identifier
@@ -45,7 +48,8 @@ def generate_audio_filename(segment_id: str) -> str:
 
 
 def get_audio_path(output_dir: str, segment_id: str) -> str:
-    """Get full audio file path for a segment.
+    """
+    获取指定片段的完整音频文件保存路径。
     
     Args:
         output_dir: Output directory
@@ -59,7 +63,8 @@ def get_audio_path(output_dir: str, segment_id: str) -> str:
 
 
 def wrap_pcm_as_wav(pcm_data: bytes, output_path: str, sample_rate: int = 24000) -> None:
-    """Wrap raw PCM data in WAV container.
+    """
+    将原始的 PCM 音频数据封装为标准的 WAV 容器格式，并写入文件。
     
     Args:
         pcm_data: Raw PCM audio data
@@ -78,7 +83,8 @@ def wrap_pcm_as_wav(pcm_data: bytes, output_path: str, sample_rate: int = 24000)
 
 
 def write_wav_from_samples(samples, output_path: str, sample_rate: int) -> None:
-    """Write samples directly to WAV file (for sherpa-onnx).
+    """
+    将音频采样数组直接写入 WAV 文件 (主要用于 sherpa-onnx)。
     
     Args:
         samples: Audio samples (float32 in [-1.0, 1.0])
@@ -99,7 +105,8 @@ def write_wav_from_samples(samples, output_path: str, sample_rate: int) -> None:
 
 
 def should_skip_segment(segment) -> bool:
-    """Check if segment should be skipped (no target text).
+    """
+    检查是否应该跳过该音频片段的合成 (即目标翻译文本为空时)。
     
     Args:
         segment: Segment object

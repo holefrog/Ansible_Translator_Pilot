@@ -15,11 +15,12 @@ NVIDIA_MAGPIE_TTS_URL = (
 )
 
 class NvidiaMagpieTTS(HTTPRateLimitedTTS):
-    """TTS provider using NVIDIA Magpie Multilingual model via Riva HTTP API.
+    """
+    基于 NVIDIA Magpie 多语言模型的语音合成 (TTS) 提供商 (通过 Riva HTTP API 调用)。
     
-    Supports Chinese (zh-CN) and many other languages.
-    Voice format: Magpie-Multilingual.ZH-CN.<VoiceName>
-    Common Chinese voices: Aria, Diego, HouZhen, Isabela, Long, Louise, Mia, Pascal, Ray, Siwei
+    支持中文 (zh-CN) 以及多种其他语言。
+    声音格式要求: Magpie-Multilingual.ZH-CN.<VoiceName>
+    常用中文声音选项: Aria, Diego, HouZhen, Isabela, Long, Louise, Mia, Pascal, Ray, Siwei
     """
 
     def __init__(self, config: dict, retry_config: dict):
