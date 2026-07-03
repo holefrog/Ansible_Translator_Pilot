@@ -69,7 +69,9 @@ class OpenAICompatibleTranslate(BatchedTranslateProvider):
             )
 
         resp_data = response.json()
-        with open("/home/david/translator-pilot/groq_debug.json", "w") as f:
+        debug_file = f"/home/david/translator-pilot/{self.name}_debug.json"
+        with open(debug_file, "w") as f:
             json.dump(resp_data, f, indent=2)
+        logger.info(f"[{self.provider_display_name}] Debug output saved to {debug_file}")
         candidate_text = resp_data["choices"][0]["message"].get("content", "")
         return self._parse_translation_json(candidate_text)
