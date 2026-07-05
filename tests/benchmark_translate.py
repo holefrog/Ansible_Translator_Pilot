@@ -228,7 +228,7 @@ def _print_multi_run_summary(all_results: list[BenchmarkResult]) -> None:
 
     providers = [p[1] for p in PROVIDERS_TO_TEST]
 
-    COL = [18, 30, 8, 8, 8, 8, 9, 9]
+    COL = [14, 22, 7, 7, 7, 7, 8, 6]
     header = (
         f"{'提供商':<{COL[0]}}"
         f"{'模型':<{COL[1]}}"
