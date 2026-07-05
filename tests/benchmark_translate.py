@@ -79,12 +79,12 @@ PROVIDERS_TO_TEST = [
     ("mistral",    "Mistral",    None),
 ]
 
-# 不重试，真实计时
-NO_RETRY_CONFIG = {
-    "max_retries": 0,
-    "base_delay": 0.0,
-    "backoff_factor": 1.0,
-    "max_delay": 0.0,
+# 使用 retry.py 的真实重试配置：最多 5 次，基础间隔 2s，指数退避，上限 60s
+BENCHMARK_RETRY_CONFIG = {
+    "max_retries":    5,
+    "base_delay":     2.0,
+    "backoff_factor": 2.0,
+    "max_delay":      60.0,
 }
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -92,13 +92,15 @@ NO_RETRY_CONFIG = {
 # ──────────────────────────────────────────────────────────────────────────────
 @dataclass
 class BenchmarkResult:
-    run:         int
-    provider:    str
-    model:       str
-    elapsed_sec: float = 0.0
-    translated:  str   = ""
-    success:     bool  = False
-    error:       str   = ""
+    run:              int
+    provider:         str
+    model:            str
+    elapsed_sec:      float = 0.0   # 含重试等待的总耗时
+    translated:       str   = ""
+    success:          bool  = False
+    error:            str   = ""
+    retry_attempts:   int   = 0     # 实际触发的重试次数
+    retry_delay_sec:  float = 0.0   # 重试等待总秒数（估算）
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -128,29 +130,66 @@ def _instantiate_provider(provider_key: str, config: dict):
         "openai":     OpenAITranslate,
         "mistral":    MistralTranslate,
     }
-    return cls_map[provider_key](config=config, retry_config=NO_RETRY_CONFIG)
+    # 传入真实 retry config；with_retry 会在外层再包一层，这里的 config 内的重试由
+    # BatchedTranslateProvider.translate() 自身使用（http_utils.run_with_http_retry）。
+    # 为避免双重重试，传给 provider 的 retry_config 保持 0 次，由外层 with_retry 控制。
+    return cls_map[provider_key](config=config, retry_config={"max_retries": 0, "base_delay": 0.0, "backoff_factor": 1.0, "max_delay": 0.0})
 
 
 def _run_single(run_no: int, provider_key: str, display_name: str,
                 model_override: str | None) -> BenchmarkResult:
+    """
+    调用翻译提供商，使用 retry.py 的 with_retry() 包裹，
+    实现最多 5 次重试、基础 2s 指数退避，并记录重试次数与总耗时。
+    """
     from contracts import Segment
+    from retry import with_retry, is_rate_limited, parse_rate_limit_delay
 
     config = _build_provider_config(provider_key, model_override)
     model  = config.get("model", "unknown")
     seg    = Segment(segment_id="seg-001", source_text=BENCHMARK_TEXT)
     result = BenchmarkResult(run=run_no, provider=display_name, model=model)
 
+    # 用于在闭包中追踪重试次数
+    attempt_counter = {"count": 0, "delay_total": 0.0}
+
+    # monkey-patch time.sleep 以统计重试等待时间
+    _orig_sleep = time.sleep
+    def _tracking_sleep(secs: float) -> None:
+        attempt_counter["count"] += 1
+        attempt_counter["delay_total"] += secs
+        print(f"  ↻ 重试等待 {secs:.1f}s ...", end="", flush=True)
+        _orig_sleep(secs)
+        print(" 重试中")
+
     t0 = time.perf_counter()
     try:
-        provider = _instantiate_provider(provider_key, config)
-        segments = provider.translate([seg])
-        result.elapsed_sec = round(time.perf_counter() - t0, 3)
-        result.translated  = segments[0].target_text or ""
-        result.success     = True
+        time.sleep = _tracking_sleep  # type: ignore[assignment]
+        provider   = _instantiate_provider(provider_key, config)
+
+        def _do_translate():
+            # 每次重试需要一个新 Segment（target_text 可能被部分修改）
+            fresh_seg = Segment(segment_id="seg-001", source_text=BENCHMARK_TEXT)
+            return provider.translate([fresh_seg])
+
+        segments = with_retry(
+            _do_translate,
+            BENCHMARK_RETRY_CONFIG,
+            label=f"{display_name} benchmark",
+        )
+        result.elapsed_sec     = round(time.perf_counter() - t0, 3)
+        result.translated      = segments[0].target_text or ""
+        result.success         = True
+        result.retry_attempts  = attempt_counter["count"]
+        result.retry_delay_sec = round(attempt_counter["delay_total"], 1)
     except Exception as exc:
-        result.elapsed_sec = round(time.perf_counter() - t0, 3)
-        result.error       = str(exc)
-        result.success     = False
+        result.elapsed_sec     = round(time.perf_counter() - t0, 3)
+        result.error           = str(exc)
+        result.success         = False
+        result.retry_attempts  = attempt_counter["count"]
+        result.retry_delay_sec = round(attempt_counter["delay_total"], 1)
+    finally:
+        time.sleep = _orig_sleep  # 恢复原始 sleep
 
     return result
 
@@ -170,8 +209,9 @@ def _print_run_results(run_no: int, results: list[BenchmarkResult]) -> None:
     _banner(f"第 {run_no} 轮  —  逐条详细结果")
     for i, r in enumerate(results, start=1):
         icon = "✅" if r.success else "❌"
-        print(f"\n  [{i}] {icon} {r.provider}  |  {r.model}")
-        print(f"      耗时: {r.elapsed_sec:.3f}s")
+        retry_info = f"  [重试 {r.retry_attempts} 次 / 等待 {r.retry_delay_sec:.1f}s]" if r.retry_attempts else ""
+        print(f"\n  [{i}] {icon} {r.provider}  |  {r.model}{retry_info}")
+        print(f"      总耗时: {r.elapsed_sec:.3f}s")
         if r.success:
             # wrap at 64 chars
             lines = [r.translated[j:j+64] for j in range(0, len(r.translated), 64)]
