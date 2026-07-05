@@ -48,7 +48,7 @@ def compute_retry_delay(
     if api_delay is not None:
         return min(max(backoff_delay, api_delay), _RATE_LIMIT_DELAY_CAP)
     if is_rate_limited(err_msg):
-        return max(backoff_delay, max_delay)
+        return backoff_delay
     return backoff_delay
 
 
