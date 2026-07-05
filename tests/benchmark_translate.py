@@ -2,7 +2,7 @@
 benchmark_translate.py
 ======================
 针对 translate role 中所有翻译提供商/模型的性能与结果基准测试。
-支持多轮运行，每轮之间等待指定秒数（默认 30s），用于触发并观察 429 限速行为。
+支持多轮运行，每轮之间等待指定秒数（默认 2s），用于触发并观察 429 限速行为。
 
 测试文本（英→中）：
   "In modern software engineering, the transition from monolithic architectures
@@ -19,10 +19,11 @@ benchmark_translate.py
   # 单轮（默认）
   .venv/bin/python /home/david/Coding/Ansible_Translator_Pilot/tests/benchmark_translate.py
 
-  # 多轮，间隔 30 秒
-  .venv/bin/python /home/david/Coding/Ansible_Translator_Pilot/tests/benchmark_translate.py --runs 5 --interval 30
+  # 多轮，间隔 2 秒（触发限速）
+  .venv/bin/python /home/david/Coding/Ansible_Translator_Pilot/tests/benchmark_translate.py --runs 5 --interval 2
 
-结果输出到终端，并保存为 JSON 到 benchmark_translate_results.json
+结果（JSON + Markdown 报告）保存到脚本所在目录：
+  /home/david/Coding/Ansible_Translator_Pilot/tests/
 """
 
 from __future__ import annotations
@@ -32,12 +33,15 @@ import json
 import os
 import sys
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
+from datetime import datetime, timezone
 
 # ──────────────────────────────────────────────────────────────────────────────
-# 确保 translator-pilot 运行目录在 sys.path 中
+# 目录常量
 # ──────────────────────────────────────────────────────────────────────────────
-RUNTIME_DIR = "/home/david/translator-pilot"
+RUNTIME_DIR = "/home/david/translator-pilot"          # 运行时依赖（modules）
+SCRIPT_DIR  = os.path.dirname(os.path.abspath(__file__))  # 脚本 & 结果所在目录
+
 if RUNTIME_DIR not in sys.path:
     sys.path.insert(0, RUNTIME_DIR)
 
@@ -270,8 +274,8 @@ def _print_per_round_table(all_results: list[BenchmarkResult], num_runs: int) ->
 # ──────────────────────────────────────────────────────────────────────────────
 def main() -> None:
     parser = argparse.ArgumentParser(description="Translate Role 多轮基准测试")
-    parser.add_argument("--runs",     type=int, default=1,  help="总运行轮次（默认 1）")
-    parser.add_argument("--interval", type=int, default=30, help="轮次间隔秒数（默认 30）")
+    parser.add_argument("--runs",     type=int, default=1, help="总运行轮次（默认 1）")
+    parser.add_argument("--interval", type=int, default=2, help="轮次间隔秒数（默认 2）")
     args = parser.parse_args()
 
     num_runs = args.runs
@@ -317,10 +321,14 @@ def main() -> None:
     total_wall = time.time() - start_wall
     print(f"\n  ⏱  总计耗时: {total_wall:.1f}s  ({num_runs} 轮)")
 
-    # ── 保存 JSON
-    output_path = os.path.join(RUNTIME_DIR, "benchmark_translate_results.json")
+    # ── 保存 JSON（保存到脚本目录）
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    json_filename = f"benchmark_results_{ts}.json"
+    json_path = os.path.join(SCRIPT_DIR, json_filename)
+
     payload = {
         "config": {
+            "timestamp": ts,
             "num_runs": num_runs,
             "interval_sec": interval,
             "benchmark_text": BENCHMARK_TEXT,
@@ -340,12 +348,127 @@ def main() -> None:
             for r in all_results
         ],
     }
-    with open(output_path, "w", encoding="utf-8") as f:
+    with open(json_path, "w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, indent=2)
+    print(f"💾 JSON 已保存到  : {json_path}")
 
-    print(f"💾 结果已保存到: {output_path}\n")
+    # ── 保存 Markdown 分析报告（保存到脚本目录）
+    md_filename = f"benchmark_report_{ts}.md"
+    md_path = os.path.join(SCRIPT_DIR, md_filename)
+    _save_markdown_report(md_path, all_results, num_runs, interval, ts, total_wall)
+    print(f"📄 报告已保存到  : {md_path}\n")
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Markdown 报告生成
+# ──────────────────────────────────────────────────────────────────────────────
+def _save_markdown_report(
+    path: str,
+    all_results: list[BenchmarkResult],
+    num_runs: int,
+    interval: int,
+    ts: str,
+    total_wall: float,
+) -> None:
+    providers = [p[1] for p in PROVIDERS_TO_TEST]
+    lines: list[str] = []
+
+    lines.append(f"# Translate Role 基准测试报告")
+    lines.append(f"")
+    lines.append(f"- **时间戳**: `{ts}`")
+    lines.append(f"- **轮次**: {num_runs}  |  **间隔**: {interval}s  |  **总耗时**: {total_wall:.1f}s")
+    lines.append(f"- **提供商数**: {len(PROVIDERS_TO_TEST)}")
+    lines.append(f"")
+    lines.append(f"## 源文本")
+    lines.append(f"")
+    lines.append(f"> {BENCHMARK_TEXT}")
+    lines.append(f"")
+
+    # 各轮次耗时表
+    lines.append(f"## 各轮次耗时明细")
+    lines.append(f"")
+    header_cols = ["提供商"] + [f"第{i}轮" for i in range(1, num_runs + 1)]
+    lines.append("| " + " | ".join(header_cols) + " |")
+    lines.append("|" + "---|" * len(header_cols))
+    for display in providers:
+        row = [display]
+        for rn in range(1, num_runs + 1):
+            hit = [r for r in all_results if r.provider == display and r.run == rn]
+            if hit:
+                r = hit[0]
+                if r.success:
+                    cell = f"✅ {r.elapsed_sec:.2f}s"
+                elif "429" in r.error:
+                    cell = "❌ 429"
+                else:
+                    cell = "❌ ERR"
+            else:
+                cell = "—"
+            row.append(cell)
+        lines.append("| " + " | ".join(row) + " |")
+    lines.append(f"")
+
+    # 统计汇总表
+    lines.append(f"## 多轮统计汇总")
+    lines.append(f"")
+    lines.append("| 提供商 | 模型 | 最快(s) | 最慢(s) | 平均(s) | 中位(s) | 成功率 |")
+    lines.append("|---|---|---:|---:|---:|---:|:---:|")
+    for display in providers:
+        rows = [r for r in all_results if r.provider == display]
+        model = rows[0].model if rows else "?"
+        ok = [r for r in rows if r.success]
+        if ok:
+            times  = sorted(r.elapsed_sec for r in ok)
+            mn     = times[0]
+            mx     = times[-1]
+            avg    = sum(times) / len(times)
+            mid_i  = len(times) // 2
+            median = times[mid_i] if len(times) % 2 else (times[mid_i-1] + times[mid_i]) / 2
+            rate   = f"{len(ok)}/{len(rows)}"
+        else:
+            mn = mx = avg = median = 0.0
+            rate = f"0/{len(rows)}"
+        lines.append(f"| {display} | `{model}` | {mn:.3f} | {mx:.3f} | {avg:.3f} | {median:.3f} | {rate} |")
+    lines.append(f"")
+
+    # 429 / 错误汇总
+    rate_limited = [r for r in all_results if not r.success and "429" in r.error]
+    other_errors = [r for r in all_results if not r.success and "429" not in r.error]
+    lines.append(f"## 错误汇总")
+    lines.append(f"")
+    if rate_limited:
+        lines.append(f"### ⚠️ 429 限速事件 ({len(rate_limited)} 次)")
+        lines.append(f"")
+        for r in rate_limited:
+            lines.append(f"- 轮次 {r.run} · **{r.provider}** (`{r.model}`): `{r.error[:150]}`")
+        lines.append(f"")
+    else:
+        lines.append(f"> ℹ️ 本次测试未触发任何 429 限速。")
+        lines.append(f"")
+    if other_errors:
+        lines.append(f"### ❌ 其他错误 ({len(other_errors)} 次)")
+        lines.append(f"")
+        for r in other_errors:
+            lines.append(f"- 轮次 {r.run} · **{r.provider}** (`{r.model}`): `{r.error[:150]}`")
+        lines.append(f"")
+
+    # 完整译文（仅成功的）
+    lines.append(f"## 完整译文对比（第1轮）")
+    lines.append(f"")
+    for display in providers:
+        hit = [r for r in all_results if r.provider == display and r.run == 1 and r.success]
+        if hit:
+            r = hit[0]
+            lines.append(f"### {display} · `{r.model}`")
+            lines.append(f"")
+            lines.append(f"> {r.translated}")
+            lines.append(f"")
+
+    with open(path, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines) + "\n")
 
 
 if __name__ == "__main__":
+    # 切换到运行目录，使相对路径导入（prompts/、cache/ 等）正常工作
     os.chdir(RUNTIME_DIR)
     main()
