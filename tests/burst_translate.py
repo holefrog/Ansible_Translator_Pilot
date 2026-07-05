@@ -284,13 +284,19 @@ def _save_report(path: str, results: list[ProviderBurstResult],
     lines.append(f"> {BENCHMARK_TEXT}")
     lines.append("")
 
-    # 汇总表
+    # 汇总表（按成功数降序）
     lines.append("## 汇总：各提供商限速门槛")
     lines.append("")
-    lines.append("| 提供商 | 模型 | 发送次数 | ✅ 成功 | 🚫 429 | ❌ 其他 | 首次429 | 结论 |")
-    lines.append("|---|---|---:|---:|---:|---:|---:|---|")
-    for r in results:
-        done = len(r.requests)
+    lines.append("| # | 提供商 | 模型 | 发送次数 | ✅ 成功 | 🚫 429 | ❌ 其他 | 首次429 | 结论 |")
+    lines.append("|:---:|---|---|---:|---:|---:|---:|---:|---|")
+
+    def _sort_key_md(r: ProviderBurstResult):
+        limit = r.first_429_at if r.first_429_at > 0 else float("inf")
+        return (-r.total_success, -limit)
+
+    medals_md = {0: "🥇", 1: "🥈", 2: "🥉"}
+    for rank, r in enumerate(sorted(results, key=_sort_key_md)):
+        done  = len(r.requests)
         first = f"第 {r.first_429_at} 次" if r.first_429_at else "未触发"
         if r.first_429_at == 0 and r.total_other_err == 0:
             verdict = "✅ 全部通过"
@@ -298,8 +304,9 @@ def _save_report(path: str, results: list[ProviderBurstResult],
             verdict = "⚠️ 非限速错误"
         else:
             verdict = f"🚫 第 {r.first_429_at} 次起限速"
+        medal = medals_md.get(rank, str(rank+1))
         lines.append(
-            f"| {r.provider} | `{r.model}` | {done} | {r.total_success}"
+            f"| {medal} | {r.provider} | `{r.model}` | {done} | {r.total_success}"
             f" | {r.total_429} | {r.total_other_err} | {first} | {verdict} |"
         )
     lines.append("")
