@@ -223,12 +223,12 @@ def _print_run_results(run_no: int, results: list[BenchmarkResult]) -> None:
 
 
 def _print_multi_run_summary(all_results: list[BenchmarkResult]) -> None:
-    """跨轮次汇总：每个提供商的 min/avg/max 耗时及成功率。"""
+    """跨轮次汇总：每个提供商的 min/avg/max/total 耗时及成功率。"""
     _banner("多轮汇总 — 各提供商统计（耗时 单位:秒）")
 
-    providers = [p[1] for p in PROVIDERS_TO_TEST]  # display names in order
+    providers = [p[1] for p in PROVIDERS_TO_TEST]
 
-    COL = [18, 32, 8, 8, 8, 8, 10]
+    COL = [18, 30, 8, 8, 8, 8, 9, 9]
     header = (
         f"{'提供商':<{COL[0]}}"
         f"{'模型':<{COL[1]}}"
@@ -236,7 +236,8 @@ def _print_multi_run_summary(all_results: list[BenchmarkResult]) -> None:
         f"{'最慢':>{COL[3]}}"
         f"{'平均':>{COL[4]}}"
         f"{'中位':>{COL[5]}}"
-        f"{'成功率':>{COL[6]}}"
+        f"{'总耗时':>{COL[6]}}"
+        f"{'成功率':>{COL[7]}}"
     )
     sep = "─" * sum(COL)
     print(header)
@@ -247,8 +248,7 @@ def _print_multi_run_summary(all_results: list[BenchmarkResult]) -> None:
         model = rows[0].model if rows else "?"
         model_short = model if len(model) <= COL[1] - 1 else model[:COL[1]-4] + "..."
 
-        ok   = [r for r in rows if r.success]
-        fail = len(rows) - len(ok)
+        ok = [r for r in rows if r.success]
 
         if ok:
             times  = sorted(r.elapsed_sec for r in ok)
@@ -257,9 +257,10 @@ def _print_multi_run_summary(all_results: list[BenchmarkResult]) -> None:
             avg    = sum(times) / len(times)
             mid_i  = len(times) // 2
             median = times[mid_i] if len(times) % 2 else (times[mid_i-1]+times[mid_i])/2
+            total  = sum(times)
             rate   = f"{len(ok)}/{len(rows)}"
         else:
-            mn = mx = avg = median = 0.0
+            mn = mx = avg = median = total = 0.0
             rate = f"0/{len(rows)}"
 
         print(
@@ -269,18 +270,26 @@ def _print_multi_run_summary(all_results: list[BenchmarkResult]) -> None:
             f"{mx:>{COL[3]}.3f}"
             f"{avg:>{COL[4]}.3f}"
             f"{median:>{COL[5]}.3f}"
-            f"{rate:>{COL[6]}}"
+            f"{total:>{COL[6]}.2f}"
+            f"{rate:>{COL[7]}}"
         )
     print(sep)
 
     # 跨所有轮次找出 429 / rate-limit 错误
+    # 注意：retry.py 消化掉的 429 不会出现在 success=False 里，
+    # 但会导致 elapsed_sec 异常偏大，以及 retry_attempts > 0。
     rate_limited = [r for r in all_results if not r.success and "429" in r.error]
+    retried      = [r for r in all_results if r.retry_attempts > 0]
     if rate_limited:
-        print(f"\n  ⚠️  共检测到 {len(rate_limited)} 次 429 限速：")
+        print(f"\n  ⚠️  共检测到 {len(rate_limited)} 次未恢复的 429 限速：")
         for r in rate_limited:
             print(f"     轮次 {r.run}  {r.provider}  ({r.model})  — {r.error[:120]}")
     else:
-        print("\n  ℹ️  本次测试未触发 429 限速。")
+        print("\n  ℹ️  无未恢复的 429 限速（成功结果中可能含重试）。")
+    if retried:
+        print(f"\n  🔁  以下请求触发了重试（retry.py 已恢复）：")
+        for r in retried:
+            print(f"     轮次 {r.run}  {r.provider}  重试 {r.retry_attempts} 次 / 等待 {r.retry_delay_sec:.1f}s")
 
 
 def _print_per_round_table(all_results: list[BenchmarkResult], num_runs: int) -> None:
@@ -451,11 +460,11 @@ def _save_markdown_report(
         lines.append("| " + " | ".join(row) + " |")
     lines.append(f"")
 
-    # 统计汇总表（含重试列）
+    # 统计汇总表（含重试列 + 总耗时 + 轮均）
     lines.append(f"## 多轮统计汇总")
     lines.append(f"")
-    lines.append("| 提供商 | 模型 | 最快(s) | 最慢(s) | 平均(s) | 中位(s) | 成功率 | 重试总次 | 重试等待(s) |")
-    lines.append("|---|---|---:|---:|---:|---:|:---:|---:|---:|")
+    lines.append("| 提供商 | 模型 | 最快(s) | 最慢(s) | 平均(s) | 中位(s) | 总耗时(s) | 轮均(s) | 成功率 | 重试总次 | 重试等待(s) |")
+    lines.append("|---|---|---:|---:|---:|---:|---:|---:|:---:|---:|---:|")
     for display in providers:
         rows = [r for r in all_results if r.provider == display]
         model = rows[0].model if rows else "?"
@@ -469,13 +478,15 @@ def _save_markdown_report(
             avg    = sum(times) / len(times)
             mid_i  = len(times) // 2
             median = times[mid_i] if len(times) % 2 else (times[mid_i-1] + times[mid_i]) / 2
+            total  = sum(times)
+            per_rn = total / len(rows)   # 含失败轮次的真实轮均
             rate   = f"{len(ok)}/{len(rows)}"
         else:
-            mn = mx = avg = median = 0.0
+            mn = mx = avg = median = total = per_rn = 0.0
             rate = f"0/{len(rows)}"
         lines.append(
             f"| {display} | `{model}` | {mn:.3f} | {mx:.3f} | {avg:.3f} | {median:.3f}"
-            f" | {rate} | {total_retries} | {total_retry_wait:.1f} |"
+            f" | {total:.2f} | {per_rn:.2f} | {rate} | {total_retries} | {total_retry_wait:.1f} |"
         )
     lines.append(f"")
 
