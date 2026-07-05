@@ -1,0 +1,312 @@
+{
+  "config": {
+    "timestamp": "20260705T025840Z",
+    "num_runs": 5,
+    "interval_sec": 2,
+    "benchmark_text": "In modern software engineering, the transition from monolithic architectures to microservices has fundamentally reshaped how applications are developed, deployed, and scaled. While microservices offer unprecedented flexibility and fault isolation, they also introduce significant complexity in network communication and data consistency. Engineering teams must carefully weigh these trade-offs, often adopting container orchestration platforms to manage the intricate web of interdependent services effectively.",
+    "providers": [
+      {
+        "key": "groq_llm",
+        "display": "Groq LLM",
+        "model_override": null
+      },
+      {
+        "key": "nvidia_llm",
+        "display": "NVIDIA LLM",
+        "model_override": null
+      },
+      {
+        "key": "gemini",
+        "display": "Gemini",
+        "model_override": null
+      },
+      {
+        "key": "openai",
+        "display": "OpenAI",
+        "model_override": null
+      },
+      {
+        "key": "mistral",
+        "display": "Mistral",
+        "model_override": null
+      }
+    ]
+  },
+  "results": [
+    {
+      "run": 1,
+      "provider": "Groq LLM",
+      "model": "openai/gpt-oss-120b",
+      "elapsed_sec": 1.871,
+      "success": true,
+      "retry_attempts": 0,
+      "retry_delay_sec": 0.0,
+      "translated": "在现代软件工程中，从单体架构向微服务的转变从根本上重塑了应用程序的开发、部署和扩展方式。虽然微服务提供了前所未有的灵活性和故障隔离，但它们也在网络通信和数据一致性方面引入了显著的复杂性。工程团队必须谨慎权衡这些取舍，常常采用容器编排平台来有效管理相互依赖服务的错综网络。",
+      "error": ""
+    },
+    {
+      "run": 1,
+      "provider": "NVIDIA LLM",
+      "model": "qwen/qwen3.5-122b-a10b",
+      "elapsed_sec": 1.507,
+      "success": true,
+      "retry_attempts": 0,
+      "retry_delay_sec": 0.0,
+      "translated": "在现代软件工程中，从单体架构向微服务的转变，从根本上重塑了应用的开发、部署和扩展方式。虽然微服务提供了前所未有的灵活性和故障隔离能力，但也给网络通信和数据一致性带来了显著复杂性。工程团队必须仔细权衡这些取舍，通常采用容器编排平台来有效管理相互依赖的服务网络。",
+      "error": ""
+    },
+    {
+      "run": 1,
+      "provider": "Gemini",
+      "model": "gemini-3.5-flash",
+      "elapsed_sec": 4.396,
+      "success": true,
+      "retry_attempts": 0,
+      "retry_delay_sec": 0.0,
+      "translated": "在现代软件工程中，从单体架构向微服务的转变，从根本上重塑了应用程序的开发、部署和扩展方式。虽然微服务提供了前所未有的灵活性和故障隔离，但它们也给网络通信和数据一致性带来了极大的复杂性。工程团队必须仔细权衡这些利弊，通常需要采用容器编排平台，来有效地管理相互依赖的服务所构成的复杂网络。",
+      "error": ""
+    },
+    {
+      "run": 1,
+      "provider": "OpenAI",
+      "model": "gpt-4o-mini",
+      "elapsed_sec": 1.684,
+      "success": true,
+      "retry_attempts": 0,
+      "retry_delay_sec": 0.0,
+      "translated": "在现代软件工程中，从单体架构到微服务的转变从根本上重塑了应用程序的开发、部署和扩展方式。虽然微服务提供了前所未有的灵活性和故障隔离，但它们也在网络通信和数据一致性方面引入了显著的复杂性。工程团队必须仔细权衡这些权衡，通常采用容器编排平台来有效管理相互依赖服务的复杂网络。",
+      "error": ""
+    },
+    {
+      "run": 1,
+      "provider": "Mistral",
+      "model": "mistral-large-latest",
+      "elapsed_sec": 4.4,
+      "success": true,
+      "retry_attempts": 0,
+      "retry_delay_sec": 0.0,
+      "translated": "在现代软件工程中，从单体架构向微服务的转变，从根本上重塑了应用程序的开发、部署和扩展方式。虽然微服务提供了前所未有的灵活性和故障隔离能力，但也在网络通信和数据一致性方面带来了巨大的复杂性。工程团队必须仔细权衡这些利弊，通常会采用容器编排平台来有效管理相互依赖的复杂服务网络。",
+      "error": ""
+    },
+    {
+      "run": 2,
+      "provider": "Groq LLM",
+      "model": "openai/gpt-oss-120b",
+      "elapsed_sec": 1.177,
+      "success": true,
+      "retry_attempts": 0,
+      "retry_delay_sec": 0.0,
+      "translated": "在现代软件工程中，从单体架构向微服务的转变从根本上重塑了应用程序的开发、部署和扩展方式。虽然微服务提供了前所未有的灵活性和故障隔离，但它们也带来了网络通信和数据一致性方面的显著复杂性。工程团队必须慎重权衡这些取舍，常常采用容器编排平台来有效管理相互依赖服务的复杂网络。",
+      "error": ""
+    },
+    {
+      "run": 2,
+      "provider": "NVIDIA LLM",
+      "model": "qwen/qwen3.5-122b-a10b",
+      "elapsed_sec": 10.776,
+      "success": true,
+      "retry_attempts": 0,
+      "retry_delay_sec": 0.0,
+      "translated": "在现代软件工程中，从单体架构向微服务的转型，从根本上重塑了应用的开发、部署和扩展方式。虽然微服务提供了前所未有的灵活性和故障隔离能力，但也给网络通信和数据一致性带来了显著复杂性。工程团队必须仔细权衡这些取舍，往往采用容器编排平台来有效管理相互依赖的服务网络。",
+      "error": ""
+    },
+    {
+      "run": 2,
+      "provider": "Gemini",
+      "model": "gemini-3.5-flash",
+      "elapsed_sec": 5.301,
+      "success": true,
+      "retry_attempts": 0,
+      "retry_delay_sec": 0.0,
+      "translated": "在现代软件工程中，从单体架构向微服务的转变，从根本上重塑了应用的开发、部署和扩展方式。虽然微服务提供了前所未有的灵活性和故障隔离，但它们也引入了网络通信和数据一致性方面的巨大复杂性。工程团队必须仔细权衡这些利弊，通常会采用容器编排平台，来有效管理相互依赖的复杂服务网络。",
+      "error": ""
+    },
+    {
+      "run": 2,
+      "provider": "OpenAI",
+      "model": "gpt-4o-mini",
+      "elapsed_sec": 1.795,
+      "success": true,
+      "retry_attempts": 0,
+      "retry_delay_sec": 0.0,
+      "translated": "在现代软件工程中，从单体架构到微服务的转变从根本上重塑了应用程序的开发、部署和扩展方式。虽然微服务提供了前所未有的灵活性和故障隔离，但它们也在网络通信和数据一致性方面引入了显著的复杂性。工程团队必须仔细权衡这些权衡，通常采用容器编排平台来有效管理相互依赖服务的复杂网络。",
+      "error": ""
+    },
+    {
+      "run": 2,
+      "provider": "Mistral",
+      "model": "mistral-large-latest",
+      "elapsed_sec": 4.89,
+      "success": true,
+      "retry_attempts": 0,
+      "retry_delay_sec": 0.0,
+      "translated": "在现代软件工程中，从单体架构向微服务的转变，从根本上重塑了应用程序的开发、部署和扩展方式。虽然微服务提供了前所未有的灵活性和故障隔离能力，但也在网络通信和数据一致性方面带来了巨大的复杂性。工程团队必须仔细权衡这些利弊，通常会采用容器编排平台来有效管理相互依赖的复杂服务网络。",
+      "error": ""
+    },
+    {
+      "run": 3,
+      "provider": "Groq LLM",
+      "model": "openai/gpt-oss-120b",
+      "elapsed_sec": 11.549,
+      "success": true,
+      "retry_attempts": 1,
+      "retry_delay_sec": 9.7,
+      "translated": "在现代软件工程中，从单体架构向微服务的转变从根本上重塑了应用程序的开发、部署和扩展方式。虽然微服务提供了前所未有的灵活性和故障隔离，但它们也带来了网络通信和数据一致性方面的显著复杂性。工程团队必须慎重权衡这些取舍，通常会采用容器编排平台来有效管理相互依赖服务的错综网络。",
+      "error": ""
+    },
+    {
+      "run": 3,
+      "provider": "NVIDIA LLM",
+      "model": "qwen/qwen3.5-122b-a10b",
+      "elapsed_sec": 1.382,
+      "success": true,
+      "retry_attempts": 0,
+      "retry_delay_sec": 0.0,
+      "translated": "在现代软件工程中，从单体架构向微服务的转变，从根本上重塑了应用的开发、部署和扩展方式。虽然微服务提供了前所未有的灵活性和故障隔离能力，但也给网络通信和数据一致性带来了显著复杂性。工程团队必须仔细权衡这些取舍，通常采用容器编排平台来有效管理相互依赖的服务网络。",
+      "error": ""
+    },
+    {
+      "run": 3,
+      "provider": "Gemini",
+      "model": "gemini-3.5-flash",
+      "elapsed_sec": 4.589,
+      "success": true,
+      "retry_attempts": 0,
+      "retry_delay_sec": 0.0,
+      "translated": "在现代软件工程中，从单体架构向微服务的转变，从根本上重塑了应用程序的开发、部署和扩展方式。虽然微服务提供了前所未有的灵活性和故障隔离，但它们也给网络通信和数据一致性带来了极大的复杂性。工程团队必须仔细权衡这些利弊，通常会采用容器编排平台，来有效管理相互依赖的复杂服务网络。",
+      "error": ""
+    },
+    {
+      "run": 3,
+      "provider": "OpenAI",
+      "model": "gpt-4o-mini",
+      "elapsed_sec": 1.569,
+      "success": true,
+      "retry_attempts": 0,
+      "retry_delay_sec": 0.0,
+      "translated": "在现代软件工程中，从单体架构到微服务的转变从根本上重塑了应用程序的开发、部署和扩展方式。虽然微服务提供了前所未有的灵活性和故障隔离，但它们也在网络通信和数据一致性方面引入了显著的复杂性。工程团队必须仔细权衡这些权衡，通常采用容器编排平台来有效管理相互依赖服务的复杂网络。",
+      "error": ""
+    },
+    {
+      "run": 3,
+      "provider": "Mistral",
+      "model": "mistral-large-latest",
+      "elapsed_sec": 5.232,
+      "success": true,
+      "retry_attempts": 0,
+      "retry_delay_sec": 0.0,
+      "translated": "在现代软件工程中，从单体架构向微服务的转变，从根本上重塑了应用程序的开发、部署和扩展方式。虽然微服务提供了前所未有的灵活性和故障隔离，但也在网络通信和数据一致性方面带来了巨大的复杂性。工程团队必须仔细权衡这些利弊，通常会采用容器编排平台来有效管理相互依赖的复杂服务网络。",
+      "error": ""
+    },
+    {
+      "run": 4,
+      "provider": "Groq LLM",
+      "model": "openai/gpt-oss-120b",
+      "elapsed_sec": 23.511,
+      "success": true,
+      "retry_attempts": 1,
+      "retry_delay_sec": 21.5,
+      "translated": "在现代软件工程中，从单体架构向微服务的转变从根本上重塑了应用程序的开发、部署和扩展方式。虽然微服务提供了前所未有的灵活性和故障隔离，但它们也带来了网络通信和数据一致性方面的显著复杂性。工程团队必须慎重权衡这些取舍，常常采用容器编排平台来有效管理相互依赖服务的复杂网络。",
+      "error": ""
+    },
+    {
+      "run": 4,
+      "provider": "NVIDIA LLM",
+      "model": "qwen/qwen3.5-122b-a10b",
+      "elapsed_sec": 1.313,
+      "success": true,
+      "retry_attempts": 0,
+      "retry_delay_sec": 0.0,
+      "translated": "在现代软件工程中，从单体架构向微服务的转变，从根本上重塑了应用的开发、部署和扩展方式。虽然微服务提供了前所未有的灵活性和故障隔离能力，但也给网络通信和数据一致性带来了显著复杂性。工程团队必须仔细权衡这些取舍，通常采用容器编排平台来有效管理相互依赖的服务网络。",
+      "error": ""
+    },
+    {
+      "run": 4,
+      "provider": "Gemini",
+      "model": "gemini-3.5-flash",
+      "elapsed_sec": 4.314,
+      "success": true,
+      "retry_attempts": 0,
+      "retry_delay_sec": 0.0,
+      "translated": "在现代软件工程中，从单体架构向微服务的转变，从根本上重塑了应用程序的开发、部署和扩展方式。虽然微服务提供了前所未有的灵活性和故障隔离，但它们也给网络通信和数据一致性带来了极大的复杂性。工程团队必须仔细权衡这些利弊，通常会采用容器编排平台，来有效管理相互依赖的服务所构成的复杂网络。",
+      "error": ""
+    },
+    {
+      "run": 4,
+      "provider": "OpenAI",
+      "model": "gpt-4o-mini",
+      "elapsed_sec": 2.186,
+      "success": true,
+      "retry_attempts": 0,
+      "retry_delay_sec": 0.0,
+      "translated": "在现代软件工程中，从单体架构到微服务的转变从根本上重塑了应用程序的开发、部署和扩展方式。虽然微服务提供了前所未有的灵活性和故障隔离，但它们也在网络通信和数据一致性方面引入了显著的复杂性。工程团队必须仔细权衡这些权衡，通常采用容器编排平台来有效管理相互依赖服务的复杂网络。",
+      "error": ""
+    },
+    {
+      "run": 4,
+      "provider": "Mistral",
+      "model": "mistral-large-latest",
+      "elapsed_sec": 3.189,
+      "success": true,
+      "retry_attempts": 0,
+      "retry_delay_sec": 0.0,
+      "translated": "在现代软件工程中，从单体架构向微服务的转变，从根本上重塑了应用程序的开发、部署和扩展方式。虽然微服务提供了前所未有的灵活性和故障隔离能力，但也在网络通信和数据一致性方面带来了巨大的复杂性。工程团队必须仔细权衡这些利弊，通常会采用容器编排平台来有效管理相互依赖的复杂服务网络。",
+      "error": ""
+    },
+    {
+      "run": 5,
+      "provider": "Groq LLM",
+      "model": "openai/gpt-oss-120b",
+      "elapsed_sec": 1.612,
+      "success": true,
+      "retry_attempts": 0,
+      "retry_delay_sec": 0.0,
+      "translated": "在现代软件工程中，从单体架构向微服务的转变从根本上重塑了应用程序的开发、部署和扩展方式。虽然微服务提供了前所未有的灵活性和故障隔离，但它们也在网络通信和数据一致性方面引入了显著的复杂性。工程团队必须谨慎权衡这些取舍，常常采用容器编排平台来有效管理相互依赖服务的错综网络。",
+      "error": ""
+    },
+    {
+      "run": 5,
+      "provider": "NVIDIA LLM",
+      "model": "qwen/qwen3.5-122b-a10b",
+      "elapsed_sec": 93.968,
+      "success": true,
+      "retry_attempts": 0,
+      "retry_delay_sec": 0.0,
+      "translated": "在现代软件工程中，从单体架构向微服务的转变，从根本上重塑了应用的开发、部署和扩展方式。虽然微服务提供了前所未有的灵活性和故障隔离能力，但也给网络通信和数据一致性带来了显著复杂性。工程团队必须仔细权衡这些利弊，通常采用容器编排平台来有效管理相互依赖服务构成的复杂网络。",
+      "error": ""
+    },
+    {
+      "run": 5,
+      "provider": "Gemini",
+      "model": "gemini-3.5-flash",
+      "elapsed_sec": 4.995,
+      "success": true,
+      "retry_attempts": 0,
+      "retry_delay_sec": 0.0,
+      "translated": "在现代软件工程中，从单体架构向微服务的转变，从根本上重塑了应用程序的开发、部署和扩展方式。虽然微服务提供了前所未有的灵活性和故障隔离，但它们也给网络通信和数据一致性带来了极大的复杂性。工程团队必须仔细权衡这些利弊，通常需要采用容器编排平台，以有效地管理相互依赖的服务所构成的复杂网络。",
+      "error": ""
+    },
+    {
+      "run": 5,
+      "provider": "OpenAI",
+      "model": "gpt-4o-mini",
+      "elapsed_sec": 1.938,
+      "success": true,
+      "retry_attempts": 0,
+      "retry_delay_sec": 0.0,
+      "translated": "在现代软件工程中，从单体架构到微服务的转变从根本上重塑了应用程序的开发、部署和扩展方式。虽然微服务提供了前所未有的灵活性和故障隔离，但它们也在网络通信和数据一致性方面引入了显著的复杂性。工程团队必须仔细权衡这些权衡，通常采用容器编排平台来有效管理相互依赖服务的复杂网络。",
+      "error": ""
+    },
+    {
+      "run": 5,
+      "provider": "Mistral",
+      "model": "mistral-large-latest",
+      "elapsed_sec": 4.787,
+      "success": true,
+      "retry_attempts": 0,
+      "retry_delay_sec": 0.0,
+      "translated": "在现代软件工程中，从单体架构向微服务的转变，从根本上重塑了应用程序的开发、部署和扩展方式。虽然微服务提供了前所未有的灵活性和故障隔离能力，但也在网络通信和数据一致性方面带来了巨大的复杂性。工程团队必须仔细权衡这些利弊，通常会采用容器编排平台来有效管理相互依赖的复杂服务网络。",
+      "error": ""
+    }
+  ]
+}
