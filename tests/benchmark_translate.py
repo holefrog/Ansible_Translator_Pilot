@@ -377,13 +377,15 @@ def main() -> None:
         },
         "results": [
             {
-                "run":         r.run,
-                "provider":    r.provider,
-                "model":       r.model,
-                "elapsed_sec": r.elapsed_sec,
-                "success":     r.success,
-                "translated":  r.translated,
-                "error":       r.error,
+                "run":              r.run,
+                "provider":         r.provider,
+                "model":            r.model,
+                "elapsed_sec":      r.elapsed_sec,
+                "success":          r.success,
+                "retry_attempts":   r.retry_attempts,
+                "retry_delay_sec":  r.retry_delay_sec,
+                "translated":       r.translated,
+                "error":            r.error,
             }
             for r in all_results
         ],
@@ -418,6 +420,7 @@ def _save_markdown_report(
     lines.append(f"- **时间戳**: `{ts}`")
     lines.append(f"- **轮次**: {num_runs}  |  **间隔**: {interval}s  |  **总耗时**: {total_wall:.1f}s")
     lines.append(f"- **提供商数**: {len(PROVIDERS_TO_TEST)}")
+    lines.append(f"- **重试配置**: 最多 {BENCHMARK_RETRY_CONFIG['max_retries']} 次 / 基础间隔 {BENCHMARK_RETRY_CONFIG['base_delay']}s / 指数退避 {BENCHMARK_RETRY_CONFIG['backoff_factor']}x / 上限 {BENCHMARK_RETRY_CONFIG['max_delay']}s")
     lines.append(f"")
     lines.append(f"## 源文本")
     lines.append(f"")
@@ -448,15 +451,17 @@ def _save_markdown_report(
         lines.append("| " + " | ".join(row) + " |")
     lines.append(f"")
 
-    # 统计汇总表
+    # 统计汇总表（含重试列）
     lines.append(f"## 多轮统计汇总")
     lines.append(f"")
-    lines.append("| 提供商 | 模型 | 最快(s) | 最慢(s) | 平均(s) | 中位(s) | 成功率 |")
-    lines.append("|---|---|---:|---:|---:|---:|:---:|")
+    lines.append("| 提供商 | 模型 | 最快(s) | 最慢(s) | 平均(s) | 中位(s) | 成功率 | 重试总次 | 重试等待(s) |")
+    lines.append("|---|---|---:|---:|---:|---:|:---:|---:|---:|")
     for display in providers:
         rows = [r for r in all_results if r.provider == display]
         model = rows[0].model if rows else "?"
         ok = [r for r in rows if r.success]
+        total_retries    = sum(r.retry_attempts  for r in rows)
+        total_retry_wait = sum(r.retry_delay_sec for r in rows)
         if ok:
             times  = sorted(r.elapsed_sec for r in ok)
             mn     = times[0]
@@ -468,7 +473,10 @@ def _save_markdown_report(
         else:
             mn = mx = avg = median = 0.0
             rate = f"0/{len(rows)}"
-        lines.append(f"| {display} | `{model}` | {mn:.3f} | {mx:.3f} | {avg:.3f} | {median:.3f} | {rate} |")
+        lines.append(
+            f"| {display} | `{model}` | {mn:.3f} | {mx:.3f} | {avg:.3f} | {median:.3f}"
+            f" | {rate} | {total_retries} | {total_retry_wait:.1f} |"
+        )
     lines.append(f"")
 
     # 429 / 错误汇总
