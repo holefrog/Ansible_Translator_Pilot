@@ -226,8 +226,8 @@ def _print_provider_summary(r: ProviderBurstResult, count: int) -> None:
 
 
 def _print_final_summary(results: list[ProviderBurstResult], count: int) -> None:
-    _banner("Burst 测试汇总 — 各提供商限速门槛")
-    COL = [18, 32, 8, 8, 8, 10, 14]
+    _banner("Burst 测试汇总 — 各提供商限速门槛（按成功数降序）")
+    COL = [13, 23, 6, 6, 7, 9, 13]   # total = 77
     header = (
         f"{'提供商':<{COL[0]}}"
         f"{'模型':<{COL[1]}}"
@@ -240,21 +240,24 @@ def _print_final_summary(results: list[ProviderBurstResult], count: int) -> None
     sep = "─" * sum(COL)
     print(header)
     print(sep)
-    for r in results:
-        done = len(r.requests)
-        if r.first_429_at:
-            first = f"第 {r.first_429_at} 次"
-        else:
-            first = "未触发"
+
+    def _key(r: ProviderBurstResult):
+        limit = r.first_429_at if r.first_429_at > 0 else float("inf")
+        return (-r.total_success, -limit)
+
+    medals = {0: "🥇", 1: "🥈", 2: "🥉"}
+    for rank, r in enumerate(sorted(results, key=_key)):
+        first   = f"第{r.first_429_at}次" if r.first_429_at else "未触发"
         if r.first_429_at == 0 and r.total_other_err == 0:
-            verdict = "✅ 全过"
+            verdict = "✅全过"
         elif r.first_429_at == 0:
-            verdict = "⚠️ 非限速错"
+            verdict = "⚠️非限速"
         else:
-            verdict = f"🚫 第{r.first_429_at}次限速"
+            verdict = f"🚫第{r.first_429_at}次"
         model_s = r.model if len(r.model) <= COL[1]-1 else r.model[:COL[1]-4]+"..."
+        medal   = medals.get(rank, "  ")
         print(
-            f"{r.provider:<{COL[0]}}"
+            f"{medal}{r.provider:<{COL[0]-1}}"
             f"{model_s:<{COL[1]}}"
             f"{r.total_success:>{COL[2]}}"
             f"{r.total_429:>{COL[3]}}"
