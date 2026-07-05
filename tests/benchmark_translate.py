@@ -243,13 +243,13 @@ def _print_multi_run_summary(all_results: list[BenchmarkResult]) -> None:
     print(header)
     print(sep)
 
+    # 预计算所有提供商统计，按总耗时升序排列（失败排末尾）
+    rows_stats = []
     for display in providers:
         rows = [r for r in all_results if r.provider == display]
         model = rows[0].model if rows else "?"
         model_short = model if len(model) <= COL[1] - 1 else model[:COL[1]-4] + "..."
-
         ok = [r for r in rows if r.success]
-
         if ok:
             times  = sorted(r.elapsed_sec for r in ok)
             mn     = times[0]
@@ -262,14 +262,20 @@ def _print_multi_run_summary(all_results: list[BenchmarkResult]) -> None:
         else:
             mn = mx = avg = median = total = 0.0
             rate = f"0/{len(rows)}"
+        rows_stats.append((display, model_short, mn, mx, avg, median, total, rate))
 
+    # 按总耗时升序（失败 total=0 排末尾）
+    rows_stats.sort(key=lambda x: x[6] if x[6] > 0 else float("inf"))
+
+    for rank, (display, model_short, mn, mx, avg, median, total, rate) in enumerate(rows_stats, 1):
+        medal = {1: "🥇", 2: "🥈", 3: "🥉"}.get(rank, "  ")
         print(
-            f"{display:<{COL[0]}}"
+            f"{medal}{display:<{COL[0]-1}}"
             f"{model_short:<{COL[1]}}"
-            f"{mn:>{COL[2]}.3f}"
-            f"{mx:>{COL[3]}.3f}"
-            f"{avg:>{COL[4]}.3f}"
-            f"{median:>{COL[5]}.3f}"
+            f"{mn:>{COL[2]}.2f}"
+            f"{mx:>{COL[3]}.2f}"
+            f"{avg:>{COL[4]}.2f}"
+            f"{median:>{COL[5]}.2f}"
             f"{total:>{COL[6]}.2f}"
             f"{rate:>{COL[7]}}"
         )
