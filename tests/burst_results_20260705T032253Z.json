@@ -1,0 +1,598 @@
+{
+  "config": {
+    "timestamp": "20260705T032253Z",
+    "count": 20,
+    "consecutive_429_abort": 5,
+    "benchmark_text": "In modern software engineering, the transition from monolithic architectures to microservices has fundamentally reshaped how applications are developed, deployed, and scaled. While microservices offer unprecedented flexibility and fault isolation, they also introduce significant complexity in network communication and data consistency. Engineering teams must carefully weigh these trade-offs, often adopting container orchestration platforms to manage the intricate web of interdependent services effectively."
+  },
+  "results": [
+    {
+      "provider": "Groq LLM",
+      "model": "openai/gpt-oss-120b",
+      "first_429_at": 2,
+      "total_success": 1,
+      "total_429": 5,
+      "total_other_err": 0,
+      "aborted_early": true,
+      "abort_reason": "连续 5 次 429，在第 6 次后提前终止",
+      "requests": [
+        {
+          "seq": 1,
+          "elapsed_sec": 1.899,
+          "success": true,
+          "is_429": false,
+          "is_other_err": false,
+          "error": ""
+        },
+        {
+          "seq": 2,
+          "elapsed_sec": 0.087,
+          "success": false,
+          "is_429": true,
+          "is_other_err": false,
+          "error": "翻译失败:groq_llm API Error 429: {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01kr1w4rt4ezttkzm62rwr2v43` service tier `on_demand` on tokens per minute (TPM"
+        },
+        {
+          "seq": 3,
+          "elapsed_sec": 0.082,
+          "success": false,
+          "is_429": true,
+          "is_other_err": false,
+          "error": "翻译失败:groq_llm API Error 429: {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01kr1w4rt4ezttkzm62rwr2v43` service tier `on_demand` on tokens per minute (TPM"
+        },
+        {
+          "seq": 4,
+          "elapsed_sec": 0.09,
+          "success": false,
+          "is_429": true,
+          "is_other_err": false,
+          "error": "翻译失败:groq_llm API Error 429: {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01kr1w4rt4ezttkzm62rwr2v43` service tier `on_demand` on tokens per minute (TPM"
+        },
+        {
+          "seq": 5,
+          "elapsed_sec": 0.087,
+          "success": false,
+          "is_429": true,
+          "is_other_err": false,
+          "error": "翻译失败:groq_llm API Error 429: {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01kr1w4rt4ezttkzm62rwr2v43` service tier `on_demand` on tokens per minute (TPM"
+        },
+        {
+          "seq": 6,
+          "elapsed_sec": 0.097,
+          "success": false,
+          "is_429": true,
+          "is_other_err": false,
+          "error": "翻译失败:groq_llm API Error 429: {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01kr1w4rt4ezttkzm62rwr2v43` service tier `on_demand` on tokens per minute (TPM"
+        }
+      ]
+    },
+    {
+      "provider": "NVIDIA LLM",
+      "model": "qwen/qwen3.5-122b-a10b",
+      "first_429_at": 0,
+      "total_success": 18,
+      "total_429": 0,
+      "total_other_err": 2,
+      "aborted_early": false,
+      "abort_reason": "",
+      "requests": [
+        {
+          "seq": 1,
+          "elapsed_sec": 1.658,
+          "success": true,
+          "is_429": false,
+          "is_other_err": false,
+          "error": ""
+        },
+        {
+          "seq": 2,
+          "elapsed_sec": 1.207,
+          "success": true,
+          "is_429": false,
+          "is_other_err": false,
+          "error": ""
+        },
+        {
+          "seq": 3,
+          "elapsed_sec": 1.458,
+          "success": true,
+          "is_429": false,
+          "is_other_err": false,
+          "error": ""
+        },
+        {
+          "seq": 4,
+          "elapsed_sec": 1.824,
+          "success": true,
+          "is_429": false,
+          "is_other_err": false,
+          "error": ""
+        },
+        {
+          "seq": 5,
+          "elapsed_sec": 1.509,
+          "success": true,
+          "is_429": false,
+          "is_other_err": false,
+          "error": ""
+        },
+        {
+          "seq": 6,
+          "elapsed_sec": 1.456,
+          "success": true,
+          "is_429": false,
+          "is_other_err": false,
+          "error": ""
+        },
+        {
+          "seq": 7,
+          "elapsed_sec": 9.096,
+          "success": true,
+          "is_429": false,
+          "is_other_err": false,
+          "error": ""
+        },
+        {
+          "seq": 8,
+          "elapsed_sec": 12.367,
+          "success": true,
+          "is_429": false,
+          "is_other_err": false,
+          "error": ""
+        },
+        {
+          "seq": 9,
+          "elapsed_sec": 3.899,
+          "success": true,
+          "is_429": false,
+          "is_other_err": false,
+          "error": ""
+        },
+        {
+          "seq": 10,
+          "elapsed_sec": 1.457,
+          "success": true,
+          "is_429": false,
+          "is_other_err": false,
+          "error": ""
+        },
+        {
+          "seq": 11,
+          "elapsed_sec": 1.554,
+          "success": true,
+          "is_429": false,
+          "is_other_err": false,
+          "error": ""
+        },
+        {
+          "seq": 12,
+          "elapsed_sec": 1.365,
+          "success": true,
+          "is_429": false,
+          "is_other_err": false,
+          "error": ""
+        },
+        {
+          "seq": 13,
+          "elapsed_sec": 48.622,
+          "success": true,
+          "is_429": false,
+          "is_other_err": false,
+          "error": ""
+        },
+        {
+          "seq": 14,
+          "elapsed_sec": 2.094,
+          "success": true,
+          "is_429": false,
+          "is_other_err": false,
+          "error": ""
+        },
+        {
+          "seq": 15,
+          "elapsed_sec": 42.938,
+          "success": true,
+          "is_429": false,
+          "is_other_err": false,
+          "error": ""
+        },
+        {
+          "seq": 16,
+          "elapsed_sec": 1.45,
+          "success": true,
+          "is_429": false,
+          "is_other_err": false,
+          "error": ""
+        },
+        {
+          "seq": 17,
+          "elapsed_sec": 1.511,
+          "success": false,
+          "is_429": false,
+          "is_other_err": true,
+          "error": "翻译失败:NVIDIA LLM output is not valid JSON: Expecting value: line 1 column 1 (char 0)"
+        },
+        {
+          "seq": 18,
+          "elapsed_sec": 6.044,
+          "success": false,
+          "is_429": false,
+          "is_other_err": true,
+          "error": "翻译失败:NVIDIA LLM output is not valid JSON: Expecting value: line 1 column 1 (char 0)"
+        },
+        {
+          "seq": 19,
+          "elapsed_sec": 1.613,
+          "success": true,
+          "is_429": false,
+          "is_other_err": false,
+          "error": ""
+        },
+        {
+          "seq": 20,
+          "elapsed_sec": 1.346,
+          "success": true,
+          "is_429": false,
+          "is_other_err": false,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "provider": "Gemini",
+      "model": "gemini-3.5-flash",
+      "first_429_at": 1,
+      "total_success": 4,
+      "total_429": 7,
+      "total_other_err": 0,
+      "aborted_early": true,
+      "abort_reason": "连续 5 次 429，在第 11 次后提前终止",
+      "requests": [
+        {
+          "seq": 1,
+          "elapsed_sec": 0.466,
+          "success": false,
+          "is_429": true,
+          "is_other_err": false,
+          "error": "翻译失败:Gemini API Error 429: {\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: htt"
+        },
+        {
+          "seq": 2,
+          "elapsed_sec": 5.477,
+          "success": true,
+          "is_429": false,
+          "is_other_err": false,
+          "error": ""
+        },
+        {
+          "seq": 3,
+          "elapsed_sec": 0.194,
+          "success": false,
+          "is_429": true,
+          "is_other_err": false,
+          "error": "翻译失败:Gemini API Error 429: {\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: htt"
+        },
+        {
+          "seq": 4,
+          "elapsed_sec": 4.741,
+          "success": true,
+          "is_429": false,
+          "is_other_err": false,
+          "error": ""
+        },
+        {
+          "seq": 5,
+          "elapsed_sec": 4.888,
+          "success": true,
+          "is_429": false,
+          "is_other_err": false,
+          "error": ""
+        },
+        {
+          "seq": 6,
+          "elapsed_sec": 4.883,
+          "success": true,
+          "is_429": false,
+          "is_other_err": false,
+          "error": ""
+        },
+        {
+          "seq": 7,
+          "elapsed_sec": 0.167,
+          "success": false,
+          "is_429": true,
+          "is_other_err": false,
+          "error": "翻译失败:Gemini API Error 429: {\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: htt"
+        },
+        {
+          "seq": 8,
+          "elapsed_sec": 0.171,
+          "success": false,
+          "is_429": true,
+          "is_other_err": false,
+          "error": "翻译失败:Gemini API Error 429: {\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: htt"
+        },
+        {
+          "seq": 9,
+          "elapsed_sec": 0.168,
+          "success": false,
+          "is_429": true,
+          "is_other_err": false,
+          "error": "翻译失败:Gemini API Error 429: {\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: htt"
+        },
+        {
+          "seq": 10,
+          "elapsed_sec": 0.166,
+          "success": false,
+          "is_429": true,
+          "is_other_err": false,
+          "error": "翻译失败:Gemini API Error 429: {\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: htt"
+        },
+        {
+          "seq": 11,
+          "elapsed_sec": 0.142,
+          "success": false,
+          "is_429": true,
+          "is_other_err": false,
+          "error": "翻译失败:Gemini API Error 429: {\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: htt"
+        }
+      ]
+    },
+    {
+      "provider": "OpenAI",
+      "model": "gpt-4o-mini",
+      "first_429_at": 0,
+      "total_success": 20,
+      "total_429": 0,
+      "total_other_err": 0,
+      "aborted_early": false,
+      "abort_reason": "",
+      "requests": [
+        {
+          "seq": 1,
+          "elapsed_sec": 2.599,
+          "success": true,
+          "is_429": false,
+          "is_other_err": false,
+          "error": ""
+        },
+        {
+          "seq": 2,
+          "elapsed_sec": 2.388,
+          "success": true,
+          "is_429": false,
+          "is_other_err": false,
+          "error": ""
+        },
+        {
+          "seq": 3,
+          "elapsed_sec": 1.772,
+          "success": true,
+          "is_429": false,
+          "is_other_err": false,
+          "error": ""
+        },
+        {
+          "seq": 4,
+          "elapsed_sec": 1.955,
+          "success": true,
+          "is_429": false,
+          "is_other_err": false,
+          "error": ""
+        },
+        {
+          "seq": 5,
+          "elapsed_sec": 1.88,
+          "success": true,
+          "is_429": false,
+          "is_other_err": false,
+          "error": ""
+        },
+        {
+          "seq": 6,
+          "elapsed_sec": 3.034,
+          "success": true,
+          "is_429": false,
+          "is_other_err": false,
+          "error": ""
+        },
+        {
+          "seq": 7,
+          "elapsed_sec": 2.144,
+          "success": true,
+          "is_429": false,
+          "is_other_err": false,
+          "error": ""
+        },
+        {
+          "seq": 8,
+          "elapsed_sec": 2.515,
+          "success": true,
+          "is_429": false,
+          "is_other_err": false,
+          "error": ""
+        },
+        {
+          "seq": 9,
+          "elapsed_sec": 1.827,
+          "success": true,
+          "is_429": false,
+          "is_other_err": false,
+          "error": ""
+        },
+        {
+          "seq": 10,
+          "elapsed_sec": 1.653,
+          "success": true,
+          "is_429": false,
+          "is_other_err": false,
+          "error": ""
+        },
+        {
+          "seq": 11,
+          "elapsed_sec": 1.73,
+          "success": true,
+          "is_429": false,
+          "is_other_err": false,
+          "error": ""
+        },
+        {
+          "seq": 12,
+          "elapsed_sec": 1.647,
+          "success": true,
+          "is_429": false,
+          "is_other_err": false,
+          "error": ""
+        },
+        {
+          "seq": 13,
+          "elapsed_sec": 2.069,
+          "success": true,
+          "is_429": false,
+          "is_other_err": false,
+          "error": ""
+        },
+        {
+          "seq": 14,
+          "elapsed_sec": 1.9,
+          "success": true,
+          "is_429": false,
+          "is_other_err": false,
+          "error": ""
+        },
+        {
+          "seq": 15,
+          "elapsed_sec": 1.894,
+          "success": true,
+          "is_429": false,
+          "is_other_err": false,
+          "error": ""
+        },
+        {
+          "seq": 16,
+          "elapsed_sec": 1.805,
+          "success": true,
+          "is_429": false,
+          "is_other_err": false,
+          "error": ""
+        },
+        {
+          "seq": 17,
+          "elapsed_sec": 2.175,
+          "success": true,
+          "is_429": false,
+          "is_other_err": false,
+          "error": ""
+        },
+        {
+          "seq": 18,
+          "elapsed_sec": 1.728,
+          "success": true,
+          "is_429": false,
+          "is_other_err": false,
+          "error": ""
+        },
+        {
+          "seq": 19,
+          "elapsed_sec": 1.837,
+          "success": true,
+          "is_429": false,
+          "is_other_err": false,
+          "error": ""
+        },
+        {
+          "seq": 20,
+          "elapsed_sec": 1.646,
+          "success": true,
+          "is_429": false,
+          "is_other_err": false,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "provider": "Mistral",
+      "model": "mistral-large-latest",
+      "first_429_at": 5,
+      "total_success": 4,
+      "total_429": 5,
+      "total_other_err": 0,
+      "aborted_early": true,
+      "abort_reason": "连续 5 次 429，在第 9 次后提前终止",
+      "requests": [
+        {
+          "seq": 1,
+          "elapsed_sec": 3.586,
+          "success": true,
+          "is_429": false,
+          "is_other_err": false,
+          "error": ""
+        },
+        {
+          "seq": 2,
+          "elapsed_sec": 3.775,
+          "success": true,
+          "is_429": false,
+          "is_other_err": false,
+          "error": ""
+        },
+        {
+          "seq": 3,
+          "elapsed_sec": 3.176,
+          "success": true,
+          "is_429": false,
+          "is_other_err": false,
+          "error": ""
+        },
+        {
+          "seq": 4,
+          "elapsed_sec": 3.899,
+          "success": true,
+          "is_429": false,
+          "is_other_err": false,
+          "error": ""
+        },
+        {
+          "seq": 5,
+          "elapsed_sec": 0.307,
+          "success": false,
+          "is_429": true,
+          "is_other_err": false,
+          "error": "翻译失败:Mistral API Error 429: {\"object\":\"error\",\"message\":\"Rate limit exceeded\",\"type\":\"rate_limited\",\"param\":null,\"code\":\"1300\",\"raw_status_code\":429}"
+        },
+        {
+          "seq": 6,
+          "elapsed_sec": 0.428,
+          "success": false,
+          "is_429": true,
+          "is_other_err": false,
+          "error": "翻译失败:Mistral API Error 429: {\"object\":\"error\",\"message\":\"Rate limit exceeded\",\"type\":\"rate_limited\",\"param\":null,\"code\":\"1300\",\"raw_status_code\":429}"
+        },
+        {
+          "seq": 7,
+          "elapsed_sec": 0.322,
+          "success": false,
+          "is_429": true,
+          "is_other_err": false,
+          "error": "翻译失败:Mistral API Error 429: {\"object\":\"error\",\"message\":\"Rate limit exceeded\",\"type\":\"rate_limited\",\"param\":null,\"code\":\"1300\",\"raw_status_code\":429}"
+        },
+        {
+          "seq": 8,
+          "elapsed_sec": 0.309,
+          "success": false,
+          "is_429": true,
+          "is_other_err": false,
+          "error": "翻译失败:Mistral API Error 429: {\"object\":\"error\",\"message\":\"Rate limit exceeded\",\"type\":\"rate_limited\",\"param\":null,\"code\":\"1300\",\"raw_status_code\":429}"
+        },
+        {
+          "seq": 9,
+          "elapsed_sec": 0.34,
+          "success": false,
+          "is_429": true,
+          "is_other_err": false,
+          "error": "翻译失败:Mistral API Error 429: {\"object\":\"error\",\"message\":\"Rate limit exceeded\",\"type\":\"rate_limited\",\"param\":null,\"code\":\"1300\",\"raw_status_code\":429}"
+        }
+      ]
+    }
+  ]
+}
